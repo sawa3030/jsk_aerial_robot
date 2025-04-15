@@ -101,7 +101,9 @@ class BlockPickDemo():
             depths = []
             for i in range(len(points_x)):
                 if points_x[i] < width and points_y[i] < height:
-                    depths.append(depth_image[points_y[i], points_x[i]] * scale)
+                    depth_of_each_point = depth_image[points_y[i], points_x[i]] * scale
+                    if depth_of_each_point > 0.0:
+                        depths.append(depth_of_each_point)
             self.depth = np.mean(depths)
             self.update_time_depth = depth.header.stamp
             print(f"depth: {self.depth}")
