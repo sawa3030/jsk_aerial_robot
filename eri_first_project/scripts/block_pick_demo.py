@@ -10,18 +10,21 @@ from aerial_robot_base.robot_interface import RobotInterface
 from aerial_robot_base.state_machine import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from aerial_robot_msgs.msg import FlightNav
 # import cv2
 
 
 class BlockPickDemo():
     def __init__(self):
-        # self.ri = RobotInterface()
+        self.ri = RobotInterface()
         rospy.sleep(1.0) # wait for joint updated
         self.bridge = CvBridge()
-        # rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
-        # rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
-        rospy.Subscriber("/camera/color/image_raw", Image, self.cb_image)
-        rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.cb_depth)
+        rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
+        rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
+        # rospy.Subscriber("/camera/color/image_raw", Image, self.cb_image)
+        # rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.cb_depth)
+
+        self.nav_pub = rospy.Publisher('/hydrus/uav/nav', FlightNav, queue_size=1)
 
         self.update_hz = 50
     
@@ -62,11 +65,12 @@ class BlockPickDemo():
             if (rospy.Time.now() - self.update_time_image).to_sec() < 1.0:
                 try:
                     depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-                    scale = 0.001
+                    scale = 0.001 # this might not be true
                     height, width = depth_image.shape
                     cx = (self.cx * width) // self.width
                     cy = (self.cy * height) // self.height
                     self.depth =  depth_image[cy, cx] * scale
+                    self.update_time_depth = msg.header.stamp
                     print(f"depth: {self.depth}")
                 except Exception as e:
                     print(e)
@@ -79,6 +83,16 @@ class BlockPickDemo():
         while not rospy.is_shutdown():
             # user code begin
             # self.ri.setJointAngle(["joint1", "joint3"], [1.0, 1.0])
+            if hasattr(self, "update_time_depth"):
+                if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
+                    nav_msg = FlightNav()
+                    nav_msg.control_frame = FlightNav.LOCAL_FRAME
+                    nav_msg.target = FlightNav.COG
+                    nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
+                    nav_msg.target_vel_x = -0.1
+                    nav_msg.target_vel_y = 0.1
+                    self.nav_pub.publish(nav_msg)
+
             # user code end
 
             r.sleep()
