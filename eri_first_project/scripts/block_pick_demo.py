@@ -11,6 +11,7 @@ from aerial_robot_base.state_machine import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from aerial_robot_msgs.msg import FlightNav
+from message_filters import TimeSynchronizer, Subscriber
 # import cv2
 
 
@@ -19,18 +20,24 @@ class BlockPickDemo():
         self.ri = RobotInterface()
         rospy.sleep(1.0) # wait for joint updated
         self.bridge = CvBridge()
-        rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
-        rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
+        
+        # rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
+        # rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
         # rospy.Subscriber("/camera/color/image_raw", Image, self.cb_image)
         # rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.cb_depth)
+        image_sub = Subscriber("/rs_d435/color/image_rect_color", Image)
+        depth_sub = Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image)
+
+        tss = TimeSynchronizer([image_sub, depth_sub], queue_size=10)
+        tss.registerCallback(self.gotimage)
 
         self.nav_pub = rospy.Publisher('/hydrus/uav/nav', FlightNav, queue_size=1)
 
         self.update_hz = 50
     
-    def cb_image(self, msg):
+    def gotimage(self, image, depth):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
             hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
             lower_red1 = np.array([0, 100, 100])
@@ -54,27 +61,22 @@ class BlockPickDemo():
                 self.height, self.width = mask.shape
                 self.cx = cx
                 self.cy = cy
-                self.update_time_image = msg.header.stamp
                 print(f"最大輪郭の重心座標: ({cx}, {cy})")
-
         except CvBridgeError as e:
             print(e)
-    
-    def cb_depth(self, msg):
-        if hasattr(self, "update_time_image"):
-            if (rospy.Time.now() - self.update_time_image).to_sec() < 1.0:
-                try:
-                    depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-                    scale = 0.001 # this might not be true
-                    height, width = depth_image.shape
-                    cx = (self.cx * width) // self.width
-                    cy = (self.cy * height) // self.height
-                    self.depth =  depth_image[cy, cx] * scale
-                    self.update_time_depth = msg.header.stamp
-                    print(f"depth: {self.depth}")
-                except Exception as e:
-                    print(e)
-                    return
+
+        try:
+            depth_image = self.bridge.imgmsg_to_cv2(depth, desired_encoding='passthrough')
+            scale = 0.001 # this might not be true
+            height, width = depth_image.shape
+            cx = (self.cx * width) // self.width
+            cy = (self.cy * height) // self.height
+            self.depth =  depth_image[cy, cx] * scale
+            self.update_time_depth = depth.header.stamp
+            print(f"depth: {self.depth}")
+        except Exception as e:
+            print(e)
+            return
             
 
     def run(self):
