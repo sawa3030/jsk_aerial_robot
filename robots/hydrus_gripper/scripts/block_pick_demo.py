@@ -106,7 +106,6 @@ class BlockPickDemo():
                         depths.append(depth_of_each_point)
             self.depth = np.mean(depths)
             self.update_time_depth = depth.header.stamp
-            print(f"depth: {self.depth}")
         except Exception as e:
             print(e)
             return
@@ -120,7 +119,7 @@ class BlockPickDemo():
             # self.ri.setJointAngle(["joint1", "joint3"], [1.0, 1.0])
             if hasattr(self, "update_time_depth"):
                 if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
-                    if self.depth > 0.00001: # this might needs to be tuned
+                    if 0.00001 < self.depth < 30 : # this might needs to be tuned
                         nav_msg = FlightNav()
                         nav_msg.control_frame = FlightNav.LOCAL_FRAME
                         nav_msg.target = FlightNav.COG
