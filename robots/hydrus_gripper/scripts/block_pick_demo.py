@@ -28,6 +28,10 @@ class BlockPickDemo():
         self.points_num = 100
         self.points_var = 100
         self.scale = 0.001
+        self.lower_red1 = np.array([0, 100, 100])
+        self.upper_red1 = np.array([10, 255, 255])
+        self.lower_red2 = np.array([160, 100, 100])
+        self.upper_red2 = np.array([180, 255, 255])
 
         # rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
         # rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
@@ -53,13 +57,9 @@ class BlockPickDemo():
             hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
             # === Filter red color ===
-            lower_red1 = np.array([0, 100, 100])
-            upper_red1 = np.array([10, 255, 255])
-            lower_red2 = np.array([160, 100, 100])
-            upper_red2 = np.array([180, 255, 255])
 
-            mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-            mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+            mask1 = cv2.inRange(hsv, self.lower_red1, self.upper_red1)
+            mask2 = cv2.inRange(hsv, self.lower_red2, self.upper_red2)
 
             mask = cv2.bitwise_or(mask1, mask2)
 
