@@ -61,7 +61,7 @@ class BlockPickDemo():
                 return
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
-            image_height, image_width = mask.shape
+            self.image_height, self.image_width = mask.shape
             self.cx = cx
             self.cy = cy
             print(f"最大輪郭の重心座標: ({cx}, {cy})")
@@ -71,8 +71,8 @@ class BlockPickDemo():
             candidate_points = candidate_points.astype(int)
 
             valid_mask = (
-                (0 <= candidate_points[:, 0]) & (candidate_points[:, 0] < image_width) &
-                (0 <= candidate_points[:, 1]) & (candidate_points[:, 1] < image_height)
+                (0 <= candidate_points[:, 0]) & (candidate_points[:, 0] < self.image_width) &
+                (0 <= candidate_points[:, 1]) & (candidate_points[:, 1] < self.image_height)
             )
             candidate_points = candidate_points[valid_mask]
 
@@ -95,8 +95,8 @@ class BlockPickDemo():
             depth_image = self.bridge.imgmsg_to_cv2(depth, desired_encoding='passthrough')
             scale = 0.001 # this might not be true
             height, width = depth_image.shape
-            points_x = (points_x * width) // image_width
-            points_y = (points_y * height) // image_height
+            points_x = (points_x * width) // self.image_width
+            points_y = (points_y * height) // self.image_height
 
             depths = []
             for i in range(len(points_x)):
@@ -124,9 +124,21 @@ class BlockPickDemo():
                         nav_msg = FlightNav()
                         nav_msg.control_frame = FlightNav.LOCAL_FRAME
                         nav_msg.target = FlightNav.COG
-                        nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
-                        nav_msg.target_vel_x = -0.1
-                        nav_msg.target_vel_y = 0.1
+
+                        if self.cx < self.image_width / 3:
+                            nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                            nav_msg.target_omega_z  = 0.1
+                            print("turning right")
+                        elif self.cx > self.image_width * 2 / 3:
+                            nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                            nav_msg.target_omega_z = -0.1
+                            print("turning left")
+                        else:
+                            nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
+                            nav_msg.target_vel_x = -0.1
+                            nav_msg.target_vel_y = 0.1
+                            print("moving forward")
+                        print(nav_msg)
                         self.nav_pub.publish(nav_msg)
 
             # user code end
