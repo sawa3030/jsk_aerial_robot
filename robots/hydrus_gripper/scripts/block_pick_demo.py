@@ -82,13 +82,6 @@ class BlockPickDemo():
             self.cy = cy
             print(f"最大輪郭の重心座標: ({cx}, {cy})")
             
-            # 重心をとってpublish
-            # copied_image = copy.deepcopy(cv_image)
-            # cv2.circle(copied_image, (cx, cy), 5, (0, 255, 0), -1)
-            # cv2.imshow("image", copied_image)
-            # cv2.waitKey(1)
-            
-
             # === Get the points near the center ===
             rand_offsets = (np.random.rand(self.points_num, 2) - 0.5) * self.points_var
             candidate_points = np.array([self.cx, self.cy]) + rand_offsets
@@ -121,31 +114,6 @@ class BlockPickDemo():
             height, width = depth_image.shape
             points_x = (points_x * width) // self.image_width
             points_y = (points_y * height) // self.image_height
-
-            # copied_depth_image = copy.deepcopy(depth_image)
-            # normalized = cv2.convertScaleAbs(copied_depth_image, alpha=255.0/self.depth_max)
-            # cv2.circle(normalized, (width-1, height-1), 100, (0, 0, 0), -1)
-            # cv2.imshow("image", normalized)
-            # cv2.waitKey(1)
-
-            
-
-            #publish depth_image and points_x, points_y with circle
-            copied_depth_image = copy.deepcopy(depth_image)
-            depth_8u = cv2.convertScaleAbs(copied_depth_image, alpha=(255.0 / self.depth_max))
-
-            depth_bgr = cv2.cvtColor(depth_8u, cv2.COLOR_GRAY2BGR)
-
-            for i in range(len(points_x)):
-                if points_x[i] < width and points_y[i] < height:
-                    cv2.circle(depth_bgr, (points_x[i], points_y[i]), 5, (0, 255, 0), -1)
-            
-            cv2.imshow("image", depth_bgr)
-            cv2.waitKey(1)
-
-            # depth_image_msg = self.bridge.cv2_to_imgmsg(depth_bgr, encoding="bgr8")
-            # depth_image_msg.header = self.depth_image.header
-            # self.recognize_pub.publish(depth_image_msg)
 
             depths = []
             for i in range(len(points_x)):
