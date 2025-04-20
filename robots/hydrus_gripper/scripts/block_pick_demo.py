@@ -11,14 +11,14 @@ from aerial_robot_base.state_machine import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from aerial_robot_msgs.msg import FlightNav
-from message_filters import TimeSynchronizer, Subscriber
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 # import cv2
 import numpy as np
 
 
 class BlockPickDemo():
     def __init__(self):
-        self.ri = RobotInterface()
+        # self.ri = RobotInterface()
         rospy.sleep(1.0) # wait for joint updated
         self.bridge = CvBridge()
 
@@ -37,13 +37,16 @@ class BlockPickDemo():
         # rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
         # rospy.Subscriber("/camera/color/image_raw", Image, self.cb_image)
         # rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.cb_depth)
-        image_sub = Subscriber("/rs_d435/color/image_rect_color", Image)
-        depth_sub = Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image)
+        image_sub = Subscriber("/camera/color/image_raw", Image)
+        depth_sub = Subscriber("/camera/aligned_depth_to_color/image_raw", Image)
+        # image_sub = Subscriber("/rs_d435/color/image_rect_color", Image)
+        # depth_sub = Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image)
 
-        tss = TimeSynchronizer([image_sub, depth_sub], queue_size=10)
+        tss = ApproximateTimeSynchronizer([image_sub, depth_sub], queue_size=10, slop=0.01)
         tss.registerCallback(self.gotimage)
 
         self.nav_pub = rospy.Publisher('/hydrus/uav/nav', FlightNav, queue_size=1)
+        self.recognize_pub = rospy.Publisher('/hydrus/recognize', Image, queue_size=1)
 
         self.update_hz = 50
 
@@ -63,7 +66,6 @@ class BlockPickDemo():
 
             mask = cv2.bitwise_or(mask1, mask2)
 
-
             # === Get the largest and get the center ===
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if len(contours) == 0:
@@ -79,7 +81,13 @@ class BlockPickDemo():
             self.cx = cx
             self.cy = cy
             print(f"最大輪郭の重心座標: ({cx}, {cy})")
-
+            
+            # 重心をとってpublish
+            # copied_image = copy.deepcopy(cv_image)
+            # cv2.circle(copied_image, (cx, cy), 5, (0, 255, 0), -1)
+            # cv2.imshow("image", copied_image)
+            # cv2.waitKey(1)
+            
 
             # === Get the points near the center ===
             rand_offsets = (np.random.rand(self.points_num, 2) - 0.5) * self.points_var
@@ -103,7 +111,7 @@ class BlockPickDemo():
             if len(points_x) == 0:
                 return
 
-        except CvBridgeError as e:
+        except Exception as e:
             print(e)
             return
 
@@ -113,6 +121,31 @@ class BlockPickDemo():
             height, width = depth_image.shape
             points_x = (points_x * width) // self.image_width
             points_y = (points_y * height) // self.image_height
+
+            # copied_depth_image = copy.deepcopy(depth_image)
+            # normalized = cv2.convertScaleAbs(copied_depth_image, alpha=255.0/self.depth_max)
+            # cv2.circle(normalized, (width-1, height-1), 100, (0, 0, 0), -1)
+            # cv2.imshow("image", normalized)
+            # cv2.waitKey(1)
+
+            
+
+            #publish depth_image and points_x, points_y with circle
+            copied_depth_image = copy.deepcopy(depth_image)
+            depth_8u = cv2.convertScaleAbs(copied_depth_image, alpha=(255.0 / self.depth_max))
+
+            depth_bgr = cv2.cvtColor(depth_8u, cv2.COLOR_GRAY2BGR)
+
+            for i in range(len(points_x)):
+                if points_x[i] < width and points_y[i] < height:
+                    cv2.circle(depth_bgr, (points_x[i], points_y[i]), 5, (0, 255, 0), -1)
+            
+            cv2.imshow("image", depth_bgr)
+            cv2.waitKey(1)
+
+            # depth_image_msg = self.bridge.cv2_to_imgmsg(depth_bgr, encoding="bgr8")
+            # depth_image_msg.header = self.depth_image.header
+            # self.recognize_pub.publish(depth_image_msg)
 
             depths = []
             for i in range(len(points_x)):
@@ -139,28 +172,28 @@ class BlockPickDemo():
                     continue
                 print(f"depth: {self.depth}")
 
-                if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
-                    if self.depth < self.depth_min or self.depth_max < self.depth:
-                        continue
+                # if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
+                #     if self.depth < self.depth_min or self.depth_max < self.depth:
+                #         continue
 
-                    nav_msg = FlightNav()
-                    nav_msg.control_frame = FlightNav.LOCAL_FRAME
-                    nav_msg.target = FlightNav.COG
+                #     nav_msg = FlightNav()
+                #     nav_msg.control_frame = FlightNav.LOCAL_FRAME
+                #     nav_msg.target = FlightNav.COG
 
-                    if self.cx < self.image_width / 3:
-                        nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
-                        nav_msg.target_omega_z  = 0.1
-                        print("turning right")
-                    elif self.cx > self.image_width * 2 / 3:
-                        nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
-                        nav_msg.target_omega_z = -0.1
-                        print("turning left")
-                    else:
-                        nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
-                        nav_msg.target_vel_x = -0.1
-                        nav_msg.target_vel_y = 0.1
-                        print("moving forward")
-                    self.nav_pub.publish(nav_msg)
+                #     if self.cx < self.image_width / 3:
+                #         nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                #         nav_msg.target_omega_z  = 0.1
+                #         print("turning right")
+                #     elif self.cx > self.image_width * 2 / 3:
+                #         nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                #         nav_msg.target_omega_z = -0.1
+                #         print("turning left")
+                #     else:
+                #         nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
+                #         nav_msg.target_vel_x = -0.1
+                #         nav_msg.target_vel_y = 0.1
+                #         print("moving forward")
+                #     self.nav_pub.publish(nav_msg)
 
             # user code end
 
