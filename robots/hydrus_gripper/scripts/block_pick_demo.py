@@ -24,7 +24,7 @@ class BlockPickDemo():
 
         self.depth_min = 0.00001
         self.depth_max = 30.0
-        self.min_area = 10
+        self.min_area = 500
         self.points_num = 100
         self.points_var = 100
         self.scale = 0.001
