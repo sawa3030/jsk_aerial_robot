@@ -15,6 +15,7 @@ from message_filters import ApproximateTimeSynchronizer, Subscriber
 # import cv2
 import numpy as np
 
+is_sim = True
 
 class BlockPickDemo():
     def __init__(self):
@@ -22,25 +23,34 @@ class BlockPickDemo():
         rospy.sleep(1.0) # wait for joint updated
         self.bridge = CvBridge()
 
-        self.depth_min = 0.00001
-        self.depth_max = 30.0
-        self.min_area = 500
-        self.points_num = 100
-        self.points_var = 100
-        self.scale = 0.001
-        self.lower_red1 = np.array([0, 100, 100])
-        self.upper_red1 = np.array([10, 255, 255])
-        self.lower_red2 = np.array([160, 100, 100])
-        self.upper_red2 = np.array([180, 255, 255])
+        if is_sim:
+            self.depth_min = 0.0000001
+            self.depth_max = 4.0
+            self.min_area = 500
+            self.points_num = 100
+            self.points_var = 100
+            self.scale = 0.001
+            self.lower_red1 = np.array([0, 100, 100])
+            self.upper_red1 = np.array([15, 255, 255])
+            self.lower_red2 = np.array([160, 100, 100])
+            self.upper_red2 = np.array([180, 255, 255])
 
-        # rospy.Subscriber("/rs_d435/color/image_rect_color", Image, self.cb_image)
-        # rospy.Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image, self.cb_depth)
-        # rospy.Subscriber("/camera/color/image_raw", Image, self.cb_image)
-        # rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.cb_depth)
-        image_sub = Subscriber("/camera/color/image_raw", Image)
-        depth_sub = Subscriber("/camera/aligned_depth_to_color/image_raw", Image)
-        # image_sub = Subscriber("/rs_d435/color/image_rect_color", Image)
-        # depth_sub = Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image)
+            image_sub = Subscriber("/rs_d435/color/image_rect_color", Image)
+            depth_sub = Subscriber("/rs_d435/aligned_depth_to_color/image_raw", Image)
+        else:
+            self.depth_min = 0.5
+            self.depth_max = 4.0
+            self.min_area = 500
+            self.points_num = 100
+            self.points_var = 100
+            self.scale = 0.001
+            self.lower_red1 = np.array([0, 100, 150])
+            self.upper_red1 = np.array([10, 255, 255])
+            self.lower_red2 = np.array([170, 100, 150])
+            self.upper_red2 = np.array([180, 255, 255])
+
+            image_sub = Subscriber("/camera/color/image_raw", Image)
+            depth_sub = Subscriber("/camera/aligned_depth_to_color/image_raw", Image)
 
         tss = ApproximateTimeSynchronizer([image_sub, depth_sub], queue_size=10, slop=0.01)
         tss.registerCallback(self.gotimage)
@@ -69,11 +79,13 @@ class BlockPickDemo():
             # === Get the largest and get the center ===
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if len(contours) == 0:
+                print("No object detected")
                 return
             max_contour = max(contours, key=cv2.contourArea)
             M = cv2.moments(max_contour)
 
             if M["m00"] < self.min_area:
+                print("No object detected")
                 return
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
@@ -100,6 +112,14 @@ class BlockPickDemo():
             valid_mask_points = mask_values > 0
             points_x = xs[valid_mask_points]
             points_y = ys[valid_mask_points]
+
+            # publish the depth_image with the points
+            copied_cv_image = copy.deepcopy(cv_image)
+            for i in range(len(points_x)):
+                cv2.circle(copied_cv_image, (points_x[i], points_y[i]), 3, (0, 255, 0), -1)
+            copied_cv_image = self.bridge.cv2_to_imgmsg(copied_cv_image, encoding="bgr8")
+            copied_cv_image.header = self.depth_image.header
+            self.recognize_pub.publish(copied_cv_image)
 
             if len(points_x) == 0:
                 return
@@ -140,28 +160,28 @@ class BlockPickDemo():
                     continue
                 print(f"depth: {self.depth}")
 
-                # if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
-                #     if self.depth < self.depth_min or self.depth_max < self.depth:
-                #         continue
+                if (rospy.Time.now() - self.update_time_depth).to_sec() < 1.0:
+                    if self.depth < self.depth_min or self.depth_max < self.depth:
+                        continue
 
-                #     nav_msg = FlightNav()
-                #     nav_msg.control_frame = FlightNav.LOCAL_FRAME
-                #     nav_msg.target = FlightNav.COG
+                    nav_msg = FlightNav()
+                    nav_msg.control_frame = FlightNav.LOCAL_FRAME
+                    nav_msg.target = FlightNav.COG
 
-                #     if self.cx < self.image_width / 3:
-                #         nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
-                #         nav_msg.target_omega_z  = 0.1
-                #         print("turning right")
-                #     elif self.cx > self.image_width * 2 / 3:
-                #         nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
-                #         nav_msg.target_omega_z = -0.1
-                #         print("turning left")
-                #     else:
-                #         nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
-                #         nav_msg.target_vel_x = -0.1
-                #         nav_msg.target_vel_y = 0.1
-                #         print("moving forward")
-                #     self.nav_pub.publish(nav_msg)
+                    # if self.cx < self.image_width / 3:
+                    #     nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                    #     nav_msg.target_omega_z  = 0.1
+                    #     print("turning right")
+                    # elif self.cx > self.image_width * 2 / 3:
+                    #     nav_msg.yaw_nav_mode = FlightNav.VEL_MODE
+                    #     nav_msg.target_omega_z = -0.1
+                    #     print("turning left")
+                    # else:
+                    nav_msg.pos_xy_nav_mode = FlightNav.VEL_MODE
+                    nav_msg.target_vel_x = -0.1
+                    nav_msg.target_vel_y = 0.1
+                    print("moving forward")
+                    self.nav_pub.publish(nav_msg)
 
             # user code end
 
