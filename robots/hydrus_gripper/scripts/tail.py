@@ -36,6 +36,12 @@ def getKey():
 def printMsg(msg, msg_len = 50):
         print(msg.ljust(msg_len) + "\r", end="")
 
+def min_cut(pos, min):
+    for i in range(len(pos)):
+        if pos[i] < min:
+            pos[i] = min
+    return pos
+
 if __name__=="__main__":
         settings = termios.tcgetattr(sys.stdin)
         rospy.init_node("tail_command")
@@ -44,7 +50,7 @@ if __name__=="__main__":
         tail_pub = rospy.Publisher("/servo/target_states", ServoControlCmd, queue_size=1)
         
         rate = rospy.Rate(10)
-        speed = 50
+        speed = 200
 
         try:
             while(True):
@@ -63,6 +69,7 @@ if __name__=="__main__":
                     dest_pos[1] = dest_pos[1] + speed * reverse[1] * 2
                     dest_pos[2] = dest_pos[2] - speed * reverse[2]
                     dest_pos[3] = dest_pos[3] + speed * reverse[3] * 2
+                    dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("left")
@@ -71,6 +78,7 @@ if __name__=="__main__":
                     dest_pos[1] = dest_pos[1] - speed * reverse[1]
                     dest_pos[2] = dest_pos[2] + speed * reverse[2] * 2
                     dest_pos[3] = dest_pos[3] - speed * reverse[3]
+                    dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("right")
@@ -79,6 +87,7 @@ if __name__=="__main__":
                     dest_pos[1] = dest_pos[1] + speed * reverse[1] * 2
                     dest_pos[2] = dest_pos[2] + speed * reverse[2] * 2
                     dest_pos[3] = dest_pos[3] - speed * reverse[3]
+                    dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("up")
@@ -87,6 +96,7 @@ if __name__=="__main__":
                     dest_pos[1] = dest_pos[1] - speed * reverse[1]
                     dest_pos[2] = dest_pos[2] - speed * reverse[2]
                     dest_pos[3] = dest_pos[3] + speed * reverse[3] * 2
+                    dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("down")
