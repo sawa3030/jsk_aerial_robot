@@ -23,8 +23,13 @@ CTRL+c to quit
 ---------------------------
 """
 
-dest_pos = [2047, 2047, 2047, 2047]
-reverse = [-1, -1, -1, -1]
+## id
+## 3        4
+## 1        0
+##      2
+
+dest_pos = [2047, 2047, 2047, 2047, 2047]
+reverse = [-1, -1, -1, -1, -1]
 
 def getKey():
         tty.setraw(sys.stdin.fileno())
@@ -55,47 +60,51 @@ if __name__=="__main__":
         try:
             while(True):
                 tail_msg = ServoControlCmd()
-                tail_msg.index = [0, 1, 2, 3]
+                tail_msg.index = [0, 1, 2, 3, 4]
 
                 key = getKey()
 
                 if key == 'i':
-                    dest_pos = [2047, 2047, 2047, 2047]
+                    dest_pos = [2047, 2047, 2047, 2047, 2047]
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("init")
                 if key == 'a': ## left
-                    dest_pos[0] = dest_pos[0] - speed * reverse[0]
-                    dest_pos[1] = dest_pos[1] + speed * reverse[1] * 2
-                    dest_pos[2] = dest_pos[2] - speed * reverse[2]
-                    dest_pos[3] = dest_pos[3] + speed * reverse[3] * 2
+                    dest_pos[0] = dest_pos[0] + speed * reverse[0] * 2
+                    dest_pos[1] = dest_pos[1] - speed * reverse[1]
+                    dest_pos[2] = dest_pos[2] + speed * reverse[2]
+                    dest_pos[3] = dest_pos[3] - speed * reverse[3]
+                    dest_pos[4] = dest_pos[4] + speed * reverse[4] * 2
                     dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("left")
                 if key == 'd': ## right
-                    dest_pos[0] = dest_pos[0] + speed * reverse[0] * 2
-                    dest_pos[1] = dest_pos[1] - speed * reverse[1]
-                    dest_pos[2] = dest_pos[2] + speed * reverse[2] * 2
-                    dest_pos[3] = dest_pos[3] - speed * reverse[3]
+                    dest_pos[0] = dest_pos[0] - speed * reverse[0]
+                    dest_pos[1] = dest_pos[1] + speed * reverse[1] * 2
+                    dest_pos[2] = dest_pos[2] + speed * reverse[2]
+                    dest_pos[3] = dest_pos[3] + speed * reverse[3] * 2
+                    dest_pos[4] = dest_pos[4] - speed * reverse[4]
                     dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("right")
                 if key == 'w': ## up
-                    dest_pos[0] = dest_pos[0] - speed * reverse[0]
+                    dest_pos[0] = dest_pos[0] + speed * reverse[0] * 2
                     dest_pos[1] = dest_pos[1] + speed * reverse[1] * 2
-                    dest_pos[2] = dest_pos[2] + speed * reverse[2] * 2
+                    dest_pos[2] = dest_pos[2] - speed * reverse[2]
                     dest_pos[3] = dest_pos[3] - speed * reverse[3]
+                    dest_pos[4] = dest_pos[4] - speed * reverse[4]
                     dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
                     print("up")
                 if key == 's': ## down
-                    dest_pos[0] = dest_pos[0] + speed * reverse[0] * 2
-                    dest_pos[1] = dest_pos[1] - speed * reverse[1]
-                    dest_pos[2] = dest_pos[2] - speed * reverse[2]
+                    dest_pos[0] = dest_pos[0] - speed * reverse[0] 
+                    dest_pos[1] = dest_pos[1] - speed * reverse[1] 
+                    dest_pos[2] = dest_pos[2] + speed * reverse[2] * 2
                     dest_pos[3] = dest_pos[3] + speed * reverse[3] * 2
+                    dest_pos[4] = dest_pos[4] + speed * reverse[4] * 2
                     dest_pos = min_cut(dest_pos, -2047)
                     tail_msg.angles = dest_pos
                     tail_pub.publish(tail_msg)
