@@ -1,239 +1,281 @@
 import numpy as np
 import math
 
-s = 0.5
-d = 0.1
+s = 110
+d = 5
 alpha_1 = 0.0
 alpha_2 = 0.0
 alpha_3 = alpha_1
 alpha_4 = 0.0
-R_0_to_1 = np.array(
+p_des = np.array(
     [
-        [math.cos(alpha_1), 0, math.sin(alpha_1)],
-        [0, 1, 0],
-        [-math.sin(alpha_1), 0, math.cos(alpha_1)],
+        [5.0],
+        [3000.0],
+        [115*4-10],
     ]
 )
-R_1_to_2 = np.array(
+p = np.array(
     [
-        [1, 0, 0],
-        [0, math.cos(alpha_2), math.sin(alpha_2)],
-        [0, -math.sin(alpha_2), math.cos(alpha_2)],
-    ]
-)
-R_2_to_3 = np.array(
-    [
-        [math.cos(alpha_3), 0, -math.sin(alpha_3)],
-        [0, 1, 0],
-        [math.sin(alpha_3), 0, math.cos(alpha_3)],
-    ]
-)
-R_3_to_4 = np.array(
-    [
-        [1, 0, 0],
-        [0, math.cos(alpha_4), math.sin(alpha_4)],
-        [0, -math.sin(alpha_4), math.cos(alpha_4)],
+        [0.0],
+        [0.0],
+        [115*4],
     ]
 )
 
-R_0_to_1_prime = np.array(
-    [
-        [-math.sin(alpha_1), 0, math.cos(alpha_1)],
-        [0, 0, 0],
-        [-math.cos(alpha_1), 0, -math.sin(alpha_1)],
-    ]
-)
-R_1_to_2_prime = np.array(
-    [
-        [0, 0, 0],
-        [0, -math.sin(alpha_2), math.cos(alpha_2)],
-        [0, -math.cos(alpha_2), -math.sin(alpha_2)],
-    ]
-)
-R_2_to_3_prime = np.array(
-    [
-        [-math.sin(alpha_3), 0, -math.cos(alpha_3)],
-        [0, 0, 0],
-        [math.cos(alpha_3), 0, -math.sin(alpha_3)],
-    ]
-)
-R_3_to_4_prime = np.array(
-    [
-        [0, 0, 0],
-        [0, -math.sin(alpha_4), math.cos(alpha_4)],
-        [0, -math.cos(alpha_4), -math.sin(alpha_4)],
-    ]
-)
-
-if alpha_1 == 0:
-    p_0_to_1 = np.array(
+for i in range(100):
+    print("num of iteration: ", i)
+    R_0_to_1 = np.array(
         [
-            [0],
-            [0],
-            [s + d],
+            [math.cos(alpha_1), 0, math.sin(alpha_1)],
+            [0, 1, 0],
+            [-math.sin(alpha_1), 0, math.cos(alpha_1)],
         ]
     )
-    p_0_to_1_prime = np.array(
+    R_1_to_2 = np.array(
         [
-            [0],
-            [0],
-            [0],
+            [1, 0, 0],
+            [0, math.cos(alpha_2), math.sin(alpha_2)],
+            [0, -math.sin(alpha_2), math.cos(alpha_2)],
         ]
     )
-else:
-    r_1 = s / alpha_1
-    p_0_to_1 = np.array(
+    R_2_to_3 = np.array(
         [
-            [r_1 * (1 - math.cos(alpha_1)) + d * math.sin(alpha_1)],
-            [0],
-            [r_1 * math.sin(alpha_1) + d * math.cos(alpha_1)],
+            [math.cos(alpha_3), 0, -math.sin(alpha_3)],
+            [0, 1, 0],
+            [math.sin(alpha_3), 0, math.cos(alpha_3)],
         ]
     )
-    p_0_to_1_prime = np.array(
+    R_3_to_4 = np.array(
         [
-            [
-                -s / alpha_1 / alpha_1 * (1 - math.cos(alpha_1))
-                + r_1 * math.sin(alpha_1)
-                + d * math.cos(alpha_1)
-            ],
-            [0],
-            [
-                -s / alpha_1 / alpha_1 * math.sin(alpha_1)
-                + r_1 * math.cos(alpha_1)
-                - d * math.sin(alpha_1)
-            ],
-        ]
-    )
-if alpha_2 == 0:
-    p_1_to_2 = np.array(
-        [
-            [0],
-            [0],
-            [s + d],
-        ]
-    )
-    p_1_to_2_prime = np.array(
-        [
-            [0],
-            [0],
-            [0],
-        ]
-    )
-else:
-    r_2 = s / alpha_2
-    p_1_to_2 = np.array(
-        [
-            [0],
-            [r_2 * (1 - math.cos(alpha_2)) + d * math.sin(alpha_2)],
-            [r_2 * math.sin(alpha_2) + d * math.cos(alpha_2)],
-        ]
-    )
-    p_1_to_2_prime = np.array(
-        [
-            [0],
-            [
-                -s / alpha_2 / alpha_2 * (1 - math.cos(alpha_2))
-                + r_2 * math.sin(alpha_2)
-                + d * math.cos(alpha_2)
-            ],
-            [
-                -s / alpha_2 / alpha_2 * math.sin(alpha_2)
-                + r_2 * math.cos(alpha_2)
-                - d * math.sin(alpha_2)
-            ],
-        ]
-    )
-if alpha_3 == 0:
-    p_2_to_3 = np.array(
-        [
-            [0],
-            [0],
-            [s + d],
-        ]
-    )
-    p_2_to_3_prime = np.array(
-        [
-            [0],
-            [0],
-            [0],
-        ]
-    )
-else:
-    r_3 = s / alpha_3
-    p_2_to_3 = np.array(
-        [
-            [r_3 * (1 - math.cos(alpha_3)) + d * math.sin(alpha_3)],
-            [0],
-            [r_3 * math.sin(alpha_3) + d * math.cos(alpha_3)],
-        ]
-    )
-    p_2_to_3_prime = np.array(
-        [
-            [
-                -s / alpha_3 / alpha_3 * (1 - math.cos(alpha_3))
-                + r_3 * math.sin(alpha_3)
-                + d * math.cos(alpha_3)
-            ],
-            [0],
-            [
-                -s / alpha_3 / alpha_3 * math.sin(alpha_3)
-                + r_3 * math.cos(alpha_3)
-                - d * math.sin(alpha_3)
-            ],
-        ]
-    )
-if alpha_4 == 0:
-    p_3_to_4 = np.array(
-        [
-            [0],
-            [0],
-            [s + d],
-        ]
-    )
-    p_3_to_4_prime = np.array(
-        [
-            [0],
-            [0],
-            [0],
-        ]
-    )
-else:
-    r_4 = s / alpha_4
-    p_3_to_4 = np.array(
-        [
-            [0],
-            [r_4 * (1 - math.cos(alpha_4)) + d * math.sin(alpha_4)],
-            [r_4 * math.sin(alpha_4) + d * math.cos(alpha_4)],
-        ]
-    )
-    p_3_to_4_prime = np.array(
-        [
-            [0],
-            [
-                -s / alpha_4 / alpha_4 * (1 - math.cos(alpha_4))
-                + r_4 * math.sin(alpha_4)
-                + d * math.cos(alpha_4)
-            ],
-            [
-                -s / alpha_4 / alpha_4 * math.sin(alpha_4)
-                + r_4 * math.cos(alpha_4)
-                - d * math.sin(alpha_4)
-            ],
+            [1, 0, 0],
+            [0, math.cos(alpha_4), math.sin(alpha_4)],
+            [0, -math.sin(alpha_4), math.cos(alpha_4)],
         ]
     )
 
-dp_dalpha_1 = (
-    p_0_to_1_prime
-    + R_0_to_1_prime @ p_1_to_2
-    + R_0_to_1_prime @ R_1_to_2 @ p_2_to_3
-    + R_0_to_1 @ R_1_to_2 @ p_2_to_3_prime
-    + R_0_to_1_prime @ R_1_to_2 @ R_2_to_3 @ p_3_to_4
-    + R_0_to_1 @ R_1_to_2 @ R_2_to_3_prime @ p_3_to_4
-)
-dp_dalpha_2 = (
-    R_0_to_1 @ p_1_to_2_prime
-    + R_0_to_1 @ R_1_to_2_prime @ p_2_to_3
-    + R_0_to_1 @ R_1_to_2_prime @ R_2_to_3 @ p_3_to_4
-)
-dp_dalpha_4 = R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_3_to_4_prime
+    R_0_to_1_prime = np.array(
+        [
+            [-math.sin(alpha_1), 0, math.cos(alpha_1)],
+            [0, 0, 0],
+            [-math.cos(alpha_1), 0, -math.sin(alpha_1)],
+        ]
+    )
+    R_1_to_2_prime = np.array(
+        [
+            [0, 0, 0],
+            [0, -math.sin(alpha_2), math.cos(alpha_2)],
+            [0, -math.cos(alpha_2), -math.sin(alpha_2)],
+        ]
+    )
+    R_2_to_3_prime = np.array(
+        [
+            [-math.sin(alpha_3), 0, -math.cos(alpha_3)],
+            [0, 0, 0],
+            [math.cos(alpha_3), 0, -math.sin(alpha_3)],
+        ]
+    )
+    R_3_to_4_prime = np.array(
+        [
+            [0, 0, 0],
+            [0, -math.sin(alpha_4), math.cos(alpha_4)],
+            [0, -math.cos(alpha_4), -math.sin(alpha_4)],
+        ]
+    )
 
+    if alpha_1 == 0:
+        p_0_to_1 = np.array(
+            [
+                [0],
+                [0],
+                [s + d],
+            ]
+        )
+        p_0_to_1_prime = np.array(
+            [
+                [0],
+                [0],
+                [0],
+            ]
+        )
+    else:
+        r_1 = s / alpha_1
+        p_0_to_1 = np.array(
+            [
+                [r_1 * (1 - math.cos(alpha_1)) + d * math.sin(alpha_1)],
+                [0],
+                [r_1 * math.sin(alpha_1) + d * math.cos(alpha_1)],
+            ]
+        )
+        p_0_to_1_prime = np.array(
+            [
+                [
+                    -s / alpha_1 / alpha_1 * (1 - math.cos(alpha_1))
+                    + r_1 * math.sin(alpha_1)
+                    + d * math.cos(alpha_1)
+                ],
+                [0],
+                [
+                    -s / alpha_1 / alpha_1 * math.sin(alpha_1)
+                    + r_1 * math.cos(alpha_1)
+                    - d * math.sin(alpha_1)
+                ],
+            ]
+        )
+    if alpha_2 == 0:
+        p_1_to_2 = np.array(
+            [
+                [0],
+                [0],
+                [s + d],
+            ]
+        )
+        p_1_to_2_prime = np.array(
+            [
+                [0],
+                [0],
+                [0],
+            ]
+        )
+    else:
+        r_2 = s / alpha_2
+        p_1_to_2 = np.array(
+            [
+                [0],
+                [r_2 * (1 - math.cos(alpha_2)) + d * math.sin(alpha_2)],
+                [r_2 * math.sin(alpha_2) + d * math.cos(alpha_2)],
+            ]
+        )
+        p_1_to_2_prime = np.array(
+            [
+                [0],
+                [
+                    -s / alpha_2 / alpha_2 * (1 - math.cos(alpha_2))
+                    + r_2 * math.sin(alpha_2)
+                    + d * math.cos(alpha_2)
+                ],
+                [
+                    -s / alpha_2 / alpha_2 * math.sin(alpha_2)
+                    + r_2 * math.cos(alpha_2)
+                    - d * math.sin(alpha_2)
+                ],
+            ]
+        )
+    if alpha_3 == 0:
+        p_2_to_3 = np.array(
+            [
+                [0],
+                [0],
+                [s + d],
+            ]
+        )
+        p_2_to_3_prime = np.array(
+            [
+                [0],
+                [0],
+                [0],
+            ]
+        )
+    else:
+        r_3 = s / alpha_3
+        p_2_to_3 = np.array(
+            [
+                [r_3 * (1 - math.cos(alpha_3)) + d * math.sin(alpha_3)],
+                [0],
+                [r_3 * math.sin(alpha_3) + d * math.cos(alpha_3)],
+            ]
+        )
+        p_2_to_3_prime = np.array(
+            [
+                [
+                    -s / alpha_3 / alpha_3 * (1 - math.cos(alpha_3))
+                    + r_3 * math.sin(alpha_3)
+                    + d * math.cos(alpha_3)
+                ],
+                [0],
+                [
+                    -s / alpha_3 / alpha_3 * math.sin(alpha_3)
+                    + r_3 * math.cos(alpha_3)
+                    - d * math.sin(alpha_3)
+                ],
+            ]
+        )
+    if alpha_4 == 0:
+        p_3_to_4 = np.array(
+            [
+                [0],
+                [0],
+                [s + d],
+            ]
+        )
+        p_3_to_4_prime = np.array(
+            [
+                [0],
+                [0],
+                [0],
+            ]
+        )
+    else:
+        r_4 = s / alpha_4
+        p_3_to_4 = np.array(
+            [
+                [0],
+                [r_4 * (1 - math.cos(alpha_4)) + d * math.sin(alpha_4)],
+                [r_4 * math.sin(alpha_4) + d * math.cos(alpha_4)],
+            ]
+        )
+        p_3_to_4_prime = np.array(
+            [
+                [0],
+                [
+                    -s / alpha_4 / alpha_4 * (1 - math.cos(alpha_4))
+                    + r_4 * math.sin(alpha_4)
+                    + d * math.cos(alpha_4)
+                ],
+                [
+                    -s / alpha_4 / alpha_4 * math.sin(alpha_4)
+                    + r_4 * math.cos(alpha_4)
+                    - d * math.sin(alpha_4)
+                ],
+            ]
+        )
+
+    p = (
+        R_0_to_1 @ p_0_to_1
+        + R_0_to_1 @ R_1_to_2 @ p_1_to_2
+        + R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_2_to_3
+        + R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ R_3_to_4 @ p_3_to_4
+    )
+    if np.linalg.norm(p_des - p) < 10:
+        print("alpha_1: ", math.degrees(alpha_1))
+        print("alpha_2: ", math.degrees(alpha_2))
+        print("alpha_3: ", math.degrees(alpha_3))
+        print("alpha_4: ", math.degrees(alpha_4))
+        break
+
+    dp_dalpha_1 = (
+        p_0_to_1_prime
+        + R_0_to_1_prime @ p_1_to_2
+        + R_0_to_1_prime @ R_1_to_2 @ p_2_to_3
+        + R_0_to_1 @ R_1_to_2 @ p_2_to_3_prime
+        + R_0_to_1_prime @ R_1_to_2 @ R_2_to_3 @ p_3_to_4
+        + R_0_to_1 @ R_1_to_2 @ R_2_to_3_prime @ p_3_to_4
+    )
+    dp_dalpha_2 = (
+        R_0_to_1 @ p_1_to_2_prime
+        + R_0_to_1 @ R_1_to_2_prime @ p_2_to_3
+        + R_0_to_1 @ R_1_to_2_prime @ R_2_to_3 @ p_3_to_4
+    )
+    dp_dalpha_4 = R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_3_to_4_prime
+
+    dp_dalpha = np.concatenate(
+        (dp_dalpha_1, dp_dalpha_2, dp_dalpha_4), axis=1
+    )
+    dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p))
+
+    alpha_1 += dq[0, 0]
+    alpha_2 += dq[1, 0]
+    alpha_3 += dq[0, 0]
+    alpha_4 += dq[2, 0]
+
+    if i == 99:
+        print("ik was not solved")
