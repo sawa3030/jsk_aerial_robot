@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+from __future__ import print_function # for print function in python2
+import sys, select, termios, tty
+
+import rospy
+from std_msgs.msg import Empty
+from aerial_robot_msgs.msg import FlightNav
+import rosgraph
+from spinal.msg import ServoControlCmd
 import numpy as np
 import math
 
@@ -331,38 +341,58 @@ if __name__ == "__main__":
     alpha_2 = 0.0
     alpha_3 = alpha_1
     alpha_4 = 0.0
-    p_des = np.array(
-        [
-            [-200.0],
-            [-100.0],
-            [115 * 4 - 100],
-        ]
-    )
 
-    dest_alpha_1, dest_alpha_2, dest_alpha_3, dest_alpha_4 = solve_ik(
-        alpha_1, alpha_2, alpha_3, alpha_4, p_des
-    )
+    rospy.init_node("tail_ik")
+    tail_pub = rospy.Publisher("/servo/target_states", ServoControlCmd, queue_size=1)
 
-    (
-        x_plus_y_plus_wire,
-        x_plus_y_minus_wire,
-        x_minus_y_plus_wire,
-        x_minus_y_minus_wire,
-        x_zero_y_plus_wire,
-    ) = get_wire_diff(
-        dest_alpha_1, dest_alpha_2, dest_alpha_3, dest_alpha_4
-    )  # x_plus_y_plus_wire, x_plus_y_minus_wire, x_minus_y_plus_wire, x_minus_y_minus_wire, x_zero_y_plus_wire
-    print("x_plus_y_plus_wire: ", x_plus_y_plus_wire)
-    print("x_plus_y_minus_wire: ", x_plus_y_minus_wire)
-    print("x_minus_y_plus_wire: ", x_minus_y_plus_wire)
-    print("x_minus_y_minus_wire: ", x_minus_y_minus_wire)
-    print("x_zero_y_plus_wire: ", x_zero_y_plus_wire)
+    rate = rospy.Rate(10)
 
-    init_servo_angles = [2047, 2047, 2047, 2047, 2047]
-    dest_servo_angles = [
-        2047 - 1 * get_angle_diff(x_minus_y_minus_wire),
-        2047 - 1 * get_angle_diff(x_plus_y_minus_wire),
-        2047 - 1 * get_angle_diff(x_zero_y_plus_wire),
-        2047 - 1 * get_angle_diff(x_plus_y_plus_wire),
-        2047 - 1 * get_angle_diff(x_minus_y_plus_wire),
-    ]
+    try:
+        while True:
+            tail_msg = ServoControlCmd()
+            tail_msg.index = [0, 1, 2, 3, 4]
+
+            x = float(input("x"))
+            y = float(input("y"))
+            z = float(input("z"))
+            p_des = np.array(
+                [
+                    [x],
+                    [y],
+                    [z],
+                ]
+            )
+
+            dest_alpha_1, dest_alpha_2, dest_alpha_3, dest_alpha_4 = solve_ik(
+                alpha_1, alpha_2, alpha_3, alpha_4, p_des
+            )
+
+            (
+                x_plus_y_plus_wire,
+                x_plus_y_minus_wire,
+                x_minus_y_plus_wire,
+                x_minus_y_minus_wire,
+                x_zero_y_plus_wire,
+            ) = get_wire_diff(dest_alpha_1, dest_alpha_2, dest_alpha_3, dest_alpha_4)
+            print("x_plus_y_plus_wire: ", x_plus_y_plus_wire)
+            print("x_plus_y_minus_wire: ", x_plus_y_minus_wire)
+            print("x_minus_y_plus_wire: ", x_minus_y_plus_wire)
+            print("x_minus_y_minus_wire: ", x_minus_y_minus_wire)
+            print("x_zero_y_plus_wire: ", x_zero_y_plus_wire)
+
+            init_servo_angles = [2047, 2047, 2047, 2047, 2047]
+            dest_servo_angles = [
+                2047 - 1 * get_angle_diff(x_minus_y_minus_wire),
+                2047 - 1 * get_angle_diff(x_plus_y_minus_wire),
+                2047 - 1 * get_angle_diff(x_zero_y_plus_wire),
+                2047 - 1 * get_angle_diff(x_plus_y_plus_wire),
+                2047 - 1 * get_angle_diff(x_minus_y_plus_wire),
+            ]
+
+            tail_msg.angles = dest_servo_angles
+            tail_pub.publish(tail_msg)
+
+            rospy.sleep(0.001)
+
+    except Exception as e:
+        print(repr(e))
