@@ -5,14 +5,7 @@ s = 110
 d = 5
 r_joint_1 = 75 / 2 / math.sqrt(2)
 r_joint_2 = 75 / 2
-
-# p = np.array(
-#     [
-#         [0.0],
-#         [0.0],
-#         [115*4],
-#     ]
-# )
+r_wheel = 10  # this needs to be changed
 
 
 def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
@@ -277,20 +270,20 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
     def get_plus_pos_wire_length(alpha, r_joint):  # xまたはyが正のワイヤーの長さ
         if alpha == 0:
             return s + d
-        r = s / alpha
+        r = s / abs(alpha)
         if alpha > 0:
-            return 4 * (r - r_joint) * math.sin(alpha / 4) + d
+            return 4 * (r - r_joint) * math.sin(abs(alpha) / 4) + d
         else:
-            return 4 * (r + r_joint) * math.sin(alpha / 4) + d
+            return 4 * (r + r_joint) * math.sin(abs(alpha) / 4) + d
 
     def get_minus_pos_wire_length(alpha, r_joint):  # xまたはyが負のワイヤーの長さ
         if alpha == 0:
             return s + d
-        r = s / alpha
+        r = s / abs(alpha)
         if alpha > 0:
-            return 4 * (r + r_joint) * math.sin(alpha / 4) + d
+            return 4 * (r + r_joint) * math.sin(abs(alpha) / 4) + d
         else:
-            return 4 * (r - r_joint) * math.sin(alpha / 4) + d
+            return 4 * (r - r_joint) * math.sin(abs(alpha) / 4) + d
 
     x_plus_y_plus_wire = (
         get_plus_pos_wire_length(alpha_1, r_joint_1)
@@ -329,6 +322,10 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
     )
 
 
+def get_angle_diff(wire_diff):
+    return wire_diff / r_wheel / 2 / math.pi * 4096
+
+
 if __name__ == "__main__":
     alpha_1 = 0.0
     alpha_2 = 0.0
@@ -346,7 +343,13 @@ if __name__ == "__main__":
         alpha_1, alpha_2, alpha_3, alpha_4, p_des
     )
 
-    x_plus_y_plus_wire, x_plus_y_minus_wire, x_minus_y_plus_wire, x_minus_y_minus_wire, x_zero_y_plus_wire = get_wire_diff(
+    (
+        x_plus_y_plus_wire,
+        x_plus_y_minus_wire,
+        x_minus_y_plus_wire,
+        x_minus_y_minus_wire,
+        x_zero_y_plus_wire,
+    ) = get_wire_diff(
         dest_alpha_1, dest_alpha_2, dest_alpha_3, dest_alpha_4
     )  # x_plus_y_plus_wire, x_plus_y_minus_wire, x_minus_y_plus_wire, x_minus_y_minus_wire, x_zero_y_plus_wire
     print("x_plus_y_plus_wire: ", x_plus_y_plus_wire)
@@ -354,3 +357,12 @@ if __name__ == "__main__":
     print("x_minus_y_plus_wire: ", x_minus_y_plus_wire)
     print("x_minus_y_minus_wire: ", x_minus_y_minus_wire)
     print("x_zero_y_plus_wire: ", x_zero_y_plus_wire)
+
+    init_servo_angles = [2047, 2047, 2047, 2047, 2047]
+    dest_servo_angles = [
+        2047 - 1 * get_angle_diff(x_minus_y_minus_wire),
+        2047 - 1 * get_angle_diff(x_plus_y_minus_wire),
+        2047 - 1 * get_angle_diff(x_zero_y_plus_wire),
+        2047 - 1 * get_angle_diff(x_plus_y_plus_wire),
+        2047 - 1 * get_angle_diff(x_minus_y_plus_wire),
+    ]
