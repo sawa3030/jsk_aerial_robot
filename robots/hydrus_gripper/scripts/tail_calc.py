@@ -15,7 +15,7 @@ s = 110
 d = 5
 r_joint_1 = 75 / 2 / math.sqrt(2)
 r_joint_2 = 75 / 2
-r_wheel = 10  # this needs to be changed
+r_wheel = 20
 
 
 def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
@@ -333,7 +333,7 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
 
 
 def get_angle_diff(wire_diff):
-    return wire_diff / r_wheel / 2 / math.pi * 4096
+    return int(wire_diff / r_wheel / 2 / math.pi * 4096)
 
 
 if __name__ == "__main__":
@@ -388,6 +388,7 @@ if __name__ == "__main__":
                 2047 - 1 * get_angle_diff(x_plus_y_plus_wire),
                 2047 - 1 * get_angle_diff(x_minus_y_plus_wire),
             ]
+            print("dest_servo_angles: ", dest_servo_angles)
 
             tail_msg.angles = dest_servo_angles
             tail_pub.publish(tail_msg)
@@ -396,3 +397,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(repr(e))
+        pass
