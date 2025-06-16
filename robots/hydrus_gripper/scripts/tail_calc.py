@@ -242,7 +242,8 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
             + R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_2_to_3
             + R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ R_3_to_4 @ p_3_to_4
         )
-        if np.linalg.norm(p_des - p) < 13:
+
+        if np.linalg.norm(p_des - p[:2, :]) < 13:
             print("alpha_1: ", math.degrees(alpha_1))
             print("alpha_2: ", math.degrees(alpha_2))
             print("alpha_3: ", math.degrees(alpha_3))
@@ -265,7 +266,8 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
         dp_dalpha_4 = R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_3_to_4_prime
 
         dp_dalpha = np.concatenate((dp_dalpha_1, dp_dalpha_2, dp_dalpha_4), axis=1)
-        dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p))
+        dp_dalpha = dp_dalpha[:2, :] 
+        dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p[:2, :]))
 
         alpha_1 += dq[0, 0]
         alpha_2 += dq[1, 0]
@@ -354,12 +356,10 @@ if __name__ == "__main__":
 
             x = float(input("x"))
             y = float(input("y"))
-            z = float(input("z"))
             p_des = np.array(
                 [
                     [x],
                     [y],
-                    [z],
                 ]
             )
 
