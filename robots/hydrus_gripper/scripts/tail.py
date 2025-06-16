@@ -60,7 +60,7 @@ if __name__=="__main__":
         try:
             while(True):
                 tail_msg = ServoControlCmd()
-                tail_msg.index = [0, 1, 2, 3, 4]
+                tail_msg.index = [3, 4, 5, 6, 7]
 
                 key = getKey()
 

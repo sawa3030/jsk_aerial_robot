@@ -13,8 +13,8 @@ import math
 
 s = 110
 d = 5
-r_joint_1 = 75 / 2 / math.sqrt(2)
-r_joint_2 = 75 / 2
+r_joint_1 = 85 / 2 / math.sqrt(2)
+r_joint_2 = 85 / 2
 r_wheel = 20
 
 
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     try:
         while True:
             tail_msg = ServoControlCmd()
-            tail_msg.index = [0, 1, 2, 3, 4]
+            tail_msg.index = [3, 4, 5, 6, 7]
 
             x = float(input("x"))
             y = float(input("y"))
@@ -383,9 +383,9 @@ if __name__ == "__main__":
             init_servo_angles = [2047, 2047, 2047, 2047, 2047]
             dest_servo_angles = [
                 2047 - 1 * get_angle_diff(x_minus_y_minus_wire),
-                2047 - 1 * get_angle_diff(x_plus_y_minus_wire),
+                2047 + 1 * get_angle_diff(x_plus_y_minus_wire),
                 2047 - 1 * get_angle_diff(x_zero_y_plus_wire),
-                2047 - 1 * get_angle_diff(x_plus_y_plus_wire),
+                2047 + 1 * get_angle_diff(x_plus_y_plus_wire),
                 2047 - 1 * get_angle_diff(x_minus_y_plus_wire),
             ]
             print("dest_servo_angles: ", dest_servo_angles)
