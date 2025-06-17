@@ -345,17 +345,33 @@ if __name__ == "__main__":
     alpha_4 = 0.0
 
     rospy.init_node("tail_ik")
-    tail_pub = rospy.Publisher("/servo/target_states", ServoControlCmd, queue_size=1)
+    tail_pub = rospy.Publisher("servo/target_states", ServoControlCmd, queue_size=1)
 
     rate = rospy.Rate(10)
+
+    dest_poses = [
+        [0.0, 0.0],
+        [200.0, 0.0],
+        [-200.0, 0.0],
+        [0.0, 0.0],
+        [0.0, 200.0],
+        [0.0, -200.0],
+    ]
+    pos_index = 0
 
     try:
         while True:
             tail_msg = ServoControlCmd()
             tail_msg.index = [3, 4, 5, 6, 7]
 
-            x = float(input("x"))
-            y = float(input("y"))
+            # x = float(input("x"))
+            # y = float(input("y"))
+            z = float(input("z"))
+            x, y = dest_poses[pos_index]
+            pos_index += 1
+            if pos_index >= len(dest_poses):
+                pos_index = 0
+            print("x: ", x, " y: ", y)
             p_des = np.array(
                 [
                     [x],

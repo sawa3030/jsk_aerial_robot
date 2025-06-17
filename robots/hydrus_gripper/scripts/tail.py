@@ -52,7 +52,7 @@ if __name__=="__main__":
         rospy.init_node("tail_command")
         print(msg)
 
-        tail_pub = rospy.Publisher("/servo/target_states", ServoControlCmd, queue_size=1)
+        tail_pub = rospy.Publisher("servo/target_states", ServoControlCmd, queue_size=1)
         
         rate = rospy.Rate(10)
         speed = 200
