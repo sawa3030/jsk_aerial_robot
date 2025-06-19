@@ -10,6 +10,7 @@ import rosgraph
 from spinal.msg import ServoControlCmd
 import numpy as np
 import math
+from aerial_robot_base.robot_interface import RobotInterface
 
 s = 110
 d = 5
@@ -242,6 +243,8 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
             + R_0_to_1 @ R_1_to_2 @ p_2_to_3
             + R_0_to_1 @ R_1_to_2 @ R_2_to_3 @ p_3_to_4
         )
+        # print("p: ")
+        # print(p)
 
         # if np.linalg.norm(p_des - p[:2, :]) < 13:
         print("alpha_1: ", math.degrees(alpha_1), "deg")
@@ -361,6 +364,9 @@ if __name__ == "__main__":
 
     rate = rospy.Rate(10)
 
+    ri = RobotInterface()
+    ri.trajectoryNavigate(pos=None, rot=None)
+
     # dest_poses = [
     #     [0.0, 0.0],
     #     [200.0, 0.0],
@@ -370,25 +376,36 @@ if __name__ == "__main__":
     #     [0.0, -200.0],
     # ]
     # pos_index = 0
+    dest_pos_x = 50
+    dest_pos_y = 50
+    dest_pos_z = 440
+    max_x = 50
+    min_x = -50
+
 
     try:
         while True:
             tail_msg = ServoControlCmd()
             tail_msg.index = [3, 4, 5, 6, 7]
 
-            x = float(input("x"))
-            y = float(input("y"))
+            dest_pos_x -= 10
+            if dest_pos_x < min_x:
+                dest_pos_x = max_x
+                dest_pos_y -= 10
+            # x = float(input("x"))
+            # y = float(input("y"))
             z = float(input("z"))
             # x, y = dest_poses[pos_index]
             # pos_index += 1
             # if pos_index >= len(dest_poses):
             #     pos_index = 0
             # print("x: ", x, " y: ", y)
+
             p_des = np.array(
                 [
-                    [x],
-                    [y],
-                    [z],
+                    [dest_pos_x],
+                    [dest_pos_y],
+                    [dest_pos_z],
                 ]
             )
 
