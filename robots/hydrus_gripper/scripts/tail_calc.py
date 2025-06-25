@@ -251,7 +251,7 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
         print("alpha_2: ", math.degrees(alpha_2), "deg")
         print("alpha_3: ", math.degrees(alpha_3), "deg")
         print("alpha_4: ", math.degrees(alpha_4), "deg")
-        if np.linalg.norm(p_des - p) < 5:
+        if np.linalg.norm(p_des - p[:2, :]) < 13:
             print("p_des: ")
             print(p_des)
             print("p: ")
@@ -280,9 +280,9 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
         # print(dp_dalpha_4)
 
         dp_dalpha = np.concatenate((dp_dalpha_1, dp_dalpha_2, dp_dalpha_4), axis=1)
-        # dp_dalpha = dp_dalpha[:2, :] 
-        # dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p[:2, :]))
-        dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p)*0.05)
+        dp_dalpha = dp_dalpha[:2, :] 
+        dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p[:2, :]) * 0.05)
+        # dq = np.dot(np.linalg.pinv(dp_dalpha), (p_des - p)*0.05)
 
         alpha_1 += dq[0, 0]
         alpha_2 += dq[1, 0]
@@ -364,8 +364,8 @@ if __name__ == "__main__":
 
     rate = rospy.Rate(10)
 
-    ri = RobotInterface()
-    ri.trajectoryNavigate(pos=None, rot=None)
+    # ri = RobotInterface()
+    # ri.trajectoryNavigate(pos=None, rot=None)
 
     # dest_poses = [
     #     [0.0, 0.0],
@@ -376,9 +376,9 @@ if __name__ == "__main__":
     #     [0.0, -200.0],
     # ]
     # pos_index = 0
-    dest_pos_x = 50
-    dest_pos_y = 50
-    dest_pos_z = 440
+    dest_pos_x = 100
+    dest_pos_y = 100
+    dest_pos_z = 420
     max_x = 50
     min_x = -50
 
@@ -392,8 +392,8 @@ if __name__ == "__main__":
             if dest_pos_x < min_x:
                 dest_pos_x = max_x
                 dest_pos_y -= 10
-            # x = float(input("x"))
-            # y = float(input("y"))
+            x = float(input("x"))
+            y = float(input("y"))
             z = float(input("z"))
             # x, y = dest_poses[pos_index]
             # pos_index += 1
@@ -403,9 +403,12 @@ if __name__ == "__main__":
 
             p_des = np.array(
                 [
-                    [dest_pos_x],
-                    [dest_pos_y],
-                    [dest_pos_z],
+                    # [dest_pos_x],
+                    # [dest_pos_y],
+                    # [dest_pos_z],
+                    [x],
+                    [y],
+                    # [z],
                 ]
             )
 
