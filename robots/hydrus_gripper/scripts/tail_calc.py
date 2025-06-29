@@ -365,8 +365,11 @@ if __name__ == "__main__":
     rate = rospy.Rate(10)
 
     # ri = RobotInterface()
-    # ri.trajectoryNavigate(pos=None, rot=None)
-
+    # rospy.sleep(1.0)
+    # print(ri.getCogPos())
+    # ri.trajectoryNavigate(pos=[0,0,0.6], rot=None)
+    # rospy.sleep(5)
+    
     # dest_poses = [
     #     [0.0, 0.0],
     #     [200.0, 0.0],
@@ -376,25 +379,27 @@ if __name__ == "__main__":
     #     [0.0, -200.0],
     # ]
     # pos_index = 0
-    dest_pos_x = 100
-    dest_pos_y = 100
-    dest_pos_z = 420
-    max_x = 50
-    min_x = -50
+    dest_pos_x = 350
+    dest_pos_y = 0
+    max_x = 300
+    min_x = -300
 
 
     try:
         while True:
+            rospy.sleep(0.5)
             tail_msg = ServoControlCmd()
             tail_msg.index = [3, 4, 5, 6, 7]
 
-            dest_pos_x -= 10
+            dest_pos_x -= 50
+            # if dest_pos_x < min_x:
+            #     dest_pos_x = max_x
+            #     dest_pos_y -= 50
             if dest_pos_x < min_x:
-                dest_pos_x = max_x
-                dest_pos_y -= 10
-            x = float(input("x"))
-            y = float(input("y"))
-            z = float(input("z"))
+                exit()
+            # x = float(input("x"))
+            # y = float(input("y"))
+            # z = float(input("z"))
             # x, y = dest_poses[pos_index]
             # pos_index += 1
             # if pos_index >= len(dest_poses):
@@ -403,11 +408,11 @@ if __name__ == "__main__":
 
             p_des = np.array(
                 [
-                    # [dest_pos_x],
-                    # [dest_pos_y],
+                    [dest_pos_x],
+                    [dest_pos_y],
                     # [dest_pos_z],
-                    [x],
-                    [y],
+                    # [x],
+                    # [y],
                     # [z],
                 ]
             )
