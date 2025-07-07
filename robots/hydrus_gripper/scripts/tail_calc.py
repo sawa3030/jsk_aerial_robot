@@ -294,23 +294,24 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
 
 
 def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
+    divide_num = 2
     def get_plus_pos_wire_length(alpha, r_joint):  # xまたはyが正のワイヤーの長さ
         if alpha == 0:
             return s + d
         r = s / abs(alpha)
         if alpha > 0:
-            return 4 * (r - r_joint) * math.sin(abs(alpha) / 4) + d
+            return divide_num * (r - r_joint - 1.5) * math.sin(abs(alpha) / divide_num) + d
         else:
-            return 4 * (r + r_joint) * math.sin(abs(alpha) / 4) + d
+            return divide_num * (r + r_joint + 1.5) * math.sin(abs(alpha) / divide_num) + d
 
     def get_minus_pos_wire_length(alpha, r_joint):  # xまたはyが負のワイヤーの長さ
         if alpha == 0:
             return s + d
         r = s / abs(alpha)
         if alpha > 0:
-            return 4 * (r + r_joint) * math.sin(abs(alpha) / 4) + d
+            return divide_num * (r + r_joint + 1.5) * math.sin(abs(alpha) / divide_num) + d
         else:
-            return 4 * (r - r_joint) * math.sin(abs(alpha) / 4) + d
+            return divide_num * (r - r_joint - 1.5) * math.sin(abs(alpha) / divide_num) + d
 
     x_plus_y_plus_wire = (
         get_plus_pos_wire_length(alpha_1, r_joint_1)
@@ -350,14 +351,14 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
 
 
 def get_angle_diff(wire_diff):
-    return int(wire_diff / r_wheel / 2 / math.pi * 4096)
+    return int(wire_diff / r_wheel / math.pi * 4096)
 
 
 if __name__ == "__main__":
-    alpha_1 = math.radians(1)
-    alpha_2 = math.radians(1)
+    alpha_1 = math.radians(20)
+    alpha_2 = math.radians(0)
     alpha_3 = alpha_1
-    alpha_4 = math.radians(1)
+    alpha_4 = math.radians(0)
 
     rospy.init_node("tail_ik")
     tail_pub = rospy.Publisher("servo/target_states", ServoControlCmd, queue_size=1)
@@ -389,16 +390,17 @@ if __name__ == "__main__":
         while True:
             rospy.sleep(0.5)
             tail_msg = ServoControlCmd()
-            tail_msg.index = [3, 4, 5, 6, 7]
+            tail_msg.index = [0, 1, 2, 3, 4]
+            # tail_msg.index = [3, 4, 5, 6, 7]
 
-            dest_pos_x -= 50
+            # dest_pos_x -= 50
             # if dest_pos_x < min_x:
             #     dest_pos_x = max_x
             #     dest_pos_y -= 50
-            if dest_pos_x < min_x:
-                exit()
-            # x = float(input("x"))
-            # y = float(input("y"))
+            # if dest_pos_x < min_x:
+            #     exit()
+            x = float(input("x"))
+            y = float(input("y"))
             # z = float(input("z"))
             # x, y = dest_poses[pos_index]
             # pos_index += 1
@@ -408,11 +410,11 @@ if __name__ == "__main__":
 
             p_des = np.array(
                 [
-                    [dest_pos_x],
-                    [dest_pos_y],
+                    # [dest_pos_x],
+                    # [dest_pos_y],
                     # [dest_pos_z],
-                    # [x],
-                    # [y],
+                    [x],
+                    [y],
                     # [z],
                 ]
             )
