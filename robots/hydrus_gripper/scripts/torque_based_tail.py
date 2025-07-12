@@ -54,18 +54,14 @@ def get_wire_tension(tau_des):
 def tension_to_current(tension):
     servo_torque = tension * r_wheel / 2
     # servo_torque = torque_constant * current
-    torque_constant = 0.215 * 1000 / 1.47
-    return servo_torque / torque_constant
+    torque_constant = 0.215 * 1000 / (1.47 * 1000) # N*mm/mA
+    plus_and_minus = [1, -1, 1, -1, 1]
+    return servo_torque / torque_constant * plus_and_minus
 
 
 if __name__ == "__main__":
-    alpha_1 = math.radians(20)
-    alpha_2 = math.radians(0)
-    alpha_3 = alpha_1
-    alpha_4 = math.radians(0)
-
     rospy.init_node("tail_torque_based_control")
-    tail_pub = rospy.Publisher("servo/target_current", ServoControlCmd, queue_size=1)
+    tail_pub = rospy.Publisher("/servo/target_current", ServoControlCmd, queue_size=1)
 
     rate = rospy.Rate(10)
 
@@ -73,13 +69,12 @@ if __name__ == "__main__":
         while True:
             rospy.sleep(0.5)
             tail_msg = ServoControlCmd()
-            tail_msg.index = [0, 1, 2, 3, 4]
-
+            tail_msg.index = [6, 7, 3, 4, 5]
     
-            alpha_1 = math.radians(20   )
-            alpha_2 = math.radians(0)   
-            alpha_3 = alpha_1   
-            alpha_4 = math.radians(0)   
+            # alpha_1 = math.radians(20)
+            # alpha_2 = math.radians(0)   
+            # alpha_3 = alpha_1   
+            # alpha_4 = math.radians(0)   
 
             alpha_1 = math.radians(float(input("alpha_1 (deg): ")))
             alpha_2 = math.radians(float(input("alpha_2 (deg): ")))
@@ -97,7 +92,7 @@ if __name__ == "__main__":
             dest_servo_current = tension_to_current(wire_tension)
             print("dest_servo_current: ", dest_servo_current)
 
-            # tail_msg.current = dest_servo_current.tolist()
+            tail_msg.angles = dest_servo_current.astype(np.int32).tolist()
             tail_pub.publish(tail_msg)
 
             rospy.sleep(0.001)
