@@ -294,7 +294,7 @@ def solve_ik(alpha_1, alpha_2, alpha_3, alpha_4, p_des):
 
 
 def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
-    divide_num = 2
+    divide_num = 4
     def get_plus_pos_wire_length(alpha, r_joint):  # xまたはyが正のワイヤーの長さ
         if alpha == 0:
             return s + d
@@ -390,8 +390,8 @@ if __name__ == "__main__":
         while True:
             rospy.sleep(0.5)
             tail_msg = ServoControlCmd()
-            tail_msg.index = [0, 1, 2, 3, 4]
-            # tail_msg.index = [3, 4, 5, 6, 7]
+            # tail_msg.index = [0, 1, 2, 3, 4]
+            tail_msg.index = [6, 7, 3, 4, 5]
 
             # dest_pos_x -= 50
             # if dest_pos_x < min_x:
