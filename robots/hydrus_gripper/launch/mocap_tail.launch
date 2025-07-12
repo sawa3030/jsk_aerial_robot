@@ -7,27 +7,6 @@
         </include>
     </group>
 
-    <!-- Joint 1 -->
-    <group ns="joint1">
-        <include file="$(find aerial_robot_base)/launch/external_module/mocap.launch">
-            <arg name="robot_id" value="3" />
-        </include>
-    </group>
-
-    <!-- Joint 2 -->
-    <group ns="joint2">
-        <include file="$(find aerial_robot_base)/launch/external_module/mocap.launch">
-            <arg name="robot_id" value="4" />
-        </include>
-    </group>
-
-    <!-- Joint 3 -->
-    <group ns="joint3">
-        <include file="$(find aerial_robot_base)/launch/external_module/mocap.launch">
-            <arg name="robot_id" value="5" />
-        </include>
-    </group>
-
     <!-- Joint 4 -->
     <group ns="joint4">
         <include file="$(find aerial_robot_base)/launch/external_module/mocap.launch">
