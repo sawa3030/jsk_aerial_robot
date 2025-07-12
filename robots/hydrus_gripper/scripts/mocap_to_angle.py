@@ -22,12 +22,17 @@ class TailState():
         self.update_hz = 50
 
         self.angles = [0.0]
-        angle_subs = [
-            Subscriber("/joint0/mocap/pose", PoseStamped),
-            Subscriber("/joint1/mocap/pose", PoseStamped),
-        ]
+
+        joint0_sub = Subscriber("/joint0/mocap/pose", PoseStamped)
+        # joint1_sub = rospy.Subscriber("/joint1/mocap/pose", PoseStamped)
+        joint4_sub = Subscriber("/joint4/mocap/pose", PoseStamped)
+        # angle_subs = [joint0_sub, joint1_sub]
+        # tss = ApproximateTimeSynchronizer(angle_subs, queue_size=10, slop=0.01)
+        # tss.registerCallback(self.update_angle)
+
+        angle_subs = [joint0_sub, joint4_sub]
         tss = ApproximateTimeSynchronizer(angle_subs, queue_size=10, slop=0.01)
-        tss.registerCallback(self.update_angle)
+        tss.registerCallback(self.get_end_effector_local_pos)
 
     def update_angle(self, msg0, msg1):
         # print("Received messages for angles:")
@@ -52,6 +57,34 @@ class TailState():
             print("z: ", math.degrees(angle[2]))
             print("----")
             self.angles[i] = angle[2]
+
+    def get_end_effector_local_pos(self, msg0, msg4):
+        # print("Received messages for end effector position:")
+        # print(f"Joint 0: {msg0.pose.position}")
+        # print(f"Joint 4: {msg4.pose.position}")
+        base_world_pos = np.array([msg0.pose.position.x, msg0.pose.position.y, msg0.pose.position.z])
+        base_quaternion = np.array([msg0.pose.orientation.x, msg0.pose.orientation.y, msg0.pose.orientation.z, msg0.pose.orientation.w])
+        end_effector_world_pos = np.array([msg4.pose.position.x, msg4.pose.position.y, msg4.pose.position.z])
+        end_effector_quaternion = np.array([msg4.pose.orientation.x, msg4.pose.orientation.y, msg4.pose.orientation.z, msg4.pose.orientation.w])
+        # delta = end_effector_world_pos - base_world_pos
+        # delta = np.append(delta, 0.0) 
+        # rot = quaternion_inverse(base_quaternion)
+        # local_pos = quaternion_multiply(rot, delta)
+        # print("Local Position: ", local_pos)
+        # print("Base Quaternion: ", base_quaternion)
+        # print("End Effector Quaternion: ", end_effector_quaternion)
+        # return local_pos
+
+        delta = end_effector_world_pos - base_world_pos
+
+        base_quat_inv = quaternion_inverse(base_quaternion)
+        delta_quat = np.concatenate([delta, [0.0]])
+        rotated = quaternion_multiply(
+            quaternion_multiply(base_quat_inv, delta_quat),
+            base_quaternion
+        )
+        local_pos = rotated[:3]
+        print("Local Position: ", local_pos)
 
     def run(self):
         r = rospy.Rate(self.update_hz)
