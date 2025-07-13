@@ -13,12 +13,13 @@ import math
 from aerial_robot_base.robot_interface import RobotInterface
 import pulp
 
+from get_g import get_g
+
 s = 110
 d = 5
 r_joint_1 = 85 / 2 / math.sqrt(2)
 r_joint_2 = 85 / 2
 r_wheel = 20
-
 
 def get_tau_des(alpha):
     return 2.55 * alpha * (s/2) # N*mm
@@ -84,13 +85,15 @@ if __name__ == "__main__":
             
             # tau_des = np.array([get_tau_des(alpha_1), get_tau_des(alpha_2), get_tau_des(alpha_4)])
             tau_des = np.array([get_tau_des(alpha_1), get_tau_des(alpha_2), get_tau_des(alpha_3), get_tau_des(alpha_4)])
-            print("tau_des: ", tau_des)
+            print("tau_des (N*mm): ", tau_des)
+            tau_des -= get_g([alpha_1, alpha_2, alpha_3, alpha_4]) * 1000 # N*mm
+            print("tau_des (N*mm): ", tau_des)
 
             wire_tension = get_wire_tension(tau_des)
-            print("wire_tension: ", wire_tension)
+            print("wire_tension (N): ", wire_tension)
 
             dest_servo_current = tension_to_current(wire_tension)
-            print("dest_servo_current: ", dest_servo_current)
+            print("dest_servo_current (mA): ", dest_servo_current)
 
             tail_msg.angles = dest_servo_current.astype(np.int32).tolist()
             tail_pub.publish(tail_msg)
