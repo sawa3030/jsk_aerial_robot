@@ -47,6 +47,6 @@ public:
 
   virtual void calcStaticThrust() override;
 
-private:
+protected:
   void updateRobotModelImpl(const KDL::JntArray& joint_positions) override;
 };

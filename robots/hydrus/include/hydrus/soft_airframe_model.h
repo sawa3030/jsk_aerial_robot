@@ -37,6 +37,7 @@
 
  #include <hydrus/hydrus_tilted_robot_model.h>
  
+ namespace aerial_robot_model {
  class SoftAirframeRobotModel : public HydrusTiltedRobotModel {
  public:
    SoftAirframeRobotModel(bool init_with_rosparam = true,
@@ -44,5 +45,71 @@
                           double fc_t_min_thre = 0,
                           double epsilon = 10);
    virtual ~SoftAirframeRobotModel() = default;
+
+   unsigned int virtual_motor_num_ = 6;
+
+  ros::Subscriber rotor5_pose_sub_;
+  ros::Subscriber body_pose_sub_;
+
+  // mocap of rotor5
+  KDL::Frame rotor5_pose_from_world_;
+  KDL::Frame body_pose_from_world_;
+  ros::Time rotor5_pose_update_time_;
+  ros::Time body_pose_update_time_;
+ 
+   std::vector<KDL::Vector> rotors_origin_from_cog_with_mocap_update;
+   std::vector<KDL::Vector> rotors_normal_from_cog_with_mocap_update;
+
+   void updateRobotModelImpl(const KDL::JntArray& joint_positions);
+    void Rotor5MocapCallback(const geometry_msgs::PoseStamped& msg);
+    void BodyMocapCallback(const geometry_msgs::PoseStamped& msg);
+    template<class T> std::vector<T> getRotorsNormalFromCogWithMocapUpdate();
+   template<class T> std::vector<T> getRotorsOriginFromCogWithMocapUpdate();
+
+    private:
+    ros::NodeHandle nh_;
  };
  
+ template<> inline std::vector<KDL::Vector> SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate()
+  {
+    // todo: it might be better to use mutex
+    return rotors_normal_from_cog_with_mocap_update;
+  }
+
+  template<> inline std::vector<Eigen::Vector3d> SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToEigen(SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+  template<> inline std::vector<geometry_msgs::PointStamped> SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToMsg(SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+  template<> inline std::vector<tf2::Vector3> SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToTf2(SoftAirframeRobotModel::getRotorsNormalFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+  template<> inline std::vector<KDL::Vector> SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate()
+  {
+    // todo: it might be better to use mutex
+    return rotors_origin_from_cog_with_mocap_update;
+  }
+
+  template<> inline std::vector<Eigen::Vector3d> SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToEigen(SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+  template<> inline std::vector<geometry_msgs::PointStamped> SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToMsg(SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+  template<> inline std::vector<tf2::Vector3> SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate()
+  {
+    return aerial_robot_model::kdlToTf2(SoftAirframeRobotModel::getRotorsOriginFromCogWithMocapUpdate<KDL::Vector>());
+  }
+
+} // namespace aerial_robot_model

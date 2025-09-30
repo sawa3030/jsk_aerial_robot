@@ -6,7 +6,7 @@ SoftAirframeController::SoftAirframeController() : PoseLinearController()
 }
 
 void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
-                                        boost::shared_ptr<aerial_robot_model::RobotModel> robot_model,
+                                        boost::shared_ptr<aerial_robot_model::SoftAirframeRobotModel> robot_model,
                                         boost::shared_ptr<aerial_robot_estimation::StateEstimator> estimator,
                                         boost::shared_ptr<aerial_robot_navigation::BaseNavigator> navigator,
                                         double ctrl_loop_rate)
@@ -26,8 +26,8 @@ void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
   joint_state_sub_ = nh_.subscribe("joint_states", 1, &SoftAirframeController::jointStateCallback, this);
   
   // note: it might be better to use gimbal_link1
-  rotor5_pose_sub_ = nh_.subscribe("thrust5/mocap/pose", 1, &SoftAirframeController::Rotor5MocapCallback, this);
-  body_pose_sub_ = nh_.subscribe("mocap/pose", 1, &SoftAirframeController::BodyMocapCallback, this);
+  // rotor5_pose_sub_ = nh_.subscribe("thrust5/mocap/pose", 1, &SoftAirframeController::Rotor5MocapCallback, this);
+  // body_pose_sub_ = nh_.subscribe("mocap/pose", 1, &SoftAirframeController::BodyMocapCallback, this);
 
   torque_allocation_matrix_inv_pub_stamp_ = 0.0;
 }
@@ -148,8 +148,8 @@ void SoftAirframeController::controlCore()
 Eigen::MatrixXd SoftAirframeController::getFullQMat()
 {
   // wrench allocation matrix
-  std::vector<Eigen::Vector3d> rotors_origin = robot_model_->getRotorsOriginFromCog<Eigen::Vector3d>();
-  std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCog<Eigen::Vector3d>();
+  const std::vector<Eigen::Vector3d> rotors_origin = robot_model_->getRotorsOriginFromCogWithMocapUpdate<Eigen::Vector3d>();
+  const std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCogWithMocapUpdate<Eigen::Vector3d>();
   auto rotor_direction = robot_model_->getRotorDirection();
 
   // if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
@@ -162,9 +162,6 @@ Eigen::MatrixXd SoftAirframeController::getFullQMat()
   // }
 
   // expand for virtual motors
-  rotors_origin.push_back(rotors_origin.at(4));
-  Eigen::Vector3d v = rotors_normal.at(4);
-  rotors_normal.push_back(Eigen::Vector3d(v.x(), -v.z(), v.y()));; // rotate 90 deg around x axis
   rotor_direction.insert(std::make_pair(6, rotor_direction.at(5)));
 
   Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, virtual_motor_num_);
@@ -185,8 +182,8 @@ Eigen::MatrixXd SoftAirframeController::getFullQMat()
 Eigen::MatrixXd SoftAirframeController::getQMat()
 {
   // wrench allocation matrix
-  std::vector<Eigen::Vector3d> rotors_origin = robot_model_->getRotorsOriginFromCog<Eigen::Vector3d>();
-  std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCog<Eigen::Vector3d>();
+  const std::vector<Eigen::Vector3d> rotors_origin = robot_model_->getRotorsOriginFromCogWithMocapUpdate<Eigen::Vector3d>();
+  const std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCogWithMocapUpdate<Eigen::Vector3d>();
   auto& rotor_direction = robot_model_->getRotorDirection();
 
   // if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
@@ -242,18 +239,6 @@ void SoftAirframeController::jointStateCallback(const sensor_msgs::JointState& m
 {
   gimbal_current_angle = msg.position.at(0); // todo: think a robust implementation
   gimbal_update_time = ros::Time::now();
-}
-
-void SoftAirframeController::Rotor5MocapCallback(const geometry_msgs::PoseStamped& msg)
-{
-  tf2::fromMsg(msg.pose, rotor5_pose_from_world_);
-  rotor5_pose_update_time_ = ros::Time::now();
-}
-
-void SoftAirframeController::BodyMocapCallback(const geometry_msgs::PoseStamped& msg)
-{
-  tf2::fromMsg(msg.pose, body_pose_from_world_);
-  body_pose_update_time_ = ros::Time::now();
 }
 
 void SoftAirframeController::sendGimbalCommand()

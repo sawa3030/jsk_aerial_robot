@@ -6,6 +6,7 @@
 #include <spinal/TorqueAllocationMatrixInv.h>
 #include <spinal/ServoControlCmd.h>
 #include <spinal/ServoStates.h>
+#include <hydrus/soft_airframe_model.h>
 
 namespace aerial_robot_control
 {
@@ -16,7 +17,7 @@ public:
   virtual ~SoftAirframeController() = default;
 
   void initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
-                  boost::shared_ptr<aerial_robot_model::RobotModel> robot_model,
+                  boost::shared_ptr<aerial_robot_model::SoftAirframeRobotModel> robot_model,
                   boost::shared_ptr<aerial_robot_estimation::StateEstimator> estimator,
                   boost::shared_ptr<aerial_robot_navigation::BaseNavigator> navigator, double ctrl_loop_rate);
 
@@ -28,8 +29,8 @@ protected:
   ros::Publisher torque_allocation_matrix_inv_pub_; //for spinal
   ros::Publisher gimbal_control_pub_;
   ros::Subscriber joint_state_sub_;
-  ros::Subscriber rotor5_pose_sub_;
-  ros::Subscriber body_pose_sub_;
+  // ros::Subscriber rotor5_pose_sub_;
+  // ros::Subscriber body_pose_sub_;
   double torque_allocation_matrix_inv_pub_stamp_;
 
   Eigen::MatrixXd q_mat_;
@@ -50,11 +51,11 @@ protected:
 
   int virtual_motor_num_ = 6;
 
-  // mocap of rotor5
-  KDL::Frame rotor5_pose_from_world_;
-  KDL::Frame body_pose_from_world_;
-  ros::Time rotor5_pose_update_time_;
-  ros::Time body_pose_update_time_;
+  // // mocap of rotor5
+  // KDL::Frame rotor5_pose_from_world_;
+  // KDL::Frame body_pose_from_world_;
+  // ros::Time rotor5_pose_update_time_;
+  // ros::Time body_pose_update_time_;
 
   void setAttitudeGains();
   virtual void rosParamInit();
