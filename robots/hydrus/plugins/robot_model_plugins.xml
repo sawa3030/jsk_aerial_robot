@@ -8,4 +8,8 @@
     <description>plugin for hydrus tilted robot model </description>
   </class>
 
+  <class name="soft_airframe_robot_model" type="SoftAirframeRobotModel" base_class_type="aerial_robot_model::RobotModel">
+    <description>plugin for soft airframe hydrus robot model </description>
+  </class>
+
 </library>

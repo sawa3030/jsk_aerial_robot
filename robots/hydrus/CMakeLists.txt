@@ -48,7 +48,8 @@ include_directories(
 
 add_library(hydrus_robot_model
   src/hydrus_robot_model.cpp
-  src/hydrus_tilted_robot_model.cpp)
+  src/hydrus_tilted_robot_model.cpp
+  src/soft_airframe_model.cpp)
 target_link_libraries(hydrus_robot_model ${catkin_LIBRARIES})
 
 ### flight control plugin
