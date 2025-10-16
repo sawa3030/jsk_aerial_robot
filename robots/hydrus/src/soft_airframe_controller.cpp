@@ -54,18 +54,53 @@ void SoftAirframeController::controlCore()
 
   // Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(virtual_motor_num_); // virtual motor number
   Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_); // virtual motor number
+  double target_z;
   if(hovering_approximate_)
     {
       target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
       target_roll_ = -target_acc_dash.y() / aerial_robot_estimation::G;
-      target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.z(); // todo: add some kind of constraints
+      target_z = target_acc_w.z();
+      // target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.z(); // todo: add some kind of constraints
     }
   else
     {
       target_pitch_ = atan2(target_acc_dash.x(), target_acc_dash.z());
       target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
-      target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.length();
+      target_z = target_acc_w.length();
+      // target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.length();
     }
+
+  // solve the thrust allocation with QP
+  VectorXd w_tau(4);
+  w_tau << 1.0, 1.0, 1.0, 1.0;
+  MatrixXd Wt = w_tau.asDiagonal();
+  VectorXd w_lambda(motor_num_);
+  w_lambda << 1.0, 1.0, 1.0, 1.0, 10.0;
+  MatrixXd Wl = w_lambda.asDiagonal();
+  VectorXd w_d(motor_num_);
+  w_d << 0.1, 0.1, 0.1, 0.1, 10.0;
+  MatrixXd Wd = w_d.asDiagonal();
+
+  MatrixXd H_dense = 2.0*(full_q_mat_.transpose() * Wt * Wt * full_q_mat_ + Wl * Wl + Wd * Wd);
+  VectorXd F_dense = -2.0 * (full_q_mat_.transpose() * Wt * Wt * target_z + Wd * Wd * prev_target_vectoring_f_);
+  SparseMatrix<double> H = H_dense.sparseView();
+
+  Eigen::VectorXd lower_bound = Eigen::VectorXd::Ones(motor_num_) * robot_model_->getThrustLowerLimit();
+  Eigen::VectorXd upper_bound = Eigen::VectorXd::Ones(motor_num_) * robot_model_->getThrustUpperLimit();
+
+  target_vectoring_lp_solver_.data()->setLowerBound(lower_bound);
+  target_vectoring_lp_solver_.data()->setUpperBound(upper_bound);
+  target_vectoring_lp_solver_.data()->setHessianMatrix(H);
+  target_vectoring_lp_solver_.data()->setGradient(F_dense);
+  if(!target_vectoring_lp_solver_.solve())
+    {
+      std::cout << "QP solver fails" << std::endl;
+      return;
+    }
+  
+  target_vectoring_f_ = target_vectoring_lp_solver_.getSolution();
+  prev_target_vectoring_f_ = target_vectoring_f_;
+
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
 
   for(int i = 0; i < motor_num_; i++)
@@ -187,21 +222,21 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   // }
 
 
-  rotor5_origin_hist.push_back(rotors_origin.at(4));
-  rotor5_normal_hist.push_back(rotors_normal.at(4));
-  const int kWin = 5;
-  if ((int)rotor5_origin_hist.size() > kWin) rotor5_origin_hist.pop_front();
-  if ((int)rotor5_normal_hist.size() > kWin) rotor5_normal_hist.pop_front();
+  // rotor5_origin_hist.push_back(rotors_origin.at(4));
+  // rotor5_normal_hist.push_back(rotors_normal.at(4));
+  // const int kWin = 5;
+  // if ((int)rotor5_origin_hist.size() > kWin) rotor5_origin_hist.pop_front();
+  // if ((int)rotor5_normal_hist.size() > kWin) rotor5_normal_hist.pop_front();
   
-  Eigen::Vector3d origin_sum = Eigen::Vector3d::Zero();
-  for (const auto& v : rotor5_origin_hist) origin_sum += v;
-  const Eigen::Vector3d origin_avg = origin_sum / double(rotor5_origin_hist.size());
+  // Eigen::Vector3d origin_sum = Eigen::Vector3d::Zero();
+  // for (const auto& v : rotor5_origin_hist) origin_sum += v;
+  // const Eigen::Vector3d origin_avg = origin_sum / double(rotor5_origin_hist.size());
 
-  Eigen::Vector3d normal_sum = Eigen::Vector3d::Zero();
-  for (const auto& v : rotor5_normal_hist) normal_sum += v;
-  const Eigen::Vector3d normal_avg = normal_sum / double(rotor5_normal_hist.size());
-  rotors_origin.at(4) = origin_avg;
-  rotors_normal.at(4) = normal_avg.normalized();
+  // Eigen::Vector3d normal_sum = Eigen::Vector3d::Zero();
+  // for (const auto& v : rotor5_normal_hist) normal_sum += v;
+  // const Eigen::Vector3d normal_avg = normal_sum / double(rotor5_normal_hist.size());
+  // rotors_origin.at(4) = origin_avg;
+  // rotors_normal.at(4) = normal_avg.normalized();
   
   Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, motor_num_);
   for (unsigned int i = 0; i < motor_num_; ++i) {

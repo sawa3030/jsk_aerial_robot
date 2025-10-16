@@ -6,6 +6,7 @@
 #include <spinal/TorqueAllocationMatrixInv.h>
 #include <spinal/ServoControlCmd.h>
 #include <spinal/ServoStates.h>
+#include <OsqpEigen/OsqpEigen.h>
 
 namespace aerial_robot_control
 {
@@ -59,6 +60,9 @@ protected:
   // Eigen::Vector3d prev_rotor5_normal = Eigen::Vector3d(0,0,0);
   std::deque<Eigen::Vector3d> rotor5_origin_hist;
   std::deque<Eigen::Vector3d> rotor5_normal_hist;
+
+  OsqpEigen::Solver target_vectoring_lp_solver_;
+  VectorXd prev_target_vectoring_f_ = VectorXd::Zero(motor_num_);
 
   void setAttitudeGains();
   virtual void rosParamInit();
