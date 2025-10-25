@@ -5,11 +5,12 @@
   <!-- basic kinematics model -->
   <xacro:include filename="$(find hydrus)/urdf/common.xacro" />
   <xacro:include filename="$(find hydrus)/urdf/link.urdf.xacro" />
+  <xacro:include filename="$(find hydrus)/urdf/link_without_rotor.urdf.xacro" />
 
   <xacro:hydrus_link links="4" self="1" rotor_direction="-1" with_battery = "0" tilt_mode="1" tilt_angle="20" />
   <xacro:hydrus_link links="4" self="2" rotor_direction="1"  with_battery = "0" tilt_mode="1" tilt_angle="20" />
   <xacro:hydrus_link links="4" self="3" rotor_direction="-1" with_battery = "0" tilt_mode="1" tilt_angle="20" />
-  <xacro:hydrus_link links="4" self="4" rotor_direction="1"  with_battery = "0" tilt_mode="1" tilt_angle="20" />
+  <xacro:hydrus_link_without_rotor links="4" self="4" rotor_direction="1"  with_battery = "0" tilt_mode="1" tilt_angle="20" />
 
   <!-- special battery arrangement -->
   <xacro:extra_module name = "bat1" parent = "link1" visible = "1"
@@ -181,14 +182,14 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.0001"/>
       <!-- this is for avoiding error in gazebo -->
-      <!-- <inertia
+      <inertia
           ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0"
-          izz="0.002"/> -->
-      <inertia
+          izz="0.002"/>
+      <!-- <inertia
           ixx="0.00001" ixy="0.0" ixz="0.0"
           iyy="0.00001" iyz="0.0"
-          izz="0.00002"/>
+          izz="0.00002"/> -->
     </inertial>
     <visual>
       <geometry>
@@ -208,14 +209,14 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.0001"/>
       <!-- this is for avoiding error in gazebo -->
-      <!-- <inertia
+      <inertia
           ixx="0.001" ixy="0.0" ixz="0.0"
           iyy="0.001" iyz="0.0"
-          izz="0.002"/> -->
-      <inertia
+          izz="0.002"/>
+      <!-- <inertia
           ixx="0.00001" ixy="0.0" ixz="0.0"
           iyy="0.00001" iyz="0.0"
-          izz="0.00002"/>
+          izz="0.00002"/> -->
     </inertial>
     <visual>
       <geometry>
@@ -364,15 +365,15 @@
       <mass value="0.173"/>
       <!-- this inertia value is 10 times bigger than the real one -->
       <!-- to avoid the instability in gazebo -->
-      <!-- <inertia
+      <inertia
           ixx="0.0022661" ixy="0.0" ixz="0.0"
           iyy="0.0015451" iyz="0.0"
-          izz="0.00032533"/> -->
+          izz="0.00032533"/>
       <!-- original one -->
-      <inertia
+      <!-- <inertia
           ixx="0.00022661" ixy="0.0" ixz="0.0"
           iyy="0.00015451" iyz="0.0"
-          izz="0.000032533"/>
+          izz="0.000032533"/> -->
     </inertial>
     <!-- <collision>
       <origin xyz="0.0815 0 0" rpy="0 0 0"/>
