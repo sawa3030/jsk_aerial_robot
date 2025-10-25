@@ -31,7 +31,7 @@ protected:
   ros::Publisher q_mat_pub_;
   ros::Publisher rotor_attitude_contributions_pub_;
   ros::Subscriber joint_state_sub_;
-  ros::Subscriber rotor5_pose_sub_;
+  ros::Subscriber rotor4_pose_sub_;
   ros::Subscriber body_pose_sub_;
   ros::Subscriber rpy_pid_sub_;
   double torque_allocation_matrix_inv_pub_stamp_;
@@ -52,17 +52,17 @@ protected:
   double gimbal_current_angle;
   ros::Time gimbal_update_time;
 
-  int virtual_motor_num_ = 6;
+  int virtual_motor_num_ = 5;
 
-  // mocap of rotor5
-  KDL::Frame rotor5_pose_from_world_;
+  // mocap of rotor4
+  KDL::Frame rotor4_pose_from_world_;
   KDL::Frame body_pose_from_world_;
-  ros::Time rotor5_pose_update_time_;
+  ros::Time rotor4_pose_update_time_;
   ros::Time body_pose_update_time_;
-  Eigen::Vector3d prev_rotor5_origin = Eigen::Vector3d(0,0,0);
-  Eigen::Vector3d prev_rotor5_normal = Eigen::Vector3d(0,0,0);
-  // std::deque<Eigen::Vector3d> rotor5_origin_hist;
-  // std::deque<Eigen::Vector3d> rotor5_normal_hist;
+  Eigen::Vector3d prev_rotor4_origin = Eigen::Vector3d(0,0,0);
+  Eigen::Vector3d prev_rotor4_normal = Eigen::Vector3d(0,0,0);
+  // std::deque<Eigen::Vector3d> rotor4_origin_hist;
+  // std::deque<Eigen::Vector3d> rotor4_normal_hist;
 
   Eigen::VectorXd prev_target_vectoring_f_;
 
@@ -74,7 +74,7 @@ protected:
   virtual void sendCmd() override;
   virtual void sendFourAxisCommand();
   virtual void jointStateCallback(const sensor_msgs::JointState& msg);
-  virtual void Rotor5MocapCallback(const geometry_msgs::PoseStamped& msg);
+  virtual void Rotor4MocapCallback(const geometry_msgs::PoseStamped& msg);
   virtual void BodyMocapCallback(const geometry_msgs::PoseStamped& msg);
   virtual void sendGimbalCommand();
   virtual void sendTorqueAllocationMatrixInv();

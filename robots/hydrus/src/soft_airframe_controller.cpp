@@ -29,7 +29,8 @@ void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
   rpy_pid_sub_ = nh_.subscribe("rpy/pid", 1, &SoftAirframeController::publishRotorAttitudeContributions, this);
   
   // note: it might be better to use gimbal_link1
-  rotor5_pose_sub_ = nh_.subscribe("thrust5/mocap/pose", 1, &SoftAirframeController::Rotor5MocapCallback, this);
+  // note: Although the topic name is "thrust5", it is actually "thrust4" in the current implementation
+  rotor4_pose_sub_ = nh_.subscribe("thrust5/mocap/pose", 1, &SoftAirframeController::Rotor4MocapCallback, this);
   body_pose_sub_ = nh_.subscribe("mocap/pose", 1, &SoftAirframeController::BodyMocapCallback, this);
 
   torque_allocation_matrix_inv_pub_stamp_ = 0.0;
@@ -74,13 +75,14 @@ void SoftAirframeController::controlCore()
   target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
   prev_target_vectoring_f_ = target_vectoring_f_;
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
+  std::cout << "target vectoring f: \n" << target_vectoring_f_.transpose() << std::endl;
 
   for(int i = 0; i < motor_num_; i++)
   {
     // when using gimbal
-    // if (i == 4){
-    //   target_base_thrust_.at(i) = Eigen::Vector2d(target_vectoring_f_(4), target_vectoring_f_(5)).norm();
-    //   gimbal_angle_diff_ = atan2(target_vectoring_f_(5), target_vectoring_f_(4));
+    // if (i == 3){
+    //   target_base_thrust_.at(i) = Eigen::Vector2d(target_vectoring_f_(3), target_vectoring_f_(4)).norm();
+    //   gimbal_angle_diff_ = atan2(target_vectoring_f_(4), target_vectoring_f_(3));
     // }
     // else {
       target_base_thrust_.at(i) = target_vectoring_f_(i);
@@ -129,28 +131,28 @@ Eigen::MatrixXd SoftAirframeController::getFullQMat()
   auto rotor_direction = robot_model_->getRotorDirection();
   KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
 
-  if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
+  if (ros::Time::now().toSec() - rotor4_pose_update_time_.toSec() < 1.0 && 
       ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0){
     KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
-    KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
-    rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
-    rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
+    KDL::Frame rotor4_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor4_pose_from_world_;
+    rotors_origin.at(3) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor4_pose_from_root).p);
+    rotors_normal.at(3) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor4_pose_from_root).M * KDL::Vector(0,0,1));
 
     // expand for virtual motors
-    rotors_origin.push_back(rotors_origin.at(4));
-    rotors_normal.push_back(aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,-1,0)));
-    rotor_direction.insert(std::make_pair(6, rotor_direction.at(5)));
+    rotors_origin.push_back(rotors_origin.at(3));
+    rotors_normal.push_back(aerial_robot_model::kdlToEigen((cog.Inverse() * rotor4_pose_from_root).M * KDL::Vector(0,-1,0)));
+    rotor_direction.insert(std::make_pair(5, rotor_direction.at(4)));
   } else {
     // expand for virtual motors
-    rotors_origin.push_back(rotors_origin.at(4));
+    rotors_origin.push_back(rotors_origin.at(3));
     KDL::Frame f = robot_model_->getSegmentsTf().at("thrust5");
     rotors_normal.push_back(aerial_robot_model::kdlToEigen((cog.Inverse() * f).M * KDL::Vector(0,-1,0)));
-    rotor_direction.insert(std::make_pair(6, rotor_direction.at(5)));
+    rotor_direction.insert(std::make_pair(5, rotor_direction.at(4)));
   }
 
   Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, virtual_motor_num_);
   for (unsigned int i = 0; i < virtual_motor_num_; ++i) {
-    double m_f_rate = robot_model_->getMFRate(std::min(i, 4u)); // 5th motor is virtual motor
+    double m_f_rate = robot_model_->getMFRate(std::min(i, 3u)); // 4th motor is virtual motor
     q_mat(0, i) = rotors_normal.at(i).z();
     q_mat.block(1, i, 3, 1) = (rotors_origin.at(i).cross(rotors_normal.at(i)) + m_f_rate * rotor_direction.at(i + 1) * rotors_normal.at(i));
   }
@@ -168,50 +170,41 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCog<Eigen::Vector3d>();
   auto& rotor_direction = robot_model_->getRotorDirection();
 
-  // std::cout << "before mocap update" << std::endl;
-  // std::cout << rotors_origin.at(4) << std::endl;
-  // std::cout << rotors_normal.at(4) << std::endl;
-
-  if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
+  if (ros::Time::now().toSec() - rotor4_pose_update_time_.toSec() < 1.0 && 
       ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0){
     KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
-    KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
+    KDL::Frame rotor4_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor4_pose_from_world_;
     KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
-    rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
-    rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
+    rotors_origin.at(3) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor4_pose_from_root).p);
+    rotors_normal.at(3) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor4_pose_from_root).M * KDL::Vector(0,0,1));
   }
   
-  // std::cout << "after mocap update" << std::endl;
-  // std::cout << rotors_origin.at(4) << std::endl;
-  // std::cout << rotors_normal.at(4) << std::endl;
-  // std::cout << std::endl;
-
-  if (prev_rotor5_origin != Eigen::Vector3d(0,0,0) && prev_rotor5_normal != Eigen::Vector3d(0,0,0)){
+  if (prev_rotor4_origin != Eigen::Vector3d(0,0,0) && prev_rotor4_normal != Eigen::Vector3d(0,0,0)){
     double alpha = 0.5;
-    rotors_origin.at(4) = alpha * prev_rotor5_origin + (1 - alpha) * rotors_origin.at(4);
-    rotors_normal.at(4) = alpha * prev_rotor5_normal + (1 - alpha) * rotors_normal.at(4);
-    rotors_normal.at(4).normalize();
+    rotors_origin.at(3) = alpha * prev_rotor4_origin + (1 - alpha) * rotors_origin.at(3);
+    rotors_normal.at(3) = alpha * prev_rotor4_normal + (1 - alpha) * rotors_normal.at(3);
+    rotors_normal.at(3).normalize();
   }
 
-  prev_rotor5_origin = rotors_origin.at(4);
-  prev_rotor5_normal = rotors_normal.at(4);
+  prev_rotor4_origin = rotors_origin.at(3);
+  prev_rotor4_normal = rotors_normal.at(3);
 
 
-  // rotor5_origin_hist.push_back(rotors_origin.at(4));
-  // rotor5_normal_hist.push_back(rotors_normal.at(4));
+  // rotor4_origin_hist.push_back(rotors_origin.at(3));
+  // rotor4_normal_hist.push_back(rotors_normal.at(3));
   // const int kWin = 5;
-  // if ((int)rotor5_origin_hist.size() > kWin) rotor5_origin_hist.pop_front();
-  // if ((int)rotor5_normal_hist.size() > kWin) rotor5_normal_hist.pop_front();
+  // if ((int)rotor4_origin_hist.size() > kWin) rotor4_origin_hist.pop_front();
+  // if ((int)rotor4_normal_hist.size() > kWin) rotor4_normal_hist.pop_front();
   
   // Eigen::Vector3d origin_sum = Eigen::Vector3d::Zero();
-  // for (const auto& v : rotor5_origin_hist) origin_sum += v;
-  // const Eigen::Vector3d origin_avg = origin_sum / double(rotor5_origin_hist.size());
+  // for (const auto& v : rotor4_origin_hist) origin_sum += v;
+  // const Eigen::Vector3d origin_avg = origin_sum / double(rotor4_origin_hist.size());
 
   // Eigen::Vector3d normal_sum = Eigen::Vector3d::Zero();
-  // for (const auto& v : rotor5_normal_hist) normal_sum += v;
-  // const Eigen::Vector3d normal_avg = normal_sum / double(rotor5_normal_hist.size());
-  // rotors_origin.at(4) = origin_avg;
-  // rotors_normal.at(4) = normal_avg.normalized();
+  // for (const auto& v : rotor4_normal_hist) normal_sum += v;
+  // const Eigen::Vector3d normal_avg = normal_sum / double(rotor4_normal_hist.size());
+  // rotors_origin.at(3) = origin_avg;
+  // rotors_normal.at(3) = normal_avg.normalized();
   
   Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, motor_num_);
   for (unsigned int i = 0; i < motor_num_; ++i) {
@@ -260,10 +253,10 @@ void SoftAirframeController::jointStateCallback(const sensor_msgs::JointState& m
   gimbal_update_time = ros::Time::now();
 }
 
-void SoftAirframeController::Rotor5MocapCallback(const geometry_msgs::PoseStamped& msg)
+void SoftAirframeController::Rotor4MocapCallback(const geometry_msgs::PoseStamped& msg)
 {
-  tf2::fromMsg(msg.pose, rotor5_pose_from_world_);
-  rotor5_pose_update_time_ = ros::Time::now();
+  tf2::fromMsg(msg.pose, rotor4_pose_from_world_);
+  rotor4_pose_update_time_ = ros::Time::now();
 }
 
 void SoftAirframeController::BodyMocapCallback(const geometry_msgs::PoseStamped& msg)
