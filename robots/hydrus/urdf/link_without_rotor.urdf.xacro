@@ -199,10 +199,10 @@
     <xacro:damping_factor link ="link${self}"/>
 
     <!-- rotor -->
-    <joint name="rotor${self}" type="continuous">
+    <joint name="rt${self}" type="continuous">
       <limit effort="0.0172" lower="${min_force}" upper="${max_force}" velocity="0.5"/>
       <parent link="link${self}"/>
-      <child link="thrust${self}"/>
+      <child link="th${self}"/>
       <xacro:if value="${tilt_mode == 1}">
         <xacro:if value="${prop_15inch == 1}">
           <origin rpy="0 ${-rotor_direction * tilt_angle * pi / 180.0} 0" xyz="${link_length* 0.5 + 0.01944 * rotor_direction} 0 0.05395"/>
@@ -217,7 +217,7 @@
       <axis xyz="0 0 ${rotor_direction}"/>
     </joint>
 
-    <link name="thrust${self}">
+    <link name="th${self}">
       <!-- visual & collisiont -->
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -245,7 +245,7 @@
         </geometry>
       </visual>
     </link>
-    <xacro:damping_factor link ="thrust${self}"/>
+    <xacro:damping_factor link ="th${self}"/>
 
     <!-- battery: -->
     <!-- use default battery: -->
@@ -355,19 +355,6 @@
         </actuator>
       </transmission>
     </xacro:unless>
-
-    <transmission name="rotor_tran${self}">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="rotor${self}">
-        <!-- TODO: effort is torque, maybe position is enough -->
-        <hardwareInterface>RotorInterface</hardwareInterface>
-      </joint>
-      <actuator name="rotor${self}">
-        <!-- TODO: effort is torque, maybe position is enough -->
-        <hardwareInterface>RotorInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
 
     <xacro:friction self ="${self}"/>
 

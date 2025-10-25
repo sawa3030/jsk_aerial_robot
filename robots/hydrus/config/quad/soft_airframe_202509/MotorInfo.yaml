@@ -1,5 +1,5 @@
 motor_info:
-        motor_types: [0, 0, 0, 0, 1]
+        motor_types: [0, 0, 0, 1]
         min_pwm: 0.59 # 1180 [ms]
         max_pwm: 0.9375 # 1875 [ms]
         min_thrust: 1.0 #  [N]
