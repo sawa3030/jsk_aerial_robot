@@ -58,21 +58,33 @@ void SoftAirframeController::controlCore()
 
   // Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(virtual_motor_num_); // virtual motor number
   Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_); // virtual motor number
+  Eigen::MatrixXd weight = Eigen::MatrixXd::Identity(motor_num_, motor_num_);
+  weight(0, 0) = 0.3;
+  weight(1, 1) = 0.3;
+  weight(2, 2) = 0.3;
+  weight(4, 4) = 0.3;
+  Eigen::MatrixXd h = weight + Eigen::MatrixXd::Identity(motor_num_, motor_num_);
+  Eigen::MatrixXd h_inv = h.inverse();
+  Eigen::MatrixXd temp_inv = aerial_robot_model::pseudoinverse(full_q_mat_ * h_inv * full_q_mat_.transpose());
   if(hovering_approximate_)
     {
       target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
       target_roll_ = -target_acc_dash.y() / aerial_robot_estimation::G;
-      target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.z();
+      target_vectoring_f_ = (h_inv * full_q_mat_.transpose() * temp_inv).col(0) * target_acc_w.z();
     }
   else
     {
       target_pitch_ = atan2(target_acc_dash.x(), target_acc_dash.z());
       target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
-      target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.length();
+      target_vectoring_f_ = (h_inv * full_q_mat_.transpose() * temp_inv).col(0) * target_acc_w.length();
     }
-  target_vectoring_f_.noalias() += prev_target_vectoring_f_;
-  target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
+  // target_vectoring_f_.noalias() += prev_target_vectoring_f_;
+  // target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
+  Eigen::MatrixXd b = Eigen::MatrixXd::Identity(motor_num_, motor_num_) - h_inv * full_q_mat_.transpose() * temp_inv * full_q_mat_;
+  Eigen::VectorXd diff = b * h_inv * prev_target_vectoring_f_;
+  target_vectoring_f_.noalias() += diff;
   prev_target_vectoring_f_ = target_vectoring_f_;
+  std::cout << target_vectoring_f_.transpose() << std::endl;
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
 
   for(int i = 0; i < motor_num_; i++)
