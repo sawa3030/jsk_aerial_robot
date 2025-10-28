@@ -58,11 +58,12 @@ void SoftAirframeController::controlCore()
 
   // Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(virtual_motor_num_); // virtual motor number
   Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_); // virtual motor number
-  Eigen::MatrixXd weight = Eigen::MatrixXd::Identity(motor_num_, motor_num_);
-  weight(0, 0) = 0.3;
-  weight(1, 1) = 0.3;
-  weight(2, 2) = 0.3;
-  weight(4, 4) = 0.3;
+  Eigen::MatrixXd weight = Eigen::MatrixXd::Zero(motor_num_, motor_num_);
+  weight(0, 0) = 0.001;
+  weight(1, 1) = 0.001;
+  weight(2, 2) = 0.001;
+  weight(3, 3) = 0.02;
+  weight(4, 4) = 0.001;
   Eigen::MatrixXd h = weight + Eigen::MatrixXd::Identity(motor_num_, motor_num_);
   Eigen::MatrixXd h_inv = h.inverse();
   Eigen::MatrixXd temp_inv = aerial_robot_model::pseudoinverse(full_q_mat_ * h_inv * full_q_mat_.transpose());
@@ -198,6 +199,19 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   // std::cout << rotors_normal.at(4) << std::endl;
   // std::cout << std::endl;
 
+  // fail safe for mocap update
+  if (prev_rotor5_origin != Eigen::Vector3d(0,0,0) && prev_rotor5_normal != Eigen::Vector3d(0,0,0)){
+    for (unsigned int i = 0; i < 3; ++i) {
+      if (abs(rotors_origin.at(4)(i) - prev_rotor5_origin(i)) > 0.5 || abs(rotors_normal.at(4)(i) - prev_rotor5_normal(i)) > 0.5){
+        std::cout << "Mocap of thrust5 failed!!!!" << std::endl;
+        rotors_origin.at(4) = prev_rotor5_origin;
+        rotors_normal.at(4) = prev_rotor5_normal;
+        break;
+      }
+    }
+  }
+
+  // low pass filter for rotor5 pose and orientation
   if (prev_rotor5_origin != Eigen::Vector3d(0,0,0) && prev_rotor5_normal != Eigen::Vector3d(0,0,0)){
     double alpha = 0.5;
     rotors_origin.at(4) = alpha * prev_rotor5_origin + (1 - alpha) * rotors_origin.at(4);
