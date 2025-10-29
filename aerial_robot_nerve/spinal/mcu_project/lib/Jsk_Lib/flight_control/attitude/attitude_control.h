@@ -115,9 +115,11 @@ private:
   ros::Publisher pwms_pub_;
   ros::Publisher control_term_pub_;
   ros::Publisher control_feedback_state_pub_;
+  ros::Publisher thrust_pub_;
   spinal::Pwms pwms_msg_;
   spinal::RollPitchYawTerms control_term_msg_;
   spinal::RollPitchYawTerm control_feedback_state_msg_;
+  std_msgs::Float32MultiArray thrust_msg_;
 
 #ifdef SIMULATION
   ros::Subscriber four_axis_cmd_sub_;
