@@ -24,6 +24,7 @@ void AttitudeController::init(ros::NodeHandle* nh, StateEstimate* estimator)
   pwms_pub_ = nh_->advertise<spinal::Pwms>("motor_pwms", 1);
   control_term_pub_ = nh_->advertise<spinal::RollPitchYawTerms>("rpy/pid", 1);
   control_feedback_state_pub_ = nh_->advertise<spinal::RollPitchYawTerm>("rpy/feedback_state", 1);
+  thrust_pub_ = nh_->advertise<std_msgs::Float32MultiArray>("thrust_commands", 1);
   anti_gyro_pub_ = nh_->advertise<std_msgs::Float32MultiArray>("gyro_moment_compensation", 1);
   four_axis_cmd_sub_ = nh_->subscribe("four_axes/command", 1, &AttitudeController::fourAxisCommandCallback, this);
   pwm_info_sub_ = nh_->subscribe("motor_info", 1, &AttitudeController::pwmInfoCallback, this);
@@ -43,6 +44,7 @@ AttitudeController::AttitudeController():
   pwms_pub_("motor_pwms", &pwms_msg_),
   control_term_pub_("rpy/pid", &control_term_msg_),
   control_feedback_state_pub_("rpy/feedback_state", &control_feedback_state_msg_),
+  thrust_pub_("thrust_commands", &thrust_msg_),
   four_axis_cmd_sub_("four_axes/command", &AttitudeController::fourAxisCommandCallback, this ),
   pwm_info_sub_("motor_info", &AttitudeController::pwmInfoCallback, this),
   rpy_gain_sub_("rpy/gain", &AttitudeController::rpyGainCallback, this),
@@ -1091,6 +1093,18 @@ void AttitudeController::pwmConversion()
 
   for(int i = 0; i < motor_number_; i++)
     target_thrust_[i] = roll_pitch_term_[i] + (1 + base_thrust_decreasing_rate) * base_thrust_term_[i] + (1 + yaw_decreasing_rate) * yaw_term_[i];
+
+  // publish target thrust for debug
+  thrust_msg_.data.resize(0);
+  std::cout << "Target Thrust: ";
+  for(int i = 0; i < motor_number_; i++)
+    {
+      thrust_msg_.data.push_back(target_thrust_[i]); // [N]
+      std::cout << target_thrust_[i] << " ";
+    }
+  std::cout << std::endl;
+  thrust_pub_.publish(thrust_msg_);
+  thrust_msg_.data.clear();
 
   /* convert to target pwm */
   for(int i = 0; i < motor_number_; i++)
