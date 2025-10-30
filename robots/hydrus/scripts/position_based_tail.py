@@ -279,14 +279,14 @@ if __name__ == "__main__":
             if dest_alpha_1 > math.radians(99):
                 print("stop!!!!")
                 rotor_msg.pwms = [0.5]
-                rotor_pub.publish(rotor_msg)
+                # rotor_pub.publish(rotor_msg)
                 rospy.sleep(0.5)
                 exit()
             dest_alpha_3 = math.radians(float(input("alpha_3 (deg): ")))
             if dest_alpha_3 > math.radians(99):
                 print("stop!!!!")
                 rotor_msg.pwms = [0.5]
-                rotor_pub.publish(rotor_msg)
+                # rotor_pub.publish(rotor_msg)
                 rospy.sleep(0.5)
                 exit()
 
@@ -337,7 +337,7 @@ if __name__ == "__main__":
             tail_pub.publish(tail_msg)
 
             rotor_msg.pwms = [rotor_pwm]
-            rotor_pub.publish(rotor_msg)
+            # rotor_pub.publish(rotor_msg)
 
             rospy.sleep(0.001)
 
