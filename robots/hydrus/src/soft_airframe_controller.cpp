@@ -26,14 +26,14 @@ void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
   
   // subscriber
   joint_state_sub_ = nh_.subscribe("joint_states", 1, &SoftAirframeController::jointStateCallback, this);
-  rpy_pid_sub_ = nh_.subscribe("rpy/pid", 1, &SoftAirframeController::publishRotorAttitudeContributions, this);
+  // rpy_pid_sub_ = nh_.subscribe("rpy/pid", 1, &SoftAirframeController::publishRotorAttitudeContributions, this);
   
   // note: it might be better to use gimbal_link1
   rotor5_pose_sub_ = nh_.subscribe("thrust5/mocap/pose", 1, &SoftAirframeController::Rotor5MocapCallback, this);
   body_pose_sub_ = nh_.subscribe("mocap/pose", 1, &SoftAirframeController::BodyMocapCallback, this);
 
   torque_allocation_matrix_inv_pub_stamp_ = 0.0;
-  prev_target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_);
+  prev_target_vectoring_f_ = Eigen::VectorXd::Zero(4);
 }
 
 void SoftAirframeController::controlCore()
@@ -57,7 +57,7 @@ void SoftAirframeController::controlCore()
   Eigen::MatrixXd full_q_mat_inv_ = aerial_robot_model::pseudoinverse(full_q_mat_);
 
   // Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(virtual_motor_num_); // virtual motor number
-  Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_); // virtual motor number
+  Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(4); // virtual motor number
   if(hovering_approximate_)
     {
       target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
@@ -70,12 +70,12 @@ void SoftAirframeController::controlCore()
       target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
       target_vectoring_f_ = full_q_mat_inv_.col(0) * target_acc_w.length();
     }
-  target_vectoring_f_.noalias() += prev_target_vectoring_f_;
-  target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
+  // target_vectoring_f_.noalias() += prev_target_vectoring_f_;
+  // target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
   prev_target_vectoring_f_ = target_vectoring_f_;
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
 
-  for(int i = 0; i < motor_num_; i++)
+  for(int i = 0; i < 4; i++)
   {
     // when using gimbal
     // if (i == 4){
@@ -86,13 +86,14 @@ void SoftAirframeController::controlCore()
       target_base_thrust_.at(i) = target_vectoring_f_(i);
     // }
   }
+  target_base_thrust_.at(4) = 3.0;
 
   q_mat_ = getQMat();
   q_mat_inv_ = aerial_robot_model::pseudoinverse(q_mat_);
 
   // special process for yaw since the bandwidth between PC and spinal
   double max_yaw_scale = 0; // for reconstruct yaw control term in spinal
-  for (unsigned int i = 0; i < motor_num_; i++)
+  for (unsigned int i = 0; i < 4; i++)
     {
       if(q_mat_inv_(i, YAW - 2) > max_yaw_scale) max_yaw_scale = q_mat_inv_(i, YAW - 2);
     }
@@ -172,29 +173,29 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   // std::cout << rotors_origin.at(4) << std::endl;
   // std::cout << rotors_normal.at(4) << std::endl;
 
-  if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
-      ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0){
-    KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
-    KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
-    KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
-    rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
-    rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
-  }
+  // if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
+  //     ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0){
+  //   KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
+  //   KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
+  //   KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
+  //   rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
+  //   rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
+  // }
   
   // std::cout << "after mocap update" << std::endl;
   // std::cout << rotors_origin.at(4) << std::endl;
   // std::cout << rotors_normal.at(4) << std::endl;
   // std::cout << std::endl;
 
-  if (prev_rotor5_origin != Eigen::Vector3d(0,0,0) && prev_rotor5_normal != Eigen::Vector3d(0,0,0)){
-    double alpha = 0.5;
-    rotors_origin.at(4) = alpha * prev_rotor5_origin + (1 - alpha) * rotors_origin.at(4);
-    rotors_normal.at(4) = alpha * prev_rotor5_normal + (1 - alpha) * rotors_normal.at(4);
-    rotors_normal.at(4).normalize();
-  }
+  // if (prev_rotor5_origin != Eigen::Vector3d(0,0,0) && prev_rotor5_normal != Eigen::Vector3d(0,0,0)){
+  //   double alpha = 0.5;
+  //   rotors_origin.at(4) = alpha * prev_rotor5_origin + (1 - alpha) * rotors_origin.at(4);
+  //   rotors_normal.at(4) = alpha * prev_rotor5_normal + (1 - alpha) * rotors_normal.at(4);
+  //   rotors_normal.at(4).normalize();
+  // }
 
-  prev_rotor5_origin = rotors_origin.at(4);
-  prev_rotor5_normal = rotors_normal.at(4);
+  // prev_rotor5_origin = rotors_origin.at(4);
+  // prev_rotor5_normal = rotors_normal.at(4);
 
 
   // rotor5_origin_hist.push_back(rotors_origin.at(4));
@@ -213,8 +214,8 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   // rotors_origin.at(4) = origin_avg;
   // rotors_normal.at(4) = normal_avg.normalized();
   
-  Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, motor_num_);
-  for (unsigned int i = 0; i < motor_num_; ++i) {
+  Eigen::MatrixXd q_mat = Eigen::MatrixXd::Zero(4, 4);
+  for (unsigned int i = 0; i < 4; ++i) {
     double m_f_rate = robot_model_->getMFRate(i);
     q_mat(0, i) = rotors_normal.at(i).z();
     q_mat.block(1, i, 3, 1) = (rotors_origin.at(i).cross(rotors_normal.at(i)) + m_f_rate * rotor_direction.at(i + 1) * rotors_normal.at(i));
@@ -300,12 +301,15 @@ void SoftAirframeController::sendTorqueAllocationMatrixInv()
       Eigen::MatrixXd torque_allocation_matrix_inv = q_mat_inv_.rightCols(3);
       if (torque_allocation_matrix_inv.cwiseAbs().maxCoeff() > INT16_MAX * 0.001f)
         ROS_ERROR("Torque Allocation Matrix overflow");
-      for (unsigned int i = 0; i < motor_num_; i++)
+      for (unsigned int i = 0; i < 4; i++)
         {
           torque_allocation_matrix_inv_msg.rows.at(i).x = torque_allocation_matrix_inv(i,0) * 1000;
           torque_allocation_matrix_inv_msg.rows.at(i).y = torque_allocation_matrix_inv(i,1) * 1000;
           torque_allocation_matrix_inv_msg.rows.at(i).z = torque_allocation_matrix_inv(i,2) * 1000;
         }
+      torque_allocation_matrix_inv_msg.rows.at(4).x = 0 * 1000;
+      torque_allocation_matrix_inv_msg.rows.at(4).y = 0 * 1000;
+      torque_allocation_matrix_inv_msg.rows.at(4).z = 0 * 1000;
       torque_allocation_matrix_inv_pub_.publish(torque_allocation_matrix_inv_msg);
     }
 }
@@ -353,33 +357,33 @@ void SoftAirframeController::publishQMat()
   q_mat_pub_.publish(q_mat_msg);
 }
 
-void SoftAirframeController::publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_)
-{
-  std_msgs::Float32MultiArray rotor_attitude_contributions_msg;
-  rotor_attitude_contributions_msg.layout.dim.resize(2);
-  rotor_attitude_contributions_msg.layout.dim[0].label = "rows";
-  rotor_attitude_contributions_msg.layout.dim[0].size = motor_num_;
-  rotor_attitude_contributions_msg.layout.dim[0].stride = 3;
-  rotor_attitude_contributions_msg.layout.dim[1].label = "cols";
-  rotor_attitude_contributions_msg.layout.dim[1].size = 3;
-  rotor_attitude_contributions_msg.layout.dim[1].stride = 1;
-  rotor_attitude_contributions_msg.data.resize(motor_num_ * 3);
+// void SoftAirframeController::publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_)
+// {
+//   std_msgs::Float32MultiArray rotor_attitude_contributions_msg;
+//   rotor_attitude_contributions_msg.layout.dim.resize(2);
+//   rotor_attitude_contributions_msg.layout.dim[0].label = "rows";
+//   rotor_attitude_contributions_msg.layout.dim[0].size = motor_num_;
+//   rotor_attitude_contributions_msg.layout.dim[0].stride = 3;
+//   rotor_attitude_contributions_msg.layout.dim[1].label = "cols";
+//   rotor_attitude_contributions_msg.layout.dim[1].size = 3;
+//   rotor_attitude_contributions_msg.layout.dim[1].stride = 1;
+//   rotor_attitude_contributions_msg.data.resize(motor_num_ * 3);
 
-  Eigen::MatrixXd q_mat_temp = getQMat();
+//   Eigen::MatrixXd q_mat_temp = getQMat();
 
-  if (control_term_msg_.motors.size() != motor_num_){
-    return;
-  }
+//   if (control_term_msg_.motors.size() != motor_num_){
+//     return;
+//   }
   
-    for (int i = 0; i < motor_num_; i++)
-      {
-        rotor_attitude_contributions_msg.data[i * 3] = q_mat_temp(1, i) * (control_term_msg_.motors[i].roll_p + control_term_msg_.motors[i].roll_i + control_term_msg_.motors[i].roll_d) * 0.001f;
-        rotor_attitude_contributions_msg.data[i * 3 + 1] = q_mat_temp(2, i) * (control_term_msg_.motors[i].roll_p + control_term_msg_.motors[i].roll_i + control_term_msg_.motors[i].roll_d) * 0.001f;
-        rotor_attitude_contributions_msg.data[i * 3 + 2] = q_mat_temp(3, i) * control_term_msg_.motors[i].yaw_d * 0.001f;
-      }
+//     for (int i = 0; i < motor_num_; i++)
+//       {
+//         rotor_attitude_contributions_msg.data[i * 3] = q_mat_temp(1, i) * (control_term_msg_.motors[i].roll_p + control_term_msg_.motors[i].roll_i + control_term_msg_.motors[i].roll_d) * 0.001f;
+//         rotor_attitude_contributions_msg.data[i * 3 + 1] = q_mat_temp(2, i) * (control_term_msg_.motors[i].roll_p + control_term_msg_.motors[i].roll_i + control_term_msg_.motors[i].roll_d) * 0.001f;
+//         rotor_attitude_contributions_msg.data[i * 3 + 2] = q_mat_temp(3, i) * control_term_msg_.motors[i].yaw_d * 0.001f;
+//       }
 
-  rotor_attitude_contributions_pub_.publish(rotor_attitude_contributions_msg);
-}
+//   rotor_attitude_contributions_pub_.publish(rotor_attitude_contributions_msg);
+// }
 
 /* plugin registration */
 #include <pluginlib/class_list_macros.h>

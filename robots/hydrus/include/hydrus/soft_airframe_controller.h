@@ -79,7 +79,7 @@ protected:
   virtual void sendGimbalCommand();
   virtual void sendTorqueAllocationMatrixInv();
   virtual void publishQMat();
-  virtual void publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_);
+  // virtual void publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_);
 
 };
 }  // namespace aerial_robot_control

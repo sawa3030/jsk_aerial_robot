@@ -113,11 +113,16 @@
   <link name="soft_link1">
     <inertial>
       <origin xyz="0.06875 0.000002 0.018960" rpy="0 0 0"/>
-      <mass value="${0.010*2 + 0.012}"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
+      <!-- <inertia
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/> -->
       <inertia
-          ixx="0.00003988" ixy="0.0" ixz="0.0"
-          iyy="0.00010606" iyz="0.0"
-          izz="0.00010185"/>
+          ixx="0.00001" ixy="0.0" ixz="0.0"
+          iyy="0.00001" iyz="0.0"
+          izz="0.00002"/>
     </inertial>
     <visual>
       <geometry>
@@ -135,11 +140,16 @@
   <link name="soft_link2">
     <inertial>
       <origin xyz="0.1175 0.000002 0.019998" rpy="0 0 0"/>
-      <mass value="${0.010*5 + 0.012*2}"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
+      <!-- <inertia
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/> -->
       <inertia
-          ixx="0.00006787" ixy="0.0" ixz="0.0"
-          iyy="0.00049831" iyz="0.0"
-          izz="0.00048990"/>
+          ixx="0.00001" ixy="0.0" ixz="0.0"
+          iyy="0.00001" iyz="0.0"
+          izz="0.00002"/>
     </inertial>
     <visual>
       <geometry>
@@ -157,11 +167,16 @@
   <link name="soft_link3">
     <inertial>
       <origin xyz="0.10740316 0.0 0.003" rpy="0 0 0"/>
-      <mass value="${0.010*2 + 0.012 + 0.070 + 0.016}"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
+      <!-- <inertia
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/> -->
       <inertia
-          ixx="0.00005679" ixy="-0.000000031" ixz="-0.00002256"
-          iyy="0.00028149" iyz="0.000000005"
-          izz="0.00026759"/>
+          ixx="0.00001" ixy="0.0" ixz="0.0"
+          iyy="0.00001" iyz="0.0"
+          izz="0.00002"/>
     </inertial>
     <visual>
       <geometry>
@@ -323,10 +338,16 @@
   <link name="leg6">
     <inertial>
       <origin xyz="0.0 0.0 -0.093" rpy="0 0 0"/>
-      <mass value="0.051000"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
       <inertia
-          ixx="0.000122" iyy="0.000133" izz="0.000012"
-          ixy="0.000000" ixz="0.000000" iyz="0.000000"/>
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/>
+      <!-- <inertia
+          ixx="0.00001" ixy="0.0" ixz="0.0"
+          iyy="0.00001" iyz="0.0"
+          izz="0.00002"/> -->
     </inertial>
     <visual>
       <geometry>
@@ -361,18 +382,16 @@
   <link name="gimbal_link1">
     <inertial>
       <origin xyz="0.0815 0 0" rpy="0 0 0"/>
-      <mass value="0.173"/>
-      <!-- this inertia value is 10 times bigger than the real one -->
-      <!-- to avoid the instability in gazebo -->
-      <!-- <inertia
-          ixx="0.0022661" ixy="0.0" ixz="0.0"
-          iyy="0.0015451" iyz="0.0"
-          izz="0.00032533"/> -->
-      <!-- original one -->
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
       <inertia
-          ixx="0.00022661" ixy="0.0" ixz="0.0"
-          iyy="0.00015451" iyz="0.0"
-          izz="0.000032533"/>
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/>
+      <!-- <inertia
+          ixx="0.00001" ixy="0.0" ixz="0.0"
+          iyy="0.00001" iyz="0.0"
+          izz="0.00002"/> -->
     </inertial>
     <!-- <collision>
       <origin xyz="0.0815 0 0" rpy="0 0 0"/>
