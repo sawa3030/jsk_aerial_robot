@@ -643,7 +643,15 @@ namespace aerial_robot_model {
     for(unsigned int i = 0; i < state.position.size(); ++i)
       {
         auto itr = joint_index_map_.find(state.name[i]);
-        if(itr != joint_index_map_.end()) joint_positions(itr->second) = state.position[i];
+        if(itr != joint_index_map_.end()) {
+          if (state.name[i] == "soft_joint2" || state.name[i] == "soft_joint3") {
+            if (state.effort[i] != 0.0) continue;
+          }
+          if (state.name[i] == "soft_joint2" || state.name[i] == "soft_joint3") {
+            std::cout << "joint found: " << state.name[i] << ", " << state.position[i] << std::endl;
+          }
+          joint_positions(itr->second) = state.position[i];
+        }
       }
     return joint_positions;
   }
