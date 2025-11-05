@@ -230,6 +230,60 @@
   </gazebo>
   <xacro:damping_factor link="dummy_link1"/>
 
+  <link name="dummy_link2">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
+      <!-- <inertia
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/> -->
+      <inertia
+          ixx="0.000016" ixy="-0.000003" ixz="0.000001"
+          iyy="0.000019" iyz="0.000000"
+          izz="0.000022"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+    </visual>
+  </link>
+  <gazebo reference="dummy_link2">
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
+  </gazebo>
+  <xacro:damping_factor link="dummy_link2"/>
+
+  <link name="dummy_link3">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.0001"/>
+      <!-- this is for avoiding error in gazebo -->
+      <!-- <inertia
+          ixx="0.001" ixy="0.0" ixz="0.0"
+          iyy="0.001" iyz="0.0"
+          izz="0.002"/> -->
+      <inertia
+          ixx="0.000016" ixy="-0.000003" ixz="0.000001"
+          iyy="0.000019" iyz="0.000000"
+          izz="0.000022"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.05"/>
+      </geometry>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+    </visual>
+  </link>
+  <gazebo reference="dummy_link3">
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
+  </gazebo>
+  <xacro:damping_factor link="dummy_link3"/>
+
   <joint name="soft_joint1" type="fixed">
     <parent link="link4"/>
     <child link="soft_link1"/>
@@ -275,6 +329,24 @@
     <dynamics damping="0.9" friction="0.1"/>
   </joint>
 
+  <joint name="soft_joint6" type="revolute">
+    <limit effort="5.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
+    <parent link="soft_link3"/>
+    <child link="dummy_link2"/>
+    <origin xyz="0.235 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.9" friction="0.1"/>
+  </joint>
+
+  <joint name="soft_joint7" type="revolute">
+    <limit effort="5.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
+    <parent link="soft_link3"/>
+    <child link="dummy_link3"/>
+    <origin xyz="0.235 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.9" friction="0.1"/>
+  </joint>
+
   <transmission name="soft_joint_tran_2">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="soft_joint2">
@@ -314,6 +386,28 @@
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="soft_joint_servo5">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="soft_joint_tran_6">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="soft_joint6">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="soft_joint_servo6">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="soft_joint_tran_7">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="soft_joint7">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="soft_joint_servo7">
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
