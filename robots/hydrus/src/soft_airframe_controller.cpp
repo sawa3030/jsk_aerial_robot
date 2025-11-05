@@ -77,7 +77,7 @@ void SoftAirframeController::controlCore()
     }
   z_rpy_ddot(1) = pid_controllers_.at(ROLL).result();
   z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
-  z_rpy_ddot(3) = pid_controllers_.at(YAW).result() + pid_controllers_.at(YAW).getErrD() * pid_controllers_.at(YAW).getDGain();
+  z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
   target_vectoring_f_.noalias() = full_q_mat_inv_ * z_rpy_ddot;
   target_vectoring_f_.noalias() += prev_target_vectoring_f_;
   target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
