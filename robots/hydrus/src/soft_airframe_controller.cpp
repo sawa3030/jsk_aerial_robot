@@ -131,16 +131,16 @@ void SoftAirframeController::controlCore()
   //     lb(8) = 5.0;
   //   }
   // }
-  if(max_rotor5 > 3.0) {
-    if(joint_angles_.size() >= 2){
-      if (joint_angles_.at(1) * 180.0 / M_PI > 9.0){
-        offset_thrust += 0.002;
-      }
-    }
-  }
-  if (offset_thrust > 5.0) {
-    offset_thrust = 5.0;
-  }
+  // if(max_rotor5 > 3.0) {
+  //   if(joint_angles_.size() >= 2){
+  //     if (joint_angles_.at(1) * 180.0 / M_PI > 9.0){
+  //       offset_thrust += 0.002;
+  //     }
+  //   }
+  // }
+  // if (offset_thrust > 5.0) {
+  //   offset_thrust = 5.0;
+  // }
 
   ub.head(4) = z_rpy_ddot;
   for (int i = 0; i < motor_num_; i++)
@@ -195,7 +195,7 @@ void SoftAirframeController::controlCore()
   if (target_vectoring_f_(4) > max_rotor5){
     max_rotor5 = target_vectoring_f_(4);
   }
-  target_vectoring_f_(4) += offset_thrust;
+  // target_vectoring_f_(4) += offset_thrust;
   // std::cout << "answer from psuedo inverse(1): " << ((full_q_mat_inv_.col(0) * z_rpy_ddot(0)) + prev_target_vectoring_f_ - (full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_))).transpose() << std::endl;
   // std::cout << "answer from psuedo inverse(4): " << ((full_q_mat_inv_ * z_rpy_ddot) + prev_target_vectoring_f_ - (full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_))).transpose() << std::endl;
   // std::cout << "target vectoring f: " << target_vectoring_f_.transpose() << std::endl;
@@ -309,13 +309,15 @@ Eigen::MatrixXd SoftAirframeController::getQMat()
   std::vector<Eigen::Vector3d> rotors_normal = robot_model_->getRotorsNormalFromCog<Eigen::Vector3d>();
   auto& rotor_direction = robot_model_->getRotorDirection();
 
-  // if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
-  //     ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0){
-  //   KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
-  //   KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
-  //   KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
-  //   rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
-  //   rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
+  if (ros::Time::now().toSec() - rotor5_pose_update_time_.toSec() < 1.0 && 
+      ros::Time::now().toSec() - body_pose_update_time_.toSec() < 1.0 && max_rotor5 < 3.0){
+    KDL::Frame body_pose_from_root_ = robot_model_ -> getSegmentsTf().at("fc");
+    KDL::Frame rotor5_pose_from_root = body_pose_from_root_ * body_pose_from_world_.Inverse() * rotor5_pose_from_world_;
+    KDL::Frame cog = robot_model_->getCog<KDL::Frame>();
+    rotors_origin.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).p);
+    rotors_normal.at(4) = aerial_robot_model::kdlToEigen((cog.Inverse() * rotor5_pose_from_root).M * KDL::Vector(0,0,1));
+  }
+
   // } else {
   //   rotors_origin.at(4) = prev_rotor5_origin;
   //   rotors_normal.at(4) = prev_rotor5_normal;
