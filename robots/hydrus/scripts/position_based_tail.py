@@ -268,7 +268,8 @@ if __name__ == "__main__":
     servo_controller_pub = rospy.Publisher("joints_ctrl", JointState, queue_size=1)
     joint_angle_pub = rospy.Publisher("soft_airframe_joint_angles", Float32MultiArray, queue_size=1)
 
-    print("simulation mode" if is_simulation() else "real robot mode")
+    is_simulation = is_simulation()
+    print("simulation mode" if is_simulation else "real robot mode")
     
     dest = None
     last_published_target = None
