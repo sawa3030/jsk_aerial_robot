@@ -60,9 +60,7 @@ void SoftAirframeController::controlCore()
       full_q_mat_ = getQMat(); // 4 x virtual_motor_num_
       full_q_mat_inv_ = aerial_robot_model::pseudoinverse(full_q_mat_);
     }
-  
-
-  // Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(virtual_motor_num_); // virtual motor number
+    
   Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_); // virtual motor number
   Eigen::VectorXd z_rpy_ddot = Eigen::VectorXd::Zero(4);
   if(hovering_approximate_)
@@ -77,13 +75,9 @@ void SoftAirframeController::controlCore()
       target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
       z_rpy_ddot(0) = target_acc_w.length();
     }
-  // z_rpy_ddot(1) = pid_controllers_.at(ROLL).result();
-  // z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
-  // z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
-
-  z_rpy_ddot(1) = 0.0;
-  z_rpy_ddot(2) = 0.0;
-  z_rpy_ddot(3) = 0.0;
+  z_rpy_ddot(1) = pid_controllers_.at(ROLL).result();
+  z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
+  z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
 
   // solve the thrust allocation with QP
   Eigen::MatrixXd H = Eigen::MatrixXd::Zero(motor_num_, motor_num_);
@@ -103,26 +97,14 @@ void SoftAirframeController::controlCore()
   lb.head(4) = z_rpy_ddot;
   for (int i = 0; i < motor_num_; i++)
   {
-    lb(i + 4) = -10.0;
+    lb(i + 4) = 0.0;
   }
 
   ub.head(4) = z_rpy_ddot;
   for (int i = 0; i < motor_num_; i++)
   {
-    ub(i + 4) = 30.0;
+    ub(i + 4) = 25.0;
   }
-
-  // if(max_rotor5 > 3.0) {
-  //   // if(joint_angles_.size() < 2){
-  //   //   lb(8) = -5.0;
-  //   // } else if (joint_angles_.at(0) * 180.0 / M_PI < 10.0) {
-  //   //   lb(8) = 1.0 + 4.0 / 10.0 * std::abs(joint_angles_.at(0) * 180.0 / M_PI);
-  //   // } else {
-  //   //   lb(8) = 5.0;
-  //   // }
-  ub(7) = 13.0;
-  // }
-
   
   Eigen::SparseMatrix<double> H_s = H.sparseView();
   Eigen::SparseMatrix<double> A_s = A.sparseView();
@@ -156,64 +138,12 @@ void SoftAirframeController::controlCore()
   if(solved){
     target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
   } else {
-    ub(7) = 13.5;
-    target_vectoring_qp_solver_.updateBounds(lb, ub);
-    solved = target_vectoring_qp_solver_.solve();
-    target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-
-    if (!solved) {
-      ub(7) = 14.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-
-    if (!solved) {
-      ub(7) = 15.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-
-    if (!solved) {
-      ub(7) = 16.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-
-    if (!solved) {
-      ub(7) = 17.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-
-    if (!solved) {
-      ub(7) = 18.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-
-    if (!solved) {
-      ub(7) = 19.0;
-      target_vectoring_qp_solver_.updateBounds(lb, ub);
-      solved = target_vectoring_qp_solver_.solve();
-      target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-    }
-    
-    if (!solved) {
-      target_vectoring_f_ = full_q_mat_inv_ * z_rpy_ddot;
-      target_vectoring_f_.noalias() += prev_target_vectoring_f_;
-      target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
-      std::cout << "QP not solved!: " << target_vectoring_f_.transpose() << std::endl;
-    }
-    std::cout << "ub(7) = " << ub(7) << std::endl;
+    target_vectoring_f_ = full_q_mat_inv_ * z_rpy_ddot;
+    target_vectoring_f_.noalias() += prev_target_vectoring_f_;
+    target_vectoring_f_.noalias() -= full_q_mat_inv_ * (full_q_mat_ * prev_target_vectoring_f_);
+    std::cout << "QP not solved!: " << target_vectoring_f_.transpose() << std::endl;
   }
-  if (target_vectoring_f_(4) > max_rotor5){
-    max_rotor5 = target_vectoring_f_(4);
-  }
+
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
 
   for (int i = 0; i < motor_num_; i++)
@@ -229,14 +159,7 @@ void SoftAirframeController::controlCore()
 
   for(int i = 0; i < motor_num_; i++)
   {
-    // when using gimbal
-    // if (i == 4){
-    //   target_base_thrust_.at(i) = Eigen::Vector2d(target_vectoring_f_(4), target_vectoring_f_(5)).norm();
-    //   gimbal_angle_diff_ = atan2(target_vectoring_f_(5), target_vectoring_f_(4));
-    // }
-    // else {
-      target_base_thrust_.at(i) = target_vectoring_f_(i);
-    // }
+    target_base_thrust_.at(i) = target_vectoring_f_(i);
   }
 
   q_mat_ = getQMat();
@@ -464,20 +387,20 @@ void SoftAirframeController::setAttitudeGains()
   spinal::RollPitchYawTerms rpy_gain_msg; //for rosserial
   /* to flight controller via rosserial scaling by 1000 */
   rpy_gain_msg.motors.resize(1);
-  rpy_gain_msg.motors.at(0).roll_p = pid_controllers_.at(ROLL).getPGain() * 1000;
-  rpy_gain_msg.motors.at(0).roll_i = pid_controllers_.at(ROLL).getIGain() * 1000;
-  rpy_gain_msg.motors.at(0).roll_d = pid_controllers_.at(ROLL).getDGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_p = pid_controllers_.at(PITCH).getPGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_i = pid_controllers_.at(PITCH).getIGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_d = pid_controllers_.at(PITCH).getDGain() * 1000;
-  rpy_gain_msg.motors.at(0).yaw_d = pid_controllers_.at(YAW).getDGain() * 1000;
-  // rpy_gain_msg.motors.at(0).roll_p = 0;
-  // rpy_gain_msg.motors.at(0).roll_i = 0;
-  // rpy_gain_msg.motors.at(0).roll_d = 0;
-  // rpy_gain_msg.motors.at(0).pitch_p = 0;
-  // rpy_gain_msg.motors.at(0).pitch_i = 0;
-  // rpy_gain_msg.motors.at(0).pitch_d = 0;
-  // rpy_gain_msg.motors.at(0).yaw_d = 0;
+  // rpy_gain_msg.motors.at(0).roll_p = pid_controllers_.at(ROLL).getPGain() * 1000;
+  // rpy_gain_msg.motors.at(0).roll_i = pid_controllers_.at(ROLL).getIGain() * 1000;
+  // rpy_gain_msg.motors.at(0).roll_d = pid_controllers_.at(ROLL).getDGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_p = pid_controllers_.at(PITCH).getPGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_i = pid_controllers_.at(PITCH).getIGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_d = pid_controllers_.at(PITCH).getDGain() * 1000;
+  // rpy_gain_msg.motors.at(0).yaw_d = pid_controllers_.at(YAW).getDGain() * 1000;
+  rpy_gain_msg.motors.at(0).roll_p = 0;
+  rpy_gain_msg.motors.at(0).roll_i = 0;
+  rpy_gain_msg.motors.at(0).roll_d = 0;
+  rpy_gain_msg.motors.at(0).pitch_p = 0;
+  rpy_gain_msg.motors.at(0).pitch_i = 0;
+  rpy_gain_msg.motors.at(0).pitch_d = 0;
+  rpy_gain_msg.motors.at(0).yaw_d = 0;
   rpy_gain_pub_.publish(rpy_gain_msg);
 }
 
