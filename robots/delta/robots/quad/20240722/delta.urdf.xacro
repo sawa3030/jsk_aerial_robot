@@ -285,49 +285,49 @@
     </inertial>
   </link>
 
-  <transmission name="soft_joint_tran_4">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="soft_joint4">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="soft_joint_servo4">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+  <!-- <transmission name="soft_joint_tran_4"> -->
+  <!--   <type>transmission_interface/SimpleTransmission</type> -->
+  <!--   <joint name="soft_joint4"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--   </joint> -->
+  <!--   <actuator name="soft_joint_servo4"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--     <mechanicalReduction>1</mechanicalReduction> -->
+  <!--   </actuator> -->
+  <!-- </transmission> -->
 
-  <transmission name="soft_joint_tran_5">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="soft_joint5">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="soft_joint_servo5">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+  <!-- <transmission name="soft_joint_tran_5"> -->
+  <!--   <type>transmission_interface/SimpleTransmission</type> -->
+  <!--   <joint name="soft_joint5"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--   </joint> -->
+  <!--   <actuator name="soft_joint_servo5"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--     <mechanicalReduction>1</mechanicalReduction> -->
+  <!--   </actuator> -->
+  <!-- </transmission> -->
 
-  <transmission name="soft_joint_tran_6">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="soft_joint6">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="soft_joint_servo6">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+  <!-- <transmission name="soft_joint_tran_6"> -->
+  <!--   <type>transmission_interface/SimpleTransmission</type> -->
+  <!--   <joint name="soft_joint6"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--   </joint> -->
+  <!--   <actuator name="soft_joint_servo6"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--     <mechanicalReduction>1</mechanicalReduction> -->
+  <!--   </actuator> -->
+  <!-- </transmission> -->
 
-  <transmission name="soft_joint_tran_7">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="soft_joint7">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="soft_joint_servo7">
-      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
+  <!-- <transmission name="soft_joint_tran_7"> -->
+  <!--   <type>transmission_interface/SimpleTransmission</type> -->
+  <!--   <joint name="soft_joint7"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--   </joint> -->
+  <!--   <actuator name="soft_joint_servo7"> -->
+  <!--     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+  <!--     <mechanicalReduction>1</mechanicalReduction> -->
+  <!--   </actuator> -->
+  <!-- </transmission> -->
 
   <!-- leg -->
   <link name="leg6">
