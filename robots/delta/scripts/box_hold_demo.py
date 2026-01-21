@@ -63,7 +63,7 @@ class BoxHoldDemoNode:
             joint_msg.header.stamp = rospy.Time.now()
             self.joint_states_pub.publish(joint_msg)
             print("current position:", self.position)
-            self.position += 0.5
+            self.position += 0.1
 
             if self.position > 1.6:
                 rospy.sleep(1.0)

@@ -41,6 +41,16 @@ servo_controller:
       simulation:
         init_value: 0
 
+    controller10:
+      name: soft_joint8
+      simulation:
+        init_value: 0
+
+    controller11:
+      name: soft_joint9
+      simulation:
+        init_value: 0
+
   gimbals:
     no_real_state: false # true if there is no servo state from real machine
     angle_sgn: -1
