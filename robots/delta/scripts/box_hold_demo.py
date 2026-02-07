@@ -35,7 +35,7 @@ class BoxHoldDemoNode:
         req.parent_link_name = "soft_link3"
 
         # transform
-        req.transform.translation.x = 0.1175
+        req.transform.translation.x = 0.220
         req.transform.translation.y = 0.0
         req.transform.translation.z = 0.0
         req.transform.rotation.x = 0.0
@@ -70,6 +70,7 @@ class BoxHoldDemoNode:
 
         rospy.sleep(1.0)
         self.positions = [self.joint1_position, self.joint2_position, self.joint1_position]
+        self.call_add_extra_module()
 
         while not rospy.is_shutdown():
             joint_msg = JointState()
@@ -78,10 +79,11 @@ class BoxHoldDemoNode:
             joint_msg.header.stamp = rospy.Time.now()
             self.joint_states_pub.publish(joint_msg)
             print("current position:", self.positions)
-            self.positions[0] += 0.01
-            self.positions[2] += 0.01
+            self.positions[0] += 0.1
+            self.positions[2] += 0.1
 
-            if self.positions[0] > 1.6:
+            if self.positions[0] > 0.9:
+            # if self.positions[0] > 1.6:
                 rospy.sleep(1.0)
                 # self.call_add_extra_module()
                 break
