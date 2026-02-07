@@ -12,11 +12,14 @@ class DeltaSoftLinkSolver:
         rospy.init_node("delta_soft_ik_solver")
         
         self.joint_states_sub = rospy.Subscriber("joint_states", JointState, self.joint_states_cb, queue_size=1)
+        self.joints_ctrl_sub = rospy.Subscriber("joints_ctrl", JointState, self.joints_ctrl_cb, queue_size=1)
         
         if self.is_simulation():
             self.joint_states_pub = rospy.Publisher("joints_ctrl", JointState, queue_size=1)
         else:
             self.joint_states_pub = rospy.Publisher("joint_states", JointState, queue_size=1)
+        
+        self.target_soft_joint_pub = rospy.Publisher("target_soft_joints_ctrl", JointState, queue_size=1)
 
         # --- リンク長パラメータ (単位: m) ---
         # 剛体リンク長 (Link1~4)
@@ -48,6 +51,34 @@ class DeltaSoftLinkSolver:
 
     def is_simulation(self) -> bool:
         return rospy.get_param('/use_sim_time', False)
+
+    def joints_ctrl_cb(self, msg: JointState):
+        # 剛体関節(joint1, joint2, joint3)の取得
+        rigid_angles = [None, None, None] 
+        for name, pos in zip(msg.name, msg.position):
+            if name == 'joint1':
+                rigid_angles[0] = pos
+            elif name == 'joint2':
+                rigid_angles[1] = pos
+            elif name == 'joint3':
+                rigid_angles[2] = pos
+        if None in rigid_angles:
+            rospy.logwarn("Not all rigid joints found in joint states")
+            return
+
+        # IKを解く
+        soft_angles = self.solve_closed_loop_ik(rigid_angles)
+
+        # Publish
+        out_msg = JointState()
+        out_msg.header.stamp = rospy.Time.now()
+        # 出力対象: URDF内の全revolute soft joints
+        out_msg.name = ["soft_joint2", "soft_joint3", 
+                        "soft_joint5", "soft_joint6", 
+                        "soft_joint8", "soft_joint9"]
+        out_msg.position = soft_angles
+        print("Published Soft Joint Angles:", soft_angles)
+        self.target_soft_joint_pub.publish(out_msg)
 
     def joint_states_cb(self, msg: JointState):
         # 剛体関節(joint1, joint2, joint3)の取得

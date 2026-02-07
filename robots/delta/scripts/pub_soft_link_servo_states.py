@@ -76,7 +76,7 @@ class SoftJointToServoNode:
         self.servo_center = 2047
 
         self.pub = rospy.Publisher("servo/target_states", ServoControlCmd, queue_size=1)
-        self.sub = rospy.Subscriber("joint_states", JointState, self.cb, queue_size=1)
+        self.sub = rospy.Subscriber("target_soft_joints_ctrl", JointState, self.cb, queue_size=1)
 
         rospy.loginfo("soft_joint_to_servo started.")
 
@@ -111,8 +111,6 @@ class SoftJointToServoNode:
         # (-soft_joint9, -soft_joint8) -> servo 12,11,13,14  ※順番と符号
         alpha_1_b = -s9
         alpha_2_b = -s8
-
-        print(alpha_1_a, alpha_2_a, alpha_1_b, alpha_2_b)
 
         # ---- wire diff ----
         x_plus_long_a, x_minus_long_a, x_plus_short_a, x_minus_short_a = get_wire_diff(alpha_1_a, alpha_2_a)
