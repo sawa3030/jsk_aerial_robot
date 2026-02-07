@@ -164,7 +164,11 @@ void DeltaController::linearWrenchAllocation()
 
   for (int i = 0; i < motor_on_soft_frame_num_; i++)
   {
-    lb(6 + 2 * motor_on_rigid_frame_num_ + i) = robot_model_->getThrustLowerLimit(motor_on_rigid_frame_num_ + i);
+    if (target_wrench_cog(2) < 40){
+      lb(6 + 2 * motor_on_rigid_frame_num_ + i) = robot_model_->getThrustLowerLimit(motor_on_rigid_frame_num_ + i);
+    } else {
+      lb(6 + 2 * motor_on_rigid_frame_num_ + i) = 2.7;
+    }
     ub(6 + 2 * motor_on_rigid_frame_num_ + i) = robot_model_->getThrustUpperLimit(motor_on_rigid_frame_num_ + i);
   }
 
