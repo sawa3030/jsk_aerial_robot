@@ -28,6 +28,7 @@ servo_controller:
     controller2:
       id: 1
       name: joint2
+      angle_sgn: -1
     controller3:
       id: 2
       name: joint3
