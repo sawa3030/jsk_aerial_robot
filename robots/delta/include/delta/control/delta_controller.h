@@ -7,6 +7,7 @@
 #include <delta/model/delta_robot_model.h>
 #include <delta/control/delta_wrench_allocation.h>
 #include <geometry_msgs/WrenchStamped.h>
+#include <kdl/jntarray.hpp>
 #include <nlopt.hpp>
 #include <numeric>
 #include <OsqpEigen/OsqpEigen.h>
@@ -114,6 +115,8 @@ private:
   Eigen::MatrixXd q_mat_inv_;
   double candidate_yaw_term_;
   bool hovering_approximate_;
+  double joint_position_lpf_rate_;
+  KDL::JntArray filtered_joint_positions_;
   double torque_allocation_matrix_inv_pub_stamp_;
   double torque_allocation_matrix_inv_pub_interval_;
 
@@ -135,6 +138,7 @@ private:
   void controlCore() override;
   void activate() override;
   void rosParamInit();
+  KDL::JntArray lowPassFilterJointPositions(const KDL::JntArray& joint_positions);
   void processGimbalAngles();
   void calcYawTerm();
   void sendTorqueAllocationMatrix();

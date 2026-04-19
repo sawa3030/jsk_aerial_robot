@@ -96,8 +96,15 @@ void DeltaController::rosParamInit()
   getParam<bool>(control_nh, "hovering_approximate", hovering_approximate_, false);
   getParam<bool>(control_nh, "use_fc_for_att_control", use_fc_for_att_control_, true);
   getParam<bool>(control_nh, "linear_mode", linear_mode_, false);
+  getParam<double>(control_nh, "joint_position_lpf_rate", joint_position_lpf_rate_, 0.5);
+
+  if (joint_position_lpf_rate_ < 0.0)
+    joint_position_lpf_rate_ = 0.0;
+  else if (joint_position_lpf_rate_ > 1.0)
+    joint_position_lpf_rate_ = 1.0;
 
   std::cout << "torque_allocation_matrix_inv_pub_interval: " << torque_allocation_matrix_inv_pub_interval_ << std::endl;
+  std::cout << "joint_position_lpf_rate: " << joint_position_lpf_rate_ << std::endl;
 
   /* get tilt angle of each thruster */
   auto urdf_model = robot_model_->getUrdfModel();
@@ -135,7 +142,8 @@ void DeltaController::controlCore()
   robot_model_for_control_->setCogDesireOrientation(cog_desire_orientation);
   robot_model_for_control_->setExtraModuleMap(robot_model_->getExtraModuleMap());
   KDL::JntArray joint_positions = robot_model_->getJointPositions();
-  robot_model_for_control_->updateRobotModel(joint_positions);
+  KDL::JntArray filtered_joint_positions = lowPassFilterJointPositions(joint_positions);
+  robot_model_for_control_->updateRobotModel(filtered_joint_positions);
 
   /* calculate feedback term */
   calcAccFromCog();
@@ -152,6 +160,26 @@ void DeltaController::controlCore()
   first_run_ = false;
 }
 
+KDL::JntArray DeltaController::lowPassFilterJointPositions(const KDL::JntArray& joint_positions)
+{
+  if (first_run_ || filtered_joint_positions_.rows() != joint_positions.rows())
+  {
+    filtered_joint_positions_.resize(joint_positions.rows());
+    for (unsigned int i = 0; i < joint_positions.rows(); i++)
+      filtered_joint_positions_(i) = joint_positions(i);
+
+    return filtered_joint_positions_;
+  }
+
+  for (unsigned int i = 0; i < joint_positions.rows(); i++)
+  {
+    filtered_joint_positions_(i) =
+        (1.0 - joint_position_lpf_rate_) * filtered_joint_positions_(i) + joint_position_lpf_rate_ * joint_positions(i);
+  }
+
+  return filtered_joint_positions_;
+}
+
 void DeltaController::processGimbalAngles()
 {
   /* update robot model by calculated gimbal angle */
@@ -159,7 +187,7 @@ void DeltaController::processGimbalAngles()
   const auto& joint_index_map = robot_model_->getJointIndexMap();
   KDL::Rotation cog_desire_orientation = robot_model_->getCogDesireOrientation<KDL::Rotation>();
   robot_model_for_control_->setCogDesireOrientation(cog_desire_orientation);
-  KDL::JntArray gimbal_processed_joint = robot_model_->getJointPositions();
+  KDL::JntArray gimbal_processed_joint = filtered_joint_positions_;
   for (int i = 0; i < motor_on_rigid_frame_num_; i++)
   {
     std::string s = std::to_string(i + 1);

@@ -7,6 +7,7 @@ controller:
   torque_allocation_matrix_inv_pub_interval: 0.1
   use_fc_for_att_control: false
   linear_mode: true
+  joint_position_lpf_rate: 0.5
 
   xy:
     p_gain: 3.0
