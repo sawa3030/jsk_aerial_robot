@@ -102,20 +102,21 @@ void DeltaController::linearWrenchAllocation()
     weight1(2 * motor_on_rigid_frame_num_ + i, 2 * motor_on_rigid_frame_num_ + i) = 0.1;
   }
 
-  // Eigen::MatrixXd weight2 = Eigen::MatrixXd::Identity(dof, dof);
-  // for (int i = 0; i < motor_on_rigid_frame_num_; i++)
-  // {
-  //   weight2(2 * i + 0, 2 * i + 0) = 1.0 / 40000.0;
-  //   weight2(2 * i + 1, 2 * i + 1) = 1.0 / 40000.0;
-  // }
-  // for (int i = 0; i < motor_on_soft_frame_num_; i++)
-  // {
-  //   weight2(2 * motor_on_rigid_frame_num_ + i, 2 * motor_on_rigid_frame_num_ + i) = 1.0 / 40000.0;
-  // }
+  Eigen::MatrixXd weight2 = Eigen::MatrixXd::Identity(dof, dof);
+  for (int i = 0; i < motor_on_rigid_frame_num_; i++)
+  {
+    weight2(2 * i + 0, 2 * i + 0) = 1.0 / 40000.0;
+    weight2(2 * i + 1, 2 * i + 1) = 1.0 / 40000.0;
+  }
+  for (int i = 0; i < motor_on_soft_frame_num_; i++)
+  {
+    weight2(2 * motor_on_rigid_frame_num_ + i, 2 * motor_on_rigid_frame_num_ + i) = 1.0 / 1000.0;
+    // Since diff:magnitude is roughly 0.5:15 (= 1:30), add weight2 with about 1:900 of that ratio in the squared cost.
+  }
 
 
   Eigen::MatrixXd H = Eigen::MatrixXd::Zero(dof, dof);
-  H.diagonal() = 2.0 * weight1.diagonal();
+  H.diagonal() = 2.0 * weight1.diagonal() + 2.0 * weight2.diagonal();
   Eigen::VectorXd g = -2.0 * weight1 * prev_target_vectoring_f_;
   // Eigen::VectorXd g = Eigen::VectorXd::Zero(dof);
 
