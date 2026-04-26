@@ -5,7 +5,7 @@ DeltaRobotModel::DeltaRobotModel(bool init_with_rosparam, bool verbose, double f
   : RobotModel(init_with_rosparam, verbose, fc_f_min_thre, fc_t_min_thre, epsilon)
 {
   const int rotor_num = getRotorNum();
-  rotor_on_rigid_frame_num_ = 4;
+  rotor_on_rigid_frame_num_ = 3;
   rotor_on_soft_frame_num_ = rotor_num - rotor_on_rigid_frame_num_;
   links_rotation_from_cog_.resize(rotor_on_rigid_frame_num_);
   // current_joint_angles_.resize(getJointNum() - rotor_num);

@@ -22,12 +22,12 @@ class DeltaSoftLinkSolver:
         self.target_soft_joint_pub = rospy.Publisher("target_soft_joints_ctrl", JointState, queue_size=1)
 
         # --- リンク長パラメータ (単位: m) ---
-        # 剛体リンク長 (Link1~4)
+        # 剛体リンク長 (Link1~3)
         self.L_RIGID = 0.5275 
         
         # --- 柔軟リンク長 (URDF解析結果) ---
         
-        # 1. 始端: link4 -> soft_joint2
+        # 1. 始端: link3 -> soft_joint2
         self.L_S_START = 0.1175 
         
         # 2. 柔軟リンク間: soft_joint(N) -> soft_joint(N+1)
@@ -53,15 +53,13 @@ class DeltaSoftLinkSolver:
         return rospy.get_param('/use_sim_time', False)
 
     def joints_ctrl_cb(self, msg: JointState):
-        # 剛体関節(joint1, joint2, joint3)の取得
-        rigid_angles = [None, None, None] 
+        # 剛体関節(joint1, joint2)の取得
+        rigid_angles = [None, None]
         for name, pos in zip(msg.name, msg.position):
             if name == 'joint1':
                 rigid_angles[0] = pos
             elif name == 'joint2':
                 rigid_angles[1] = pos
-            elif name == 'joint3':
-                rigid_angles[2] = pos
         if None in rigid_angles:
             rospy.logwarn("Not all rigid joints found in joint states")
             return
@@ -81,15 +79,13 @@ class DeltaSoftLinkSolver:
         self.target_soft_joint_pub.publish(out_msg)
 
     def joint_states_cb(self, msg: JointState):
-        # 剛体関節(joint1, joint2, joint3)の取得
-        rigid_angles = [None, None, None] 
+        # 剛体関節(joint1, joint2)の取得
+        rigid_angles = [None, None]
         for name, pos in zip(msg.name, msg.position):
             if name == 'joint1':
                 rigid_angles[0] = pos
             elif name == 'joint2':
                 rigid_angles[1] = pos
-            elif name == 'joint3':
-                rigid_angles[2] = pos
         if None in rigid_angles:
             rospy.logwarn("Not all rigid joints found in joint states")
             return
@@ -110,9 +106,9 @@ class DeltaSoftLinkSolver:
 
     def solve_closed_loop_ik(self, rigid_joints):
         """
-        剛体関節(j1, j2, j3)を入力とし、ループが閉じる柔軟関節(s2, s3, s5, s6, s8, s9)を求める。
+        剛体関節(j1, j2)を入力とし、ループが閉じる柔軟関節(s2, s3, s5, s6, s8, s9)を求める。
         """
-        j1, j2, j3 = rigid_joints
+        j1, j2 = rigid_joints
 
         def objective_func(soft_joints):
             # 変数展開: 6つの関節
@@ -120,7 +116,7 @@ class DeltaSoftLinkSolver:
             
             x, y, theta = 0.0, 0.0, 0.0
             
-            # --- 1. Rigid Chain (Root -> Link4) ---
+            # --- 1. Rigid Chain (Root -> Link3) ---
             # Link1 (Root->J1)
             x += self.L_RIGID * math.cos(theta)
             y += self.L_RIGID * math.sin(theta)
@@ -131,17 +127,12 @@ class DeltaSoftLinkSolver:
             y += self.L_RIGID * math.sin(theta)
             theta += j2
             
-            # Link3 (J2->J3)
-            x += self.L_RIGID * math.cos(theta)
-            y += self.L_RIGID * math.sin(theta)
-            theta += j3
-            
-            # Link4 (J3->SoftStart)
+            # Link3 (J2->SoftStart)
             x += self.L_RIGID * math.cos(theta)
             y += self.L_RIGID * math.sin(theta)
 
             # --- 2. Soft Section 1 (s2, s3) ---
-            # Link4 -> s2
+            # Link3 -> s2
             x += self.L_S_START * math.cos(theta)
             y += self.L_S_START * math.sin(theta)
             theta += s2

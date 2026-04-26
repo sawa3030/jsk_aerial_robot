@@ -7,8 +7,8 @@
 
   <xacro:delta_module self="1" child="2" rotor_direction="1" rotor_tilt="0" battery="0"/>
   <xacro:delta_module self="2" child="3" rotor_direction="-1" rotor_tilt="0" battery="0"/>
-  <xacro:delta_module self="3" child="4" rotor_direction="1" rotor_tilt="0"  battery="0"/>
-  <xacro:delta_module self="4" child="4" rotor_direction="-1" rotor_tilt="0" battery="0"/>
+  <xacro:delta_module self="3" child="3" rotor_direction="1" rotor_tilt="0"  battery="0"/>
+  <!-- <xacro:delta_module self="4" child="4" rotor_direction="-1" rotor_tilt="0" battery="0"/> -->
 
   <!-- dummy root link for KDL -->
   <link name="root">
@@ -72,7 +72,7 @@
   <!-- 3 soft_airframe_1 -->
   <!-- soft_link -->
   <joint name="soft_joint1" type="fixed">
-    <parent link="link4"/>
+    <parent link="link3"/>
     <child link="soft_link1"/>
     <origin xyz="0.6 0 0" rpy="0 0 0"/>
   </joint>
@@ -187,7 +187,7 @@
   <!-- dummy_link -->
   <joint name="servo_joint1" type="fixed">
     <limit effort="5.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
-    <parent link="link4"/>
+    <parent link="link3"/>
     <child link="servo_link1"/>
     <origin xyz="0.5 0 0.01" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
@@ -196,7 +196,7 @@
 
   <joint name="servo_joint2" type="fixed">
     <limit effort="5.0" lower="${-pi/2}" upper="${pi/2}" velocity="0.5"/>
-    <parent link="link4"/>
+    <parent link="link3"/>
     <child link="servo_link2"/>
     <origin xyz="0.5 0 -0.01" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
@@ -306,15 +306,15 @@
 
 
   <!-- rotor -->
-  <joint name="rotor5" type="continuous">
+  <joint name="rotor4" type="continuous">
     <limit effort="0.0064" lower="0.0" upper="20.0" velocity="0.5"/>
     <parent link="gimbal_link5"/>
-    <child link="thrust5"/>
+    <child link="thrust4"/>
     <origin rpy="0 0 0" xyz="0.0735 0 0"/>
     <axis xyz="0 0 -1"/>
   </joint>
 
-  <link name="thrust5">
+  <link name="thrust4">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.0001"/>
@@ -330,14 +330,14 @@
       </geometry>
     </visual>
   </link>
-  <xacro:damping_factor link ="thrust5"/>
+  <xacro:damping_factor link ="thrust4"/>
 
-  <transmission name="rotor_tran5">
+  <transmission name="rotor_tran4">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="rotor5">
+    <joint name="rotor4">
       <hardwareInterface>RotorInterface</hardwareInterface>
     </joint>
-    <actuator name="rotor5">
+    <actuator name="rotor4">
       <hardwareInterface>RotorInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
@@ -546,15 +546,15 @@
 
 
   <!-- rotor -->
-  <joint name="rotor6" type="continuous">
+  <joint name="rotor5" type="continuous">
     <limit effort="0.0064" lower="0.0" upper="20.0" velocity="0.5"/>
     <parent link="gimbal_link6"/>
-    <child link="thrust6"/>
+    <child link="thrust5"/>
     <origin rpy="0 0 0" xyz="0.0735 0 0"/>
     <axis xyz="0 0 -1"/>
   </joint>
 
-  <link name="thrust6">
+  <link name="thrust5">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.0001"/>
@@ -570,14 +570,14 @@
       </geometry>
     </visual>
   </link>
-  <xacro:damping_factor link ="thrust6"/>
+  <xacro:damping_factor link ="thrust5"/>
 
-  <transmission name="rotor_tran6">
+  <transmission name="rotor_tran5">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="rotor6">
+    <joint name="rotor5">
       <hardwareInterface>RotorInterface</hardwareInterface>
     </joint>
-    <actuator name="rotor6">
+    <actuator name="rotor5">
       <hardwareInterface>RotorInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>

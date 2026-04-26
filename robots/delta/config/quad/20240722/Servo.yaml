@@ -17,9 +17,6 @@ servo_controller:
     controller2:
       id: 3
       name: joint2
-    controller3:
-      id: 5
-      name: joint3
 
   gimbals:
     no_real_state: false # true if there is no servo state from real machine
@@ -45,7 +42,4 @@ servo_controller:
       id: 4
       name: gimbal3
 
-    controller4:
-      id: 6
-      name: gimbal4
 
