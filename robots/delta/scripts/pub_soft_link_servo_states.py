@@ -133,7 +133,7 @@ class SoftJointToServoNode:
         servo_vals = servo_a + servo_b
 
         out = ServoControlCmd()
-        out.index = [8, 7, 9, 10, 12, 11, 13, 14]
+        out.index = [6, 5, 7, 8, 10, 9, 11, 12]
         out.angles = servo_vals
         self.pub.publish(out)
 

@@ -69,18 +69,18 @@ class BoxHoldDemoNode:
         r = rospy.Rate(self.update_hz)
 
         rospy.sleep(1.0)
-        self.positions = [self.joint1_position, self.joint2_position, self.joint1_position]
+        self.positions = [self.joint1_position, self.joint2_position]
         # self.call_add_extra_module()
 
         while not rospy.is_shutdown():
             joint_msg = JointState()
-            joint_msg.name = ["joint1", "joint2", "joint3"]
+            joint_msg.name = ["joint1", "joint2"]
             joint_msg.position = self.positions
             joint_msg.header.stamp = rospy.Time.now()
             self.joint_states_pub.publish(joint_msg)
             print("current position:", self.positions)
             self.positions[0] += 0.01
-            self.positions[2] += 0.01
+            self.positions[1] += 0.01
 
             # if self.positions[0] > 0.9:
             if self.positions[0] > 1.6:
