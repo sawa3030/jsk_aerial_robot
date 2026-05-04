@@ -54,7 +54,9 @@ namespace aerial_robot_model {
       const std::vector<int>& getLinkJointIndices() const { return link_joint_indices_; }
       const std::vector<double>& getLinkJointLowerLimits() const { return link_joint_lower_limits_; }
       const std::vector<double>& getLinkJointUpperLimits() const { return link_joint_upper_limits_; }
-      const double getLinkLength() const { return link_length_; }
+      const double getLinkLength() const { 
+        throw std::runtime_error("getLinkLength() is not implemented");
+      }
 
       // statics (static thrust, joint torque)
       virtual void calcJointTorque(const bool update_jacobian = true);

@@ -1,0 +1,33 @@
+servo_controller:
+
+  joints:
+    angle_sgn: 1
+    angle_scale: 0.00076699
+    zero_point_offset: 2047
+    torque_scale: 0.03483 # convert to N*m
+
+    # for simulation
+    simulation:
+      pid: {p: 50.0, i: 0.01, d: 2.0}
+      init_value: 0
+      type: effort_controllers/JointPositionController
+
+    controller2:
+      name: soft_joint2
+    controller3:
+      name: soft_joint3
+
+    controller5:
+      name: soft_joint5
+    controller6:
+      name: soft_joint6
+
+    controller8:
+      name: soft_joint8
+    controller9:
+      name: soft_joint9
+    
+    controller11:
+      name: soft_joint11
+    controller12:
+      name: soft_joint12
