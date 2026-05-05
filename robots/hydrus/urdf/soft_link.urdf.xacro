@@ -18,10 +18,9 @@
       i
       parent
       rotor_direction:=1
-      parent_to_soft_x:=0.147
-      parent_to_servo_x:=0.0
-      servo_z_offset:=0.0
-      servo_size_x:=0.05
+      parent_to_servo_x:=0.147
+      parent_to_servo_cog:=0.0567
+      servo_size_x:=0.096
       servo_size_y:=0.05
       servo_size_z:=0.05
       servo_mass:=0.141
@@ -30,11 +29,10 @@
       soft_l3:=0.1175
       soft_width:=0.03
       soft_height:=0.04
-      leg_length:=0.05
+      leg_length:=0.120
       leg_size_x:=0.02
       leg_size_y:=0.02
-      leg_mass:=0.005
-      gimbal_offset_x:=0.128
+      leg_mass:=0.04993
       rotor_offset_x:=0.0735
       gimbal_mesh:=package://hydrus/urdf/mesh/5inch_propeller_duct_right_v2.dae
       propeller_mesh:=package://hydrus/urdf/mesh/TriBlade_5045.dae">
@@ -49,30 +47,24 @@
     <joint name="servo_joint${i}" type="fixed">
       <parent link="${parent}"/>
       <child link="servo_link${i}"/>
-      <origin xyz="${parent_to_servo_x} 0 ${servo_z_offset}" rpy="0 0 0"/>
+      <origin xyz="${parent_to_servo_x} 0 0" rpy="0 0 0"/>
     </joint>
 
     <link name="servo_link${i}">
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
         <mass value="${servo_mass}"/>
         <inertia
-            ixx="0.000045" ixy="0.0" ixz="0.0"
-            iyy="0.000086" iyz="0.0"
-            izz="0.000084"/>
+            ixx="0.00006467" ixy="0.0" ixz="0.0"
+            iyy="0.00012455" iyz="0.0"
+            izz="0.00009760"/>
       </inertial>
       <visual>
         <geometry>
           <box size="${servo_size_x} ${servo_size_y} ${servo_size_z}"/>
         </geometry>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
       </visual>
-      <collision>
-        <geometry>
-          <box size="${servo_size_x} ${servo_size_y} ${servo_size_z}"/>
-        </geometry>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-      </collision>
     </link>
     <gazebo reference="servo_link${i}">
       <mu1>0.1</mu1>
@@ -82,9 +74,9 @@
 
     <!-- Three-segment soft continuum approximation. -->
     <joint name="soft_joint${s0}" type="fixed">
-      <parent link="${parent}"/>
+      <parent link="servo_link${i}"/>
       <child link="soft_link${s0}"/>
-      <origin xyz="${parent_to_soft_x} 0 0" rpy="0 0 0"/>
+      <origin xyz="${servo_size_x} 0 0" rpy="0 0 0"/>
     </joint>
 
     <joint name="soft_joint${s1}" type="revolute">
@@ -107,7 +99,7 @@
 
     <link name="soft_link${s0}">
       <inertial>
-        <origin xyz="${soft_l1 * 0.5} 0.000002 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l1 * 0.5} 0.000002 0" rpy="0 0 0"/>
         <mass value="0.059"/>
         <inertia
             ixx="0.00005433" ixy="0.00000033" ixz="0.0"
@@ -118,14 +110,8 @@
         <geometry>
           <box size="${soft_l1} ${soft_width} ${soft_height}"/>
         </geometry>
-        <origin xyz="${soft_l1 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l1 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
-      <collision>
-        <geometry>
-          <box size="${soft_l1} ${soft_width} ${soft_height}"/>
-        </geometry>
-        <origin xyz="${soft_l1 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
-      </collision>
     </link>
     <gazebo reference="soft_link${s0}">
       <mu1>0.1</mu1>
@@ -135,7 +121,7 @@
 
     <link name="soft_link${s1}">
       <inertial>
-        <origin xyz="${soft_l2 * 0.5} 0.000002 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l2 * 0.5} 0.000002 0" rpy="0 0 0"/>
         <mass value="0.118"/>
         <inertia
             ixx="0.00007941" ixy="0.00000218" ixz="0.0"
@@ -146,14 +132,8 @@
         <geometry>
           <box size="${soft_l2} ${soft_width} ${soft_height}"/>
         </geometry>
-        <origin xyz="${soft_l2 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l2 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
-      <collision>
-        <geometry>
-          <box size="${soft_l2} ${soft_width} ${soft_height}"/>
-        </geometry>
-        <origin xyz="${soft_l2 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
-      </collision>
     </link>
     <gazebo reference="soft_link${s1}">
       <mu1>0.1</mu1>
@@ -163,7 +143,7 @@
 
     <link name="soft_link${s2}">
       <inertial>
-        <origin xyz="${soft_l3 * 0.5} 0.0 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l3 * 0.5} 0.0 0" rpy="0 0 0"/>
         <mass value="0.059"/>
         <inertia
             ixx="0.00005433" ixy="0.00000033" ixz="0.0"
@@ -174,14 +154,8 @@
         <geometry>
           <box size="${soft_l3} ${soft_width} ${soft_height}"/>
         </geometry>
-        <origin xyz="${soft_l3 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
+        <origin xyz="${soft_l3 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
-      <collision>
-        <geometry>
-          <box size="${soft_l3} ${soft_width} ${soft_height}"/>
-        </geometry>
-        <origin xyz="${soft_l3 * 0.5} 0 ${soft_height * 0.5}" rpy="0 0 0"/>
-      </collision>
     </link>
     <gazebo reference="soft_link${s2}">
       <mu1>0.1</mu1>
@@ -193,17 +167,17 @@
     <joint name="leg_joint${l0}" type="fixed">
       <parent link="soft_link${s0}"/>
       <child link="leg${l0}"/>
-      <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      <origin xyz="0 0 -0.041" rpy="0 0 0"/>
     </joint>
 
     <link name="leg${l0}">
       <inertial>
-        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+        <origin xyz="0 0 -0.096" rpy="0 0 0"/>
         <mass value="${leg_mass}"/>
         <inertia
-            ixx="0.00001" ixy="0.0" ixz="0.0"
-            iyy="0.00001" iyz="0.0"
-            izz="0.00001"/>
+            ixx="0.00009073" ixy="0.0" ixz="0.0"
+            iyy="0.00005301" iyz="0.0"
+            izz="0.00003904"/>
       </inertial>
       <visual>
         <geometry>
@@ -228,17 +202,17 @@
     <joint name="leg_joint${l1}" type="fixed">
       <parent link="soft_link${s2}"/>
       <child link="leg${l1}"/>
-      <origin xyz="${soft_l3} 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      <origin xyz="${soft_l3} 0 -0.041" rpy="0 0 0"/>
     </joint>
 
     <link name="leg${l1}">
       <inertial>
-        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+        <origin xyz="0 0 -0.096" rpy="0 0 0"/>
         <mass value="${leg_mass}"/>
         <inertia
-            ixx="0.00001" ixy="0.0" ixz="0.0"
-            iyy="0.00001" iyz="0.0"
-            izz="0.00001"/>
+            ixx="0.00009073" ixy="0.0" ixz="0.0"
+            iyy="0.00005301" iyz="0.0"
+            izz="0.00003904"/>
       </inertial>
       <visual>
         <geometry>
@@ -285,14 +259,14 @@
     <joint name="gimbal_joint${i}" type="fixed">
       <parent link="soft_link${s2}"/>
       <child link="gimbal_link${i}"/>
-      <origin xyz="${gimbal_offset_x} 0 0" rpy="0 0 0"/>
+      <origin xyz="${soft_l3} 0 0" rpy="0 0 0"/>
       <axis xyz="1 0 0"/>
       <dynamics damping="0.9" friction="0.1"/>
     </joint>
 
     <link name="gimbal_link${i}">
       <inertial>
-        <origin xyz="0.0815 0 0" rpy="0 0 0"/>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
         <mass value="0.222"/>
         <inertia
             ixx="0.00022661" ixy="0.0" ixz="0.0"
@@ -300,7 +274,7 @@
             izz="0.000032533"/>
       </inertial>
       <visual>
-        <origin xyz="0.0815 0 0" rpy="0 0 0"/>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
         <geometry>
           <mesh filename="${gimbal_mesh}"/>
         </geometry>
@@ -313,7 +287,7 @@
     <xacro:damping_factor link="gimbal_link${i}"/>
 
     <joint name="rotor${i}" type="continuous">
-      <limit effort="0.0064" lower="0.0" upper="20.0" velocity="0.5"/>
+      <limit effort="0.0172" lower="0.0" upper="20.0" velocity="0.5"/>
       <parent link="gimbal_link${i}"/>
       <child link="thrust${i}"/>
       <origin xyz="${rotor_offset_x} 0 0" rpy="0 0 0"/>
