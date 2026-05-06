@@ -287,7 +287,7 @@
     <xacro:damping_factor link="gimbal_link${i}"/>
 
     <joint name="rotor${i}" type="continuous">
-      <limit effort="0.0172" lower="0.0" upper="20.0" velocity="0.5"/>
+      <limit effort="0.0064" lower="0.0" upper="20.0" velocity="0.5"/>
       <parent link="gimbal_link${i}"/>
       <child link="thrust${i}"/>
       <origin xyz="${rotor_offset_x} 0 0" rpy="0 0 0"/>
