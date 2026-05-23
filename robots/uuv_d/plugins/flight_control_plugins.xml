@@ -1,4 +1,7 @@
 <library path="lib/libuuv_d_controller_pluginlib">
+  <class name="aerial_robot_control/uuv_d_controller" type="aerial_robot_control::UUVDController" base_class_type="aerial_robot_control::ControlBase">
+    <description>Base pose-linear controller plugin for uuv_d</description>
+  </class>
   <class name="aerial_robot_control/hydrus_lqi_controller" type="aerial_robot_control::HydrusLQIController" base_class_type="aerial_robot_control::ControlBase">
     <description>LQI based controller for under-actuated hydrus</description>
   </class>

@@ -53,6 +53,7 @@ target_link_libraries(uuv_d_robot_model ${catkin_LIBRARIES})
 
 ### flight control plugin
 add_library(uuv_d_controller_pluginlib
+  src/uuv_d_controller.cpp
   src/hydrus_lqi_controller.cpp
   src/hydrus_tilted_lqi_controller.cpp)
 target_link_libraries(uuv_d_controller_pluginlib uuv_d_robot_model ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES})
