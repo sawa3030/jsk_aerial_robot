@@ -1,4 +1,4 @@
-<library path="lib/libhydrus_robot_model">
+<library path="lib/libuuv_d_robot_model">
 
   <class name="hydrus_robot_model" type="HydrusRobotModel" base_class_type="aerial_robot_model::RobotModel">
     <description>plugin for hydrus robot model </description>

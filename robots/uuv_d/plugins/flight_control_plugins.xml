@@ -1,4 +1,4 @@
-<library path="lib/libhydrus_controller_pluginlib">
+<library path="lib/libuuv_d_controller_pluginlib">
   <class name="aerial_robot_control/hydrus_lqi_controller" type="aerial_robot_control::HydrusLQIController" base_class_type="aerial_robot_control::ControlBase">
     <description>LQI based controller for under-actuated hydrus</description>
   </class>

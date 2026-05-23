@@ -20,7 +20,7 @@
         <include file="$(find realsense2_camera)/launch/multi_t265_odom.launch" >
           <arg name="throttle_rate" value="80.0"/> <!-- 80 hz -->
           <arg name="set_module_list" value="true" />
-          <arg name="module_list_file" value="$(find hydrus)/config/quad/old_model_tx2_rs_t265_201906/T265ModuleList.yaml" />
+          <arg name="module_list_file" value="$(find uuv_d)/config/quad/old_model_tx2_rs_t265_201906/T265ModuleList.yaml" />
           <arg name="reset_duration" value = "0.5" />
         </include>
         <!-- mocap -->
@@ -38,9 +38,9 @@
     </group>
 
     <!-- basic configuration for sensors (e.g. noise sigma) -->
-    <rosparam file="$(find hydrus)/config/sensors/imu/spinal.yaml" command="load" />
+    <rosparam file="$(find uuv_d)/config/sensors/imu/spinal.yaml" command="load" />
     <rosparam file="$(find aerial_robot_base)/config/sensors/gps/ublox_m8n.yaml" command="load" />
-    <rosparam file="$(find hydrus)/config/sensors/vo/realsense_t265.yaml" command="load" />
+    <rosparam file="$(find uuv_d)/config/sensors/vo/realsense_t265.yaml" command="load" />
     <rosparam file="$(find aerial_robot_base)/config/sensors/mocap.yaml" command="load" />
     <rosparam file="$(find aerial_robot_base)/config/sensors/altimeter/leddar_one.yaml" command="load" />
 

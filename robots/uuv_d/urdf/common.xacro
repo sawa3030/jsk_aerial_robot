@@ -47,7 +47,7 @@
       <xacro:if value="${old_version == 1}">
         <origin rpy="0 0 0" xyz="${link_length* 0.5} 0 0"/>
         <geometry>
-          <mesh filename="package://hydrus/urdf/mesh/ver1/link/${type}_link.dae"/>
+          <mesh filename="package://uuv_d/urdf/mesh/ver1/link/${type}_link.dae"/>
         </geometry>
       </xacro:if>
       <xacro:unless value="${old_version == 1}">
@@ -55,14 +55,14 @@
         <geometry>
           <xacro:if value="${tilt_mode == 1}">
             <xacro:if value="${prop_15inch == 1}">
-              <mesh filename="package://hydrus/urdf/mesh/ver2/link/tilt_${tilt_angle}deg_15inch_link${type}.dae"/>
+              <mesh filename="package://uuv_d/urdf/mesh/ver2/link/tilt_${tilt_angle}deg_15inch_link${type}.dae"/>
             </xacro:if>
             <xacro:unless value="${prop_15inch == 1}">
-              <mesh filename="package://hydrus/urdf/mesh/ver2/link/tilt_${tilt_angle}deg_link${type}.dae"/>
+              <mesh filename="package://uuv_d/urdf/mesh/ver2/link/tilt_${tilt_angle}deg_link${type}.dae"/>
             </xacro:unless>
           </xacro:if>
           <xacro:unless value="${tilt_mode == 1}">
-            <mesh filename="package://hydrus/urdf/mesh/ver2/link/link${type}.dae"/>
+            <mesh filename="package://uuv_d/urdf/mesh/ver2/link/link${type}.dae"/>
           </xacro:unless>
         </geometry>
       </xacro:unless>
@@ -90,7 +90,7 @@
 
   <xacro:macro name="standard_leg_old_version" params="parent self:=${self} *origin">
     <xacro:extra_module name = "leg${self}" parent = "${parent}" visible = "1"
-                        model_url = "package://hydrus/urdf/mesh/ver1/leg/standard_legs.dae" >
+                        model_url = "package://uuv_d/urdf/mesh/ver1/leg/standard_legs.dae" >
       <xacro:insert_block name="origin" />
       <inertial>
         <!-- short leg:
@@ -112,7 +112,7 @@
 
   <xacro:macro name="standard_leg_joint" params="parent self:=${self} *origin">
     <xacro:extra_module name = "leg${self}" parent = "${parent}" visible = "1"
-                        model_url = "package://hydrus/urdf/mesh/ver2/leg/joint_leg.dae" >
+                        model_url = "package://uuv_d/urdf/mesh/ver2/leg/joint_leg.dae" >
       <xacro:insert_block name="origin" />
       <inertial>
         <origin xyz="0.0 0.0005 -0.09521" rpy="0 0 0"/>
@@ -126,7 +126,7 @@
 
   <xacro:macro name="standard_leg_end" params="parent self:=${self} *origin">
     <xacro:extra_module name = "leg${self}" parent = "${parent}" visible = "1"
-                        model_url = "package://hydrus/urdf/mesh/ver2/leg/end_leg.dae" >
+                        model_url = "package://uuv_d/urdf/mesh/ver2/leg/end_leg.dae" >
       <xacro:insert_block name="origin" />
       <inertial>
         <origin xyz="0.0 0.0005 -0.09411" rpy="0 0 0"/>

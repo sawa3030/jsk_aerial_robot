@@ -8,9 +8,9 @@
     <arg name="robot_ns" value="$(arg robot_ns)" />
     <arg name="headless" value="$(arg headless)" />
     <arg name="need_joint_state" value="$(eval not rostest)"/>
-    <arg name="robot_model" value="$(find hydrus)/robots/quad/$(arg onboards_model)/robot.urdf.xacro" />
-    <arg name="rviz_config" value="$(find hydrus)/config/rviz_config" />
-    <arg name="rviz_init_pose" value="$(find hydrus)/config/quad/RvizInit.yaml" />
+    <arg name="robot_model" value="$(find uuv_d)/robots/quad/$(arg onboards_model)/robot.urdf.xacro" />
+    <arg name="rviz_config" value="$(find uuv_d)/config/rviz_config" />
+    <arg name="rviz_init_pose" value="$(find uuv_d)/config/quad/RvizInit.yaml" />
   </include >
 
 
@@ -21,14 +21,14 @@
                 '{name: [joint1, joint2, joint3],
                 position: [-1.5708, 1.5708, 1.5708]}'" />
 
-    <test test-name="hydrus_jacobian_test" pkg="hydrus" type="hydrus_jacobian_test" ns="$(arg robot_ns)" time-limit="10">
+    <test test-name="hydrus_jacobian_test" pkg="uuv_d" type="hydrus_jacobian_test" ns="$(arg robot_ns)" time-limit="10">
       <param name="rostest" value="$(arg rostest)" />
       <param name="delta" value="0.000001" />
     </test>
   </group>
 
   <group unless="$(arg rostest)">
-    <node name="hydrus_jacobian_test_node" pkg="hydrus" type="hydrus_jacobian_test" ns="$(arg robot_ns)" output="screen">
+    <node name="hydrus_jacobian_test_node" pkg="uuv_d" type="hydrus_jacobian_test" ns="$(arg robot_ns)" output="screen">
       <param name="rostest" value="$(arg rostest)" />
       <param name="delta" value="0.000001" />
       <param name="check_thrust_force" value="true" />

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(hydrus)
+project(uuv_d)
 
 add_compile_options(-std=c++17)
 
@@ -19,7 +19,7 @@ find_package(Eigen3 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include test
-  LIBRARIES hydrus_robot_model hydrus_controller_pluginlib hydrus_numerical_jacobians
+  LIBRARIES uuv_d_robot_model uuv_d_controller_pluginlib uuv_d_numerical_jacobians
   CATKIN_DEPENDS roscpp aerial_robot_msgs aerial_robot_control aerial_robot_model spinal eigen_conversions tf_conversions std_srvs
 )
 
@@ -46,34 +46,34 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(hydrus_robot_model
+add_library(uuv_d_robot_model
   src/hydrus_robot_model.cpp
   src/hydrus_tilted_robot_model.cpp)
-target_link_libraries(hydrus_robot_model ${catkin_LIBRARIES})
+target_link_libraries(uuv_d_robot_model ${catkin_LIBRARIES})
 
 ### flight control plugin
-add_library(hydrus_controller_pluginlib
+add_library(uuv_d_controller_pluginlib
   src/hydrus_lqi_controller.cpp
   src/hydrus_tilted_lqi_controller.cpp)
-target_link_libraries(hydrus_controller_pluginlib hydrus_robot_model ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES})
-add_dependencies(hydrus_controller_pluginlib aerial_robot_msgs_generate_messages_cpp spinal_generate_messages_cpp)
+target_link_libraries(uuv_d_controller_pluginlib uuv_d_robot_model ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES})
+add_dependencies(uuv_d_controller_pluginlib aerial_robot_msgs_generate_messages_cpp spinal_generate_messages_cpp)
 
 # test
 # pre-build test code
-add_library(hydrus_numerical_jacobians test/hydrus/numerical_jacobians.cpp)
-target_link_libraries(hydrus_numerical_jacobians hydrus_robot_model ${catkin_LIBRARIES})
+add_library(uuv_d_numerical_jacobians test/hydrus/numerical_jacobians.cpp)
+target_link_libraries(uuv_d_numerical_jacobians uuv_d_robot_model ${catkin_LIBRARIES})
 add_executable(hydrus_jacobian_test test/hydrus/jacobian_test.cpp)
-target_link_libraries(hydrus_jacobian_test hydrus_numerical_jacobians ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
+target_link_libraries(hydrus_jacobian_test uuv_d_numerical_jacobians ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
 
 
-install(DIRECTORY include/${PROJECT_NAME}/ test/${PROJECT_NAME}/
+install(DIRECTORY include/hydrus/ test/hydrus/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS hydrus_jacobian_test
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS hydrus_robot_model hydrus_controller_pluginlib hydrus_numerical_jacobians
+install(TARGETS uuv_d_robot_model uuv_d_controller_pluginlib uuv_d_numerical_jacobians
   DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
@@ -95,4 +95,3 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_subdirectory(test)
 endif()
-
