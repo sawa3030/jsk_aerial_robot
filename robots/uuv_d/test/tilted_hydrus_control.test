@@ -2,7 +2,7 @@
   <arg name="headless" default="False"/>
   <arg name="onboards_model" default="tilt_20deg_201907" />
   <arg name="robot_id" default=""/>
-  <arg name="robot_ns" value="hydrus$(arg robot_id)"/>
+  <arg name="robot_ns" value="uuv_d$(arg robot_id)"/>
 
   <include file="$(find uuv_d)/launch/bringup.launch">
     <arg name="real_machine" value="False" />

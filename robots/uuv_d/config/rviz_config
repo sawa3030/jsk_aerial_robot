@@ -58,49 +58,49 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        hydrus/bat1:
+        uuv_d/bat1:
           Value: true
-        hydrus/bat2:
+        uuv_d/bat2:
           Value: true
-        hydrus/cog:
+        uuv_d/cog:
           Value: true
-        hydrus/fc:
+        uuv_d/fc:
           Value: true
-        hydrus/gps:
+        uuv_d/gps:
           Value: true
-        hydrus/leddarone:
+        uuv_d/leddarone:
           Value: true
-        hydrus/leg1:
+        uuv_d/leg1:
           Value: true
-        hydrus/leg2:
+        uuv_d/leg2:
           Value: true
-        hydrus/leg3:
+        uuv_d/leg3:
           Value: true
-        hydrus/leg4:
+        uuv_d/leg4:
           Value: true
-        hydrus/leg5:
+        uuv_d/leg5:
           Value: true
-        hydrus/link1:
+        uuv_d/link1:
           Value: true
-        hydrus/link2:
+        uuv_d/link2:
           Value: true
-        hydrus/link3:
+        uuv_d/link3:
           Value: true
-        hydrus/link4:
+        uuv_d/link4:
           Value: true
-        hydrus/magnet:
+        uuv_d/magnet:
           Value: true
-        hydrus/pc:
+        uuv_d/pc:
           Value: true
-        hydrus/root:
+        uuv_d/root:
           Value: true
-        hydrus/thrust1:
+        uuv_d/thrust1:
           Value: true
-        hydrus/thrust2:
+        uuv_d/thrust2:
           Value: true
-        hydrus/thrust3:
+        uuv_d/thrust3:
           Value: true
-        hydrus/thrust4:
+        uuv_d/thrust4:
           Value: true
         world:
           Value: true
@@ -111,43 +111,43 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          hydrus/root:
-            hydrus/cog:
+          uuv_d/root:
+            uuv_d/cog:
               {}
-            hydrus/link1:
-              hydrus/bat1:
+            uuv_d/link1:
+              uuv_d/bat1:
                 {}
-              hydrus/leg1:
+              uuv_d/leg1:
                 {}
-              hydrus/link2:
-                hydrus/fc:
+              uuv_d/link2:
+                uuv_d/fc:
                   {}
-                hydrus/gps:
-                  hydrus/magnet:
+                uuv_d/gps:
+                  uuv_d/magnet:
                     {}
-                hydrus/leg2:
+                uuv_d/leg2:
                   {}
-                hydrus/link3:
-                  hydrus/leddarone:
+                uuv_d/link3:
+                  uuv_d/leddarone:
                     {}
-                  hydrus/leg3:
+                  uuv_d/leg3:
                     {}
-                  hydrus/link4:
-                    hydrus/bat2:
+                  uuv_d/link4:
+                    uuv_d/bat2:
                       {}
-                    hydrus/leg4:
+                    uuv_d/leg4:
                       {}
-                    hydrus/leg5:
+                    uuv_d/leg5:
                       {}
-                    hydrus/thrust4:
+                    uuv_d/thrust4:
                       {}
-                  hydrus/pc:
+                  uuv_d/pc:
                     {}
-                  hydrus/thrust3:
+                  uuv_d/thrust3:
                     {}
-                hydrus/thrust2:
+                uuv_d/thrust2:
                   {}
-              hydrus/thrust1:
+              uuv_d/thrust1:
                 {}
       Update Interval: 0
       Value: true
@@ -265,8 +265,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: hydrus/robot_description
-      TF Prefix: hydrus
+      Robot Description: uuv_d/robot_description
+      TF Prefix: uuv_d
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -290,7 +290,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /hydrus/trajectory
+      Topic: /uuv_d/trajectory
       Unreliable: false
       Value: true
   Enabled: true

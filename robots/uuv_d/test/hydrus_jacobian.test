@@ -1,7 +1,7 @@
 <launch>
   <arg name="headless" default="False"/>
   <arg name="rostest" default="True"/>
-  <arg name="robot_ns" default="hydrus"/>
+  <arg name="robot_ns" default="uuv_d"/>
   <arg name="onboards_model" default="old_model_tx2_zed_201810" />
 
   <include file="$(find aerial_robot_model)/launch/aerial_robot_model.launch" >

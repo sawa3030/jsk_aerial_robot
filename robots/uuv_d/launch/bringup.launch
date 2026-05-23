@@ -17,7 +17,7 @@
   <arg name="spawn_z" default="0.0"/>
   <arg name="spawn_yaw" default="0.0"/>
   <arg name="robot_id" default="" />
-  <arg name="robot_ns" value="hydrus$(arg robot_id)" />
+  <arg name="robot_ns" value="uuv_d$(arg robot_id)" />
   <arg name="config_dir" default="$(find uuv_d)/config/$(arg type)" />
   <arg name="mujoco" default="False" />
   <arg name="demo" default="True" />

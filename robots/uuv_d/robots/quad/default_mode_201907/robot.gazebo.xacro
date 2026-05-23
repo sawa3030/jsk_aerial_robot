@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot
-    xmlns:xacro="http://www.ros.org/wiki/xacro" name="hydrus" >
+    xmlns:xacro="http://www.ros.org/wiki/xacro" name="uuv_d" >
 
-  <xacro:arg name="robot_name" default="hydrus" />
+  <xacro:arg name="robot_name" default="uuv_d" />
 
   <!-- robot urdf -->
   <xacro:include filename="$(find uuv_d)/robots/quad/default_mode_201907/robot.urdf.xacro" />

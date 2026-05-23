@@ -3,7 +3,7 @@
 
   <arg name="real_machine" default="false" />
   <arg name="simulation" default="false" />
-  <arg name="robot_ns" default="hydrus" />
+  <arg name="robot_ns" default="uuv_d" />
 
   <group ns="$(arg robot_ns)">
 

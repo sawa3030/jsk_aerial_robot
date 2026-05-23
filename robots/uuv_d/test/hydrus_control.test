@@ -2,7 +2,7 @@
   <arg name="headless" default="False"/>
   <arg name="onboards_model" default="old_model_tx2_zed_201810" />
   <arg name="robot_id" default=""/>
-  <arg name="robot_ns" default="hydrus$(arg robot_id)"/>
+  <arg name="robot_ns" default="uuv_d$(arg robot_id)"/>
   <arg name="mujoco" default="false"/>
 
   <include file="$(find uuv_d)/launch/bringup.launch">
