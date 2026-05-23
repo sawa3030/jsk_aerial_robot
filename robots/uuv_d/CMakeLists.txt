@@ -60,13 +60,13 @@ add_dependencies(uuv_d_controller_pluginlib aerial_robot_msgs_generate_messages_
 
 # test
 # pre-build test code
-add_library(uuv_d_numerical_jacobians test/hydrus/numerical_jacobians.cpp)
+add_library(uuv_d_numerical_jacobians test/uuv_d/numerical_jacobians.cpp)
 target_link_libraries(uuv_d_numerical_jacobians uuv_d_robot_model ${catkin_LIBRARIES})
-add_executable(hydrus_jacobian_test test/hydrus/jacobian_test.cpp)
+add_executable(hydrus_jacobian_test test/uuv_d/jacobian_test.cpp)
 target_link_libraries(hydrus_jacobian_test uuv_d_numerical_jacobians ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
 
 
-install(DIRECTORY include/hydrus/ test/hydrus/
+install(DIRECTORY include/uuv_d/ test/uuv_d/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(TARGETS hydrus_jacobian_test

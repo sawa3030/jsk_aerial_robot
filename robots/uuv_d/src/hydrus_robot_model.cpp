@@ -1,4 +1,4 @@
-#include <hydrus/hydrus_robot_model.h>
+#include <uuv_d/hydrus_robot_model.h>
 
 using namespace aerial_robot_model::transformable;
 

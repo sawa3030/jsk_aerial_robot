@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <hydrus/hydrus_robot_model.h>
+#include <uuv_d/hydrus_robot_model.h>
 
 class HydrusTiltedRobotModel : public HydrusRobotModel {
 public:

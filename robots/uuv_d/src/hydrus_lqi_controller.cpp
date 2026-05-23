@@ -1,4 +1,4 @@
-#include <hydrus/hydrus_lqi_controller.h>
+#include <uuv_d/hydrus_lqi_controller.h>
 
 using namespace aerial_robot_control;
 

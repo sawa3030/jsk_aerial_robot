@@ -1,4 +1,4 @@
-#include <hydrus/hydrus_tilted_robot_model.h>
+#include <uuv_d/hydrus_tilted_robot_model.h>
 
 HydrusTiltedRobotModel::HydrusTiltedRobotModel(bool init_with_rosparam, bool verbose, double fc_t_min_thre, double epsilon):
   HydrusRobotModel(init_with_rosparam, verbose, fc_t_min_thre, 0, epsilon, 4)

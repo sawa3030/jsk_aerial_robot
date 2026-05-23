@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2016, JSK Lab
+ *  Copyright (c) 2020, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,26 +35,29 @@
 
 #pragma once
 
-#include <aerial_robot_control/control/under_actuated_lqi_controller.h>
-#include <hydrus/hydrus_robot_model.h>
+#include <aerial_robot_model/numerical_jacobians.h>
+#include <uuv_d/hydrus_robot_model.h>
 
-namespace aerial_robot_control
+class HydrusNumericalJacobian : public aerial_robot_model::NumericalJacobian
 {
-  class HydrusLQIController: public UnderActuatedLQIController
-  {
+public:
+  HydrusNumericalJacobian(ros::NodeHandle nh, ros::NodeHandle nhp, std::unique_ptr<aerial_robot_model::transformable::RobotModel> robot_model = std::make_unique<aerial_robot_model::transformable::RobotModel>(true));
+  virtual ~HydrusNumericalJacobian() = default;
 
-  public:
-    HydrusLQIController();
-    virtual ~HydrusLQIController() = default;
+  virtual bool checkJacobians() override;
 
-    void initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
-                    boost::shared_ptr<aerial_robot_model::RobotModel> robot_model,
-                    boost::shared_ptr<aerial_robot_estimation::StateEstimator> estimator,
-                    boost::shared_ptr<aerial_robot_navigation::BaseNavigator> navigator,
-                    double ctrl_loop_rate);
+  virtual bool checkThrsutForceJacobian(std::vector<int> joint_indices = std::vector<int>()) override;
+  virtual bool checkFeasibleControlRollPitchJacobian(std::vector<int> joint_indices = std::vector<int>());
 
-  protected:
+protected:
 
-    bool checkRobotModel() override;
-  };
+  bool check_feasible_control_roll_pitch_;
+  double feasible_control_roll_pitch_diff_thre_;
+
+  HydrusRobotModel& getHydrusRobotModel() const {return dynamic_cast<HydrusRobotModel&>(*robot_model_);}
+
+  //  numerical solution
+  virtual const Eigen::MatrixXd thrustForceNumericalJacobian(std::vector<int> joint_indices) override;
+  virtual const std::vector<Eigen::MatrixXd> feasibleControlRollPitchDistsNumericalJacobian(std::vector<int> joint_indices);
+
 };
