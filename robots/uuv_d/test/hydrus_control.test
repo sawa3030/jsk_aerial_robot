@@ -1,0 +1,42 @@
+<launch>
+  <arg name="headless" default="False"/>
+  <arg name="onboards_model" default="old_model_tx2_zed_201810" />
+  <arg name="robot_id" default=""/>
+  <arg name="robot_ns" default="hydrus$(arg robot_id)"/>
+  <arg name="mujoco" default="false"/>
+
+  <include file="$(find hydrus)/launch/bringup.launch">
+    <arg name="real_machine" value="False" />
+    <arg name="simulation" value="True" />
+    <arg name="robot_id" value="$(arg robot_id)"/>
+    <arg name="onboards_model" value="$(arg onboards_model)" />
+    <arg name="headless" value="$(arg headless)" />
+    <arg name="mujoco" value="$(arg mujoco)"/>
+    <arg name="demo" value="False" />
+  </include>
+
+  <!-- test codes -->
+  <test test-name="control_test" pkg="hydrus" type="flight_check.py"  name="flight_test"  ns="$(arg robot_ns)" time-limit="180" retry="3">
+    <rosparam>
+      init_form:
+         joint_names: ['joint1', 'joint2', 'joint3']
+         joint_angles: [1.57, 1.57, 1.57]
+         angle_thresh: 0.05
+         timeout: 20.0
+      takeoff:
+         timeout: 30.0
+         hold_time: 2.0
+      transform:
+         joint_names: ['joint1', 'joint2', 'joint3']
+         joint_trajectory: [[0, 0, 1.57], [1.57, 1.57, 1.57], [-1.57, 1.57, 1.57], [-1.57, -1.57, 1.57], [-1.57, -1.57, -1.57], [1.57, -1.57, -1.57], [1.57, 1.57, -1.57], [1.57, 1.57, 1.57]]
+         angle_thresh: 0.05
+         timeout: 20.0
+         hold_time: 2.0
+      stable_check:
+         pose_thresh: [0.3, 0.05, 0.45]
+    </rosparam>
+  </test>
+
+  <node name="task_task_trigger" pkg="rostopic" type="rostopic" args="pub -1 /task_start std_msgs/Empty" launch-prefix="bash -c 'sleep 5.0; $0 $@' "/>
+
+</launch>
