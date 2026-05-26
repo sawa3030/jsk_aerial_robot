@@ -1,12 +1,27 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soft_link_macro">
+  <material name="soft_link_material">
+    <color rgba="0.20 0.55 0.95 1.0"/>
+  </material>
+  <material name="servo_link_material">
+    <color rgba="0.95 0.55 0.20 1.0"/>
+  </material>
+  <material name="leg_link_material">
+    <color rgba="0.25 0.25 0.30 1.0"/>
+  </material>
+  <material name="gimbal_link_material">
+    <color rgba="0.20 0.70 0.40 1.0"/>
+  </material>
+  <material name="thrust_link_material">
+    <color rgba="0.90 0.25 0.25 1.0"/>
+  </material>
 
   <!--
     A macro for one soft-link module.
 
     Module i consists of:
-      - servo_link${i}: a single combined servo body corresponding to old servo_link(2*i-1) + servo_link(2*i)
       - soft_link${3*i-2}, soft_link${3*i-1}, soft_link${3*i}
+      - servo_link${i}: a single combined servo body corresponding to old servo_link(2*i-1) + servo_link(2*i)
       - leg${2*i-1}: attached at the root of soft_link${3*i-2}
       - leg${2*i}: attached at the tip of soft_link${3*i}
       - gimbal_link${i}
@@ -43,40 +58,11 @@
     <xacro:property name="l0" value="${2 * i - 1}" />
     <xacro:property name="l1" value="${2 * i}" />
 
-    <!-- Combined servo body at the root of this module. -->
-    <joint name="servo_joint${i}" type="fixed">
-      <parent link="${parent}"/>
-      <child link="servo_link${i}"/>
-      <origin xyz="${parent_to_servo_x} 0 0" rpy="0 0 0"/>
-    </joint>
-
-    <link name="servo_link${i}">
-      <inertial>
-        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
-        <mass value="${servo_mass}"/>
-        <inertia
-            ixx="0.00006467" ixy="0.0" ixz="0.0"
-            iyy="0.00012455" iyz="0.0"
-            izz="0.00009760"/>
-      </inertial>
-      <visual>
-        <geometry>
-          <box size="${servo_size_x} ${servo_size_y} ${servo_size_z}"/>
-        </geometry>
-        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
-      </visual>
-    </link>
-    <gazebo reference="servo_link${i}">
-      <mu1>0.1</mu1>
-      <mu2>0.1</mu2>
-    </gazebo>
-    <xacro:damping_factor link="servo_link${i}"/>
-
     <!-- Three-segment soft continuum approximation. -->
     <joint name="soft_joint${s0}" type="fixed">
-      <parent link="servo_link${i}"/>
+      <parent link="${parent}"/>
       <child link="soft_link${s0}"/>
-      <origin xyz="${servo_size_x} 0 0" rpy="0 0 0"/>
+      <origin xyz="${parent_to_servo_x} 0 0" rpy="0 0 0"/>
     </joint>
 
     <joint name="soft_joint${s1}" type="revolute">
@@ -110,6 +96,7 @@
         <geometry>
           <box size="${soft_l1} ${soft_width} ${soft_height}"/>
         </geometry>
+        <material name="soft_link_material"/>
         <origin xyz="${soft_l1 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
     </link>
@@ -132,6 +119,7 @@
         <geometry>
           <box size="${soft_l2} ${soft_width} ${soft_height}"/>
         </geometry>
+        <material name="soft_link_material"/>
         <origin xyz="${soft_l2 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
     </link>
@@ -154,6 +142,7 @@
         <geometry>
           <box size="${soft_l3} ${soft_width} ${soft_height}"/>
         </geometry>
+        <material name="soft_link_material"/>
         <origin xyz="${soft_l3 * 0.5} 0 0" rpy="0 0 0"/>
       </visual>
     </link>
@@ -162,6 +151,36 @@
       <mu2>0.1</mu2>
     </gazebo>
     <xacro:damping_factor link="soft_link${s2}"/>
+
+    <!-- Combined servo body after the soft-link chain. -->
+    <joint name="servo_joint${i}" type="fixed">
+      <parent link="soft_link${s2}"/>
+      <child link="servo_link${i}"/>
+      <origin xyz="${soft_l3} 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="servo_link${i}">
+      <inertial>
+        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
+        <mass value="${servo_mass}"/>
+        <inertia
+            ixx="0.00006467" ixy="0.0" ixz="0.0"
+            iyy="0.00012455" iyz="0.0"
+            izz="0.00009760"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${servo_size_x} ${servo_size_y} ${servo_size_z}"/>
+        </geometry>
+        <material name="servo_link_material"/>
+        <origin xyz="${parent_to_servo_cog} 0 0" rpy="0 0 0"/>
+      </visual>
+    </link>
+    <gazebo reference="servo_link${i}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="servo_link${i}"/>
 
     <!-- Leg attached at the root of soft_link${s0}: leg${l0} -->
     <joint name="leg_joint${l0}" type="fixed">
@@ -183,6 +202,7 @@
         <geometry>
           <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
         </geometry>
+        <material name="leg_link_material"/>
         <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
       </visual>
       <collision>
@@ -218,6 +238,7 @@
         <geometry>
           <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
         </geometry>
+        <material name="leg_link_material"/>
         <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
       </visual>
       <collision>
@@ -257,9 +278,9 @@
 
     <!-- Gimbal and rotor. -->
     <joint name="gimbal_joint${i}" type="fixed">
-      <parent link="soft_link${s2}"/>
+      <parent link="servo_link${i}"/>
       <child link="gimbal_link${i}"/>
-      <origin xyz="${soft_l3} 0 0" rpy="0 0 0"/>
+      <origin xyz="${servo_size_x} 0 0" rpy="0 0 0"/>
       <axis xyz="1 0 0"/>
       <dynamics damping="0.9" friction="0.1"/>
     </joint>
@@ -278,6 +299,7 @@
         <geometry>
           <mesh filename="${gimbal_mesh}"/>
         </geometry>
+        <material name="gimbal_link_material"/>
       </visual>
     </link>
     <gazebo reference="gimbal_link${i}">
@@ -308,6 +330,7 @@
         <geometry>
           <mesh filename="${propeller_mesh}"/>
         </geometry>
+        <material name="thrust_link_material"/>
       </visual>
     </link>
     <xacro:damping_factor link="thrust${i}"/>
