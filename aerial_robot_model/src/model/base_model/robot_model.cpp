@@ -21,9 +21,9 @@ namespace aerial_robot_model {
       getParamFromRos();
 
     gravity_.resize(6);
-    gravity_ <<  0, 0, 9.80665, 0, 0, 0;
+    gravity_ <<  0, 0, 4.9, 0, 0, 0;//無重力状態に変更
     gravity_3d_.resize(3);
-    gravity_3d_ << 0, 0, 9.80665;
+    gravity_3d_ << 0, 0, 4.9;//無重力状態に変更
 
     kinematicsInit();
     stabilityInit();

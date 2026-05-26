@@ -8,7 +8,7 @@ namespace agi {
  *
  * This is the gravity value used in the whole project.
  */
-static constexpr Scalar G = 9.8066;
+static constexpr Scalar G = 4.9;//無重力に変更
 
 
 /**

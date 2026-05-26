@@ -8,7 +8,7 @@
     <arg name="robot_ns" value="$(arg robot_ns)" />
     <arg name="headless" value="$(arg headless)" />
     <arg name="need_joint_state" value="$(eval not rostest)"/>
-    <arg name="robot_model" value="$(find uuv_d)/robots/quad/$(arg onboards_model)/robot.urdf.xacro" />
+    <arg name="robot_model" value="$(find uuv_d)/robots/quad/$(arg onboards_model)/robot.urdf" />
     <arg name="rviz_config" value="$(find uuv_d)/config/rviz_config" />
     <arg name="rviz_init_pose" value="$(find uuv_d)/config/quad/RvizInit.yaml" />
   </include >

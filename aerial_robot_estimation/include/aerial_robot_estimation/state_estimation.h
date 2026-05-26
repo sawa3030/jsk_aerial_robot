@@ -129,7 +129,8 @@ namespace aerial_robot_estimation
   static constexpr int EXPERIMENT_ESTIMATE = 1;
   static constexpr int GROUND_TRUTH = 2;
 
-  static constexpr float G = 9.797;
+  // static constexpr float G = 9.797;
+  static constexpr float G = 4.9;
 
   class StateEstimator: public boost::enable_shared_from_this<StateEstimator>
   {

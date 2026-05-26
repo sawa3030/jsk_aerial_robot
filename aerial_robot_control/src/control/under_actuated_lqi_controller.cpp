@@ -157,20 +157,33 @@ void UnderActuatedLQIController::sendFourAxisCommand()
   flight_command_data.angles[1] = target_pitch_;
   flight_command_data.angles[2] = candidate_yaw_term_;
   flight_command_data.base_thrust = target_base_thrust_;
+  //==追加：スラスターの出力値を確認するログ
+  std::stringstream ss;
+  for(int i=0;i<motor_num_;i++){
+    ss<<target_base_thrust_.at(i);
+    if(i != motor_num_ -1){
+      ss<<",";
+    }
+  }
+  ss<<"]";
+  ROS_INFO_STREAM_THROTTLE(1.0,ss.str());
   flight_cmd_pub_.publish(flight_command_data);
 }
 
 void UnderActuatedLQIController::controlCore()
 {
+  ROS_INFO_STREAM_THROTTLE(1.0, "Checking: controlCore is running!");
   PoseLinearController::controlCore();
 
   tf::Vector3 target_acc_w(pid_controllers_.at(X).result(),
                            pid_controllers_.at(Y).result(),
                            pid_controllers_.at(Z).result());
   tf::Vector3 target_acc_dash = (tf::Matrix3x3(tf::createQuaternionFromYaw(rpy_.z()))).inverse() * target_acc_w;
+//後でノルムでくくらないと行けないかも
 
-  target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
-  target_roll_ = -target_acc_dash.y() / aerial_robot_estimation::G;
+      target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
+      target_roll_ = -target_acc_dash.y() / aerial_robot_estimation::G;
+    
 
   Eigen::VectorXd target_thrust_z_term = Eigen::VectorXd::Zero(motor_num_);
   for(int i = 0; i < motor_num_; i++)
@@ -186,6 +199,9 @@ void UnderActuatedLQIController::controlCore()
   // feed-forward term for z
   Eigen::MatrixXd q_mat_inv = getQInv();
   double ff_acc_z = navigator_->getTargetAcc().z();
+  //追加　ｚ軸の目標加速度を確認
+  ROS_INFO_STREAM_THROTTLE(1.0, "Target Acc Z: " << ff_acc_z);
+
   Eigen::VectorXd ff_term = q_mat_inv.col(0) * ff_acc_z;
   target_thrust_z_term += ff_term;
 

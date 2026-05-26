@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="proto_type">
+<robot name="proto_type">
   <link name="base_link">
     <inertial>
       <origin xyz="-4.2558171182705e-06 1.1225964209836e-05 -0.215899999907217" rpy="0.0 -0.0 0.0"/>
@@ -8,14 +8,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/base_link.dae"/>
+        <mesh filename="package://proto_type/meshes/base_link.dae"/>
       </geometry>
       <material name="__unnamed_material_1"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/base_link.stl"/>
+        <mesh filename="package://proto_type/meshes/base_link.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -28,14 +28,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_0.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_0.dae"/>
       </geometry>
       <material name="__unnamed_material_2"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_0.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_0.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -48,14 +48,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_1.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_1.dae"/>
       </geometry>
       <material name="__unnamed_material_3"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_1.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_1.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -68,14 +68,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_2.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_2.dae"/>
       </geometry>
       <material name="__unnamed_material_4"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_2.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_2.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -88,14 +88,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_3.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_3.dae"/>
       </geometry>
       <material name="__unnamed_material_5"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_3.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_3.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -108,14 +108,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_4.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_4.dae"/>
       </geometry>
       <material name="__unnamed_material_6"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_4.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_4.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -128,14 +128,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_5.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_5.dae"/>
       </geometry>
       <material name="__unnamed_material_7"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_5.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_5.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -148,14 +148,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_6.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_6.dae"/>
       </geometry>
       <material name="__unnamed_material_8"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_6.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_6.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
@@ -168,14 +168,14 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_7.dae"/>
+        <mesh filename="package://proto_type/meshes/thruster_7.dae"/>
       </geometry>
       <material name="__unnamed_material_9"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_7.stl"/>
+        <mesh filename="package://proto_type/meshes/thruster_7.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>

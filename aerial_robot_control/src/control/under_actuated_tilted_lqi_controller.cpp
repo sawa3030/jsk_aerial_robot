@@ -62,8 +62,11 @@ void UnderActuatedTiltedLQIController::controlCore()
   tf::Vector3 target_acc_w(pid_controllers_.at(X).result(),
                            pid_controllers_.at(Y).result(),
                            pid_controllers_.at(Z).result());
+  ROS_INFO_STREAM_THROTTLE(1.0, 
+      "Acc Z: " << target_acc_w.z() << 
+      " | Acc Length: " << target_acc_w.length());
 
-  tf::Vector3 target_acc_dash = (tf::Matrix3x3(tf::createQuaternionFromYaw(rpy_.z()))).inverse() * target_acc_w;
+  tf::Vector3 target_acc_dash = (tf::Matrix3x3(tf::createQuaternionFromYaw(rpy_.z()))).inverse() * target_acc_w;//ここが問題？？
 
   target_pitch_ = atan2(target_acc_dash.x(), target_acc_dash.z());
   target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
@@ -76,8 +79,13 @@ void UnderActuatedTiltedLQIController::controlCore()
 
   Eigen::VectorXd f = robot_model_->getStaticThrust();
   Eigen::VectorXd g = robot_model_->getGravity();
-  Eigen::VectorXd allocate_scales = f / g.norm();
-  Eigen::VectorXd target_thrust_z_term = allocate_scales * target_acc_w.length();
+  Eigen::VectorXd allocate_scales = Eigen::VectorXd::Zero(f.size());
+  if(g.norm() < 1e-6)
+    allocate_scales = Eigen::VectorXd::Ones(allocate_scales.size());
+  else
+    allocate_scales = f / g.norm();
+  double sign = (target_acc_w.z()>=0.0)? 1.0: -1.0; 
+  Eigen::VectorXd target_thrust_z_term = allocate_scales * target_acc_w.length()*sign;
 
   // constraint z (also  I term)
   int index;

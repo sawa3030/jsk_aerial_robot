@@ -109,7 +109,9 @@ namespace aerial_robot_control
       {
         target_pitch_ = atan2(target_acc_dash.x(), target_acc_dash.z());
         target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
-        target_thrust_z_term = q_mat_inv_.col(0) * target_acc_w.length();
+        //変更　ｚ軸の目標加速度が負の場合は、長さも負にする
+        double sign = (target_acc_w.z()>=0.0)? 1.0: -1.0; 
+        target_thrust_z_term = q_mat_inv_.col(0) * target_acc_w.length()*sign;
       }
 
      // constraint z (also  I term)

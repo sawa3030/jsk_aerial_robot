@@ -7,7 +7,7 @@
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
       <magnetic_field>34 0 -36</magnetic_field>
-      <gravity>0 0 -9.8</gravity>
+      <gravity>0 0 -4.9</gravity>
     </physics>
 
     <spherical_coordinates>

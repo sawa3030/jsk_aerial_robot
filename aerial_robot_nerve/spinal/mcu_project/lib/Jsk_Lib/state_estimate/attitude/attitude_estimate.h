@@ -54,7 +54,7 @@ class AttitudeEstimate
 public:
   ~AttitudeEstimate(){}
 #ifdef SIMULATION
-  AttitudeEstimate(): acc_(0,0,9.8), mag_(1,0,0){}
+  AttitudeEstimate(): acc_(0,0,4.9), mag_(1,0,0){}//無重力に変更
 
   void init(ros::NodeHandle* nh)
   {

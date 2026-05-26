@@ -46,7 +46,7 @@ using namespace std;
 #define RadiansToCentiDegrees(x) (static_cast<float>(x) * RAD_TO_DEG * static_cast<float>(100))
 
 // acceleration due to gravity in m/s/s
-#define GRAVITY_MSS     9.80665f
+#define GRAVITY_MSS     4.9f //無重力に変更
 
 // radius of earth in meters
 #define RADIUS_OF_EARTH 6378100

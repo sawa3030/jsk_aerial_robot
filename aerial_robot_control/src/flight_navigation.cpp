@@ -1107,7 +1107,7 @@ void BaseNavigator::rosParamInit()
     land_descend_vel_ == -0.3;
   }
 
-  getParam<double>(nh, "takeoff_xy_pos_tolerance", takeoff_xy_pos_tolerance_, 0.3);
+  getParam<double>(nh, "takeoff_xy_pos_tolerance", takeoff_xy_pos_tolerance_, 0.3);//無重力状態のため、ここの誤差は大きくて構わない。
   getParam<double>(nh, "takeoff_z_pos_tolerance", takeoff_z_pos_tolerance_, 0.3);
   getParam<double>(nh, "hover_convergent_duration", hover_convergent_duration_, 1.0);
   getParam<double>(nh, "land_check_duration", land_check_duration_, 0.5);
