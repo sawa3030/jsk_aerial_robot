@@ -241,8 +241,15 @@ void SoftAirframeController::sendFourAxisCommand()
 
 void SoftAirframeController::jointStateCallback(const sensor_msgs::JointState& msg)
 {
-  gimbal_current_angle = msg.position.at(0); // todo: think a robust implementation
-  gimbal_update_time = ros::Time::now();
+  // if (msg.position.empty())
+  //   {
+  //     ROS_WARN_THROTTLE(1.0, "[SoftAirframeController] received joint_states with empty position; skip gimbal angle update");
+  //     return;
+  //   }
+
+  // gimbal_current_angle = msg.position.at(0); // todo: think a robust implementation
+  // gimbal_update_time = ros::Time::now();
+  return;
 }
 
 void SoftAirframeController::sendTorqueAllocationMatrixInv()

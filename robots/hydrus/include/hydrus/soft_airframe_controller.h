@@ -50,8 +50,8 @@ protected:
   bool hovering_approximate_;
 
   double gimbal_angle_diff_ = 0.0;
-  double gimbal_current_angle;
-  ros::Time gimbal_update_time;
+  // double gimbal_current_angle = 0.0;
+  // ros::Time gimbal_update_time;
 
   Eigen::VectorXd prev_target_vectoring_f_;
   OsqpEigen::Solver target_vectoring_qp_solver_;
