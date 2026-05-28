@@ -20,7 +20,7 @@
 
 
   <!-- flight controller -->
-  <xacro:extra_module name="fc_link" parent="servo_link3" visible="1" model_url="package://hydrus/urdf/mesh/ver2/flight_controller/spinal.dae">
+  <xacro:extra_module name="fc_link" parent="servo_link2" visible="1" model_url="package://hydrus/urdf/mesh/ver2/flight_controller/spinal.dae">
     <origin xyz="0.05 0 0.01" rpy="0 0 0"/>
     <inertial>
       <origin xyz="0.02700000 0.00000000 0.01130642" rpy="0 0 0"/>
@@ -45,7 +45,7 @@
   </xacro:extra_module>
 
   <!-- onboard computer -->
-  <xacro:extra_module name="vim4" parent="servo_link3" visible="1" model_url="package://hydrus/urdf/mesh/vim4.dae">
+  <xacro:extra_module name="vim4" parent="servo_link2" visible="1" model_url="package://hydrus/urdf/mesh/vim4.dae">
     <origin xyz="0.05 0 -0.01" rpy="0 0 0"/>
     <inertial>
       <origin xyz="0.00146548 0.00262274 0.01119251" rpy="0 0 0"/>
@@ -65,27 +65,27 @@
   <xacro:soft_link_module
       i="1"
       parent="root"
-      rotor_direction="1"
+      rotor_direction="-1"
       parent_to_servo_x="0.0" />
 
   <xacro:soft_link_module
       i="2"
       parent="gimbal_link1"
-      rotor_direction="-1" />
-
-  <!-- The third module has a slightly longer and larger servo body. -->
-  <xacro:soft_link_module
-      i="3"
-      parent="gimbal_link2"
       rotor_direction="1"
       servo_size_x="0.156"
       servo_size_y="0.06"
       servo_size_z="0.01"
       servo_mass="0.18" />
 
+  <!-- The third module has a slightly longer and larger servo body. -->
+  <xacro:soft_link_module
+      i="3"
+      parent="gimbal_link2"
+      rotor_direction="-1" />
+
   <xacro:soft_link_module
       i="4"
       parent="gimbal_link3"
-      rotor_direction="-1" />
+      rotor_direction="1" />
 
 </robot>
