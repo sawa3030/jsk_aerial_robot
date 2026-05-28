@@ -83,7 +83,7 @@
     </transmission>
 
   </xacro:macro>
-  <link name="thruster_0">
+  <link name="booster_0">
     <inertial>
       <origin xyz="-0.014292 -0.0143 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -103,7 +103,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_1">
+  <link name="booster_1">
     <inertial>
       <origin xyz="0.0143 -0.014292 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -123,7 +123,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_2">
+  <link name="booster_2">
     <inertial>
       <origin xyz="-0.0143 0.014292 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -143,7 +143,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_3">
+  <link name="booster_3">
     <inertial>
       <origin xyz="0.014292 0.0143 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -163,7 +163,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_4">
+  <link name="booster_4">
     <inertial>
       <origin xyz="0.014292 -0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -183,7 +183,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_5">
+  <link name="booster_5">
     <inertial>
       <origin xyz="0.204989569717696 -0.0142922441746005 -0.0177167300549156" rpy="0.0 -0.0 0.0"/>
       <mass value="0.0993924873705004"/>
@@ -203,7 +203,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_6">
+  <link name="booster_6">
     <inertial>
       <origin xyz="0.205 0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -223,7 +223,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="thruster_7">
+  <link name="booster_7">
     <inertial>
       <origin xyz="-0.014292 0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -243,59 +243,59 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <joint name="thruster_0" type="continuous">
+  <joint name="booster_0" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_0"/>
+    <child link="booster_0"/>
     <axis xyz="-0.49999886 -0.49999886  0.70710839"/>
     <origin xyz="0.10964 0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_1" type="continuous">
+  <joint name="booster_1" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_1"/>
+    <child link="booster_1"/>
     <axis xyz=" 0.49999886 -0.49999886  0.70710839"/>
     <origin xyz="-0.10964 0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_2" type="continuous">
+  <joint name="booster_2" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_2"/>
+    <child link="booster_2"/>
     <axis xyz="-0.49999886  0.49999886  0.70710839"/>
     <origin xyz="0.10964 -0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_3" type="continuous">
+  <joint name="booster_3" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_3"/>
+    <child link="booster_3"/>
     <axis xyz="0.49999886 0.49999886 0.70710839"/>
     <origin xyz="-0.10964 -0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_4" type="continuous">
+  <joint name="booster_4" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_4"/>
+    <child link="booster_4"/>
     <axis xyz=" 0.49999886 -0.49999886 -0.70710839"/>
     <origin xyz="-0.10964 0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_5" type="continuous">
+  <joint name="booster_5" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_5"/>
+    <child link="booster_5"/>
     <axis xyz="-0.49999886 -0.49999886 -0.70710839"/>
     <origin xyz="-0.10964 0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_6" type="continuous">
+  <joint name="booster_6" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_6"/>
+    <child link="booster_6"/>
     <axis xyz=" 0.49999886  0.49999886 -0.70710839"/>
     <origin xyz="-0.10964 -0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="thruster_7" type="continuous">
+  <joint name="booster_7" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
     <parent link="base_link"/>
-    <child link="thruster_7"/>
+    <child link="booster_7"/>
     <axis xyz="-0.49999886  0.49999886 -0.70710839"/>
     <origin xyz="0.10964 -0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
@@ -329,13 +329,13 @@
   <xacro:property name="min_t" value="-20.0" />
   <xacro:property name="max_t" value="20.0" />
 
-  <xacro:add_rotor_and_thrust id="1" parent="thruster_0" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/> 
-  <xacro:add_rotor_and_thrust id="2" parent="thruster_1" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="3" parent="thruster_2" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="4" parent="thruster_3" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="5" parent="thruster_4" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="6" parent="thruster_5" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="7" parent="thruster_6" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="8" parent="thruster_7" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/> 
+  <xacro:add_rotor_and_thrust id="1" parent="booster_0" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/> 
+  <xacro:add_rotor_and_thrust id="2" parent="booster_1" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
+  <xacro:add_rotor_and_thrust id="3" parent="booster_2" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
+  <xacro:add_rotor_and_thrust id="4" parent="booster_3" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
+  <xacro:add_rotor_and_thrust id="5" parent="booster_4" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
+  <xacro:add_rotor_and_thrust id="6" parent="booster_5" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
+  <xacro:add_rotor_and_thrust id="7" parent="booster_6" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
+  <xacro:add_rotor_and_thrust id="8" parent="booster_7" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/> 
 
 </robot>
