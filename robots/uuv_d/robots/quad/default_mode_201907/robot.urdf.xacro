@@ -19,9 +19,9 @@
     </joint>
   <link name="base_link">
     <inertial>
-      <origin xyz="-4.2558171182705e-06 1.1225964209836e-05 -0.215899999907217" rpy="0.0 -0.0 0.0"/>
-      <mass value="1.90859968353568"/>
-      <inertia ixx="0.0162419971330382" ixy="4.56271680930171e-05" ixz="-4.69435220066161e-11" iyy="0.0168438204899763" iyz="-1.78508266758785e-11" izz="0.0050226778184606"/>
+      <origin xyz="-4.2558e-06 1.1226e-05 -0.2159" rpy="0.0 -0.0 0.0"/>
+      <mass value="1.9086"/>
+      <inertia ixx="0.016242" ixy="4.5627e-05" ixz="-4.7038e-11" iyy="0.016844" iyz="-1.7865e-11" izz="0.0050227"/>
     </inertial>
     <visual>
       <geometry>
@@ -37,53 +37,7 @@
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="fc">
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.00001"/>
-        <inertia
-            ixx="0.000001" ixy="0.0" ixz="0.0"
-            iyy="0.000001" iyz="0.0"
-            izz="0.000001"/>
-      </inertial>
-    </link>
-    <joint name="fc_joint" type="fixed">
-      <child link="fc"/>
-      <parent link="base_link"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <axis xyz="0 0 1"/>
-    </joint>
-  <xacro:macro name="add_rotor_and_thrust" params="id parent min_thrust max_thrust direction">
-    
-    <link name="thrust${id}">
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.0001"/>
-        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00002"/>
-      </inertial>
-    </link>
-
-    <joint name="rotor${id}" type="continuous">
-      <limit effort="100.0" lower="${min_thrust}" upper="${max_thrust}" velocity="50.0"/>
-      <parent link="${parent}"/>
-      <child link="thrust${id}"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <axis xyz="0 0 ${direction}"/>
-    </joint>
-
-    <transmission name="rotor_tran${id}">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="rotor${id}">
-        <hardwareInterface>RotorInterface</hardwareInterface>
-      </joint>
-      <actuator name="actuator_rotor_${id}">
-        <hardwareInterface>RotorInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
-
-  </xacro:macro>
-  <link name="booster_0">
+  <link name="t1">
     <inertial>
       <origin xyz="-0.014292 -0.0143 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -91,19 +45,39 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_0.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t1.dae"/>
       </geometry>
       <material name="__unnamed_material_2"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_0.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t1.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_1">
+  <link name="thrust1">
+    <inertial>
+      <origin xyz="3.3307e-15 3.525e-15 -0.001" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0028342"/>
+      <inertia ixx="6.5251e-07" ixy="-1.0853e-21" ixz="1.8529e-22" iyy="6.5251e-07" iyz="-3.7058e-22" izz="1.3031e-06"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust1.dae"/>
+      </geometry>
+      <material name="__unnamed_material_3"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust1.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="t2">
     <inertial>
       <origin xyz="0.0143 -0.014292 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -111,19 +85,39 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_1.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t2.dae"/>
       </geometry>
-      <material name="__unnamed_material_3"/>
+      <material name="__unnamed_material_4"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_1.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t2.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_2">
+  <link name="thrust2">
+    <inertial>
+      <origin xyz="2.2204e-16 8.3267e-17 0.001" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0028342"/>
+      <inertia ixx="6.5251e-07" ixy="-3.5867e-21" ixz="-2.647e-22" iyy="6.5251e-07" iyz="-1.3235e-22" izz="1.3031e-06"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust2.dae"/>
+      </geometry>
+      <material name="__unnamed_material_5"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust2.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="t3">
     <inertial>
       <origin xyz="-0.0143 0.014292 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -131,19 +125,39 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_2.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t3.dae"/>
       </geometry>
-      <material name="__unnamed_material_4"/>
+      <material name="__unnamed_material_6"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_2.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t3.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_3">
+  <link name="thrust3">
+    <inertial>
+      <origin xyz="-2.22044604925031e-16 4.9960036108132e-16 0.00100000000000011" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.00283424938765202"/>
+      <inertia ixx="6.52506444943004e-07" ixy="5.12190235292835e-21" ixz="6.35274710440725e-22" iyy="6.52506444943007e-07" iyz="-2.64697796016969e-23" izz="1.30312339029424e-06"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust3.dae"/>
+      </geometry>
+      <material name="__unnamed_material_7"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust3.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="t4">
     <inertial>
       <origin xyz="0.014292 0.0143 0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -151,19 +165,39 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_3.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t4.dae"/>
       </geometry>
-      <material name="__unnamed_material_5"/>
+      <material name="__unnamed_material_8"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_3.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t4.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_4">
+  <link name="thrust4">
+    <inertial>
+      <origin xyz="-3.33066907387547e-16 -2.4008572907519e-15 0.000999999999999834" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.00283424938765202"/>
+      <inertia ixx="6.52506444943007e-07" ixy="1.87935435172048e-21" ixz="-1.19114008207636e-22" iyy="6.52506444943005e-07" iyz="3.97046694025453e-22" izz="1.30312339029424e-06"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust4.dae"/>
+      </geometry>
+      <material name="__unnamed_material_9"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust4.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="t5">
     <inertial>
       <origin xyz="0.014292 -0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
       <mass value="0.099392"/>
@@ -171,171 +205,305 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_4.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t5.dae"/>
       </geometry>
-      <material name="__unnamed_material_6"/>
+      <material name="__unnamed_material_10"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_4.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t5.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_5">
+  <link name="thrust5"/>
+  <link name="t6">
     <inertial>
-      <origin xyz="0.204989569717696 -0.0142922441746005 -0.0177167300549156" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.0993924873705004"/>
-      <inertia ixx="7.91363117744372e-05" ixy="6.13947103624969e-08" ixz="3.80401853538402e-06" iyy="7.91541243411415e-05" iyz="3.781720562086e-06" izz="7.67197078219348e-05"/>
+      <origin xyz="-0.0143000152087087 -0.0142922441739046 -0.0177167300533436" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0993924873705024"/>
+      <inertia ixx="7.91363117744376e-05" ixy="6.13947103617769e-08" ixz="3.80401853538391e-06" iyy="7.91541243411415e-05" iyz="3.78172056208575e-06" izz="7.67197078219357e-05"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_5.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t6.dae"/>
       </geometry>
-      <material name="__unnamed_material_7"/>
+      <material name="__unnamed_material_11"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_5.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t6.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_6">
+  <link name="thrust6">
     <inertial>
-      <origin xyz="0.205 0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.099392"/>
-      <inertia ixx="7.9154e-05" ixy="-6.1395e-08" ixz="3.7817e-06" iyy="7.9136e-05" iyz="-3.804e-06" izz="7.672e-05"/>
+      <origin xyz="4.05231403988182e-14 2.86715096109447e-14 0.0010000000000413" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.00283424938765202"/>
+      <inertia ixx="6.52506444942999e-07" ixy="-6.07481441858944e-21" ixz="-1.98523347012727e-22" iyy="6.52506444943014e-07" iyz="-2.38228016415272e-22" izz="1.30312339029425e-06"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_6.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust6.dae"/>
       </geometry>
-      <material name="__unnamed_material_8"/>
+      <material name="__unnamed_material_12"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_6.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust6.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <link name="booster_7">
+  <link name="t7">
     <inertial>
-      <origin xyz="-0.014292 0.0143 -0.017717" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.099392"/>
-      <inertia ixx="7.9154e-05" ixy="-6.1395e-08" ixz="3.7817e-06" iyy="7.9136e-05" iyz="-3.804e-06" izz="7.672e-05"/>
+      <origin xyz="0.204997340751786 0.0143000152101347 -0.0177167300564932" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0993924873705016"/>
+      <inertia ixx="7.91541243411232e-05" ixy="-6.13947103569633e-08" ixz="3.78172056208173e-06" iyy="7.91363117744202e-05" iyz="-3.80401853537825e-06" izz="7.67197078219122e-05"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_7.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t7.dae"/>
       </geometry>
-      <material name="__unnamed_material_9"/>
+      <material name="__unnamed_material_13"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thruster_7.stl"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t7.stl"/>
       </geometry>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
     </collision>
   </link>
-  <joint name="booster_0" type="continuous">
-    <limit effort="0.0" velocity="0.0"/>
+  <link name="thrust7">
+    <inertial>
+      <origin xyz="0.189044325927537 -1.16573417585641e-14 0.110144792463057" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.00283424938765199"/>
+      <inertia ixx="1.14046915395644e-06" ixy="-2.35978085149128e-20" ixz="-2.81725401403391e-07" iyy="6.52506444942998e-07" iyz="5.05572790392411e-21" izz="8.15160681280793e-07"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust7.dae"/>
+      </geometry>
+      <material name="__unnamed_material_14"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust7.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="t8">
+    <inertial>
+      <origin xyz="-0.20498956971677 0.0142922441793721 -0.0177167300578815" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0993924873705009"/>
+      <inertia ixx="7.91363117743876e-05" ixy="6.13947103530806e-08" ixz="-3.80401853537279e-06" iyy="7.91541243410908e-05" iyz="-3.78172056207681e-06" izz="7.67197078218827e-05"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t8.dae"/>
+      </geometry>
+      <material name="__unnamed_material_15"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t8.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <link name="thrust8"/>
+  <link name="fc">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+      <mass value="0.0"/>
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/fc.dae"/>
+      </geometry>
+      <material name="__unnamed_material_16"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/fc.stl"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
+    </collision>
+  </link>
+  <joint name="l1" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_0"/>
-    <axis xyz="-0.49999886 -0.49999886  0.70710839"/>
+    <child link="t1"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="0.10964 0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_1" type="continuous">
+  <joint name="rotor1" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
+    <parent link="t1"/>
+    <child link="thrust1"/>
+    <axis xyz=" 0.  0. -1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="-2.4569 -0.42052999999999996 -0.32175"/>
+  </joint>
+  <joint name="l2" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_1"/>
-    <axis xyz=" 0.49999886 -0.49999886  0.70710839"/>
+    <child link="t2"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="-0.10964 0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_2" type="continuous">
+  <joint name="rotor2" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
+    <parent link="t2"/>
+    <child link="thrust2"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.68472 0.42053 0.3217499999999999"/>
+  </joint>
+  <joint name="l3" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_2"/>
-    <axis xyz="-0.49999886  0.49999886  0.70710839"/>
+    <child link="t3"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="0.10964 -0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_3" type="continuous">
+  <joint name="rotor3" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
+    <parent link="t3"/>
+    <child link="thrust3"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="-0.68472 -0.42053 0.3217499999999999"/>
+  </joint>
+  <joint name="l4" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_3"/>
-    <axis xyz="0.49999886 0.49999886 0.70710839"/>
+    <child link="t4"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="-0.10964 -0.096917 -0.39159" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_4" type="continuous">
+  <joint name="rotor4" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
+    <parent link="t4"/>
+    <child link="thrust4"/>
+    <axis xyz=" 0.  0. -1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="-0.68472 0.42053 -0.3217499999999999"/>
+  </joint>
+  <joint name="l5" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_4"/>
+    <child link="t5"/>
     <axis xyz=" 0.49999886 -0.49999886 -0.70710839"/>
-    <origin xyz="-0.10964 0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
+    <origin xyz="-0.109644792462478 0.0969168703997903 -0.0402142442010311" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_5" type="continuous">
+  <joint name="rotor5" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
-    <parent link="base_link"/>
-    <child link="booster_5"/>
-    <axis xyz="-0.49999886 -0.49999886 -0.70710839"/>
-    <origin xyz="-0.10964 0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
+    <parent link="t5"/>
+    <child link="thrust5"/>
+    <axis xyz=" 0.  0. -1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="2.4569 -0.42052999999999996 0.32175"/>
   </joint>
-  <joint name="booster_6" type="continuous">
-    <limit effort="0.0" velocity="0.0"/>
+  <joint name="l6" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_6"/>
-    <axis xyz=" 0.49999886  0.49999886 -0.70710839"/>
+    <child link="t6"/>
+    <axis xyz="0. 0. 0."/>
+    <origin xyz="0.10964 0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
+  </joint>
+  <joint name="rotor6" type="continuous">
+    <limit effort="0.0" velocity="0.0"/>
+    <parent link="t6"/>
+    <child link="thrust6"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="2.4569 0.42052999999999996 -0.32175"/>
+  </joint>
+  <joint name="l7" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
+    <parent link="base_link"/>
+    <child link="t7"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="-0.10964 -0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
-  <joint name="booster_7" type="continuous">
+  <joint name="rotor7" type="continuous">
     <limit effort="0.0" velocity="0.0"/>
+    <parent link="t7"/>
+    <child link="thrust7"/>
+    <axis xyz=" 0.  0. -1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="-2.4569 -0.42052999999999996 -0.32175"/>
+  </joint>
+  <joint name="l8" type="fixed">
+    <limit effort="0.0" velocity="0.0" lower="-20.0" upper="20.0"/>
     <parent link="base_link"/>
-    <child link="booster_7"/>
-    <axis xyz="-0.49999886  0.49999886 -0.70710839"/>
+    <child link="t8"/>
+    <axis xyz="0. 0. 0."/>
     <origin xyz="0.10964 -0.096917 -0.040214" rpy="0.0 -0.0 0.0"/>
   </joint>
+  <joint name="rotor8" type="continuous">
+    <limit effort="0.0" velocity="0.0"/>
+    <parent link="t8"/>
+    <child link="thrust8"/>
+    <axis xyz="0. 0. 1."/>
+    <origin xyz="0.0 0.0 0.0" rpy="-2.4569 0.42052999999999996 0.32175"/>
+  </joint>
+  <joint name="fc" type="fixed">
+    <limit effort="0.0" velocity="0.0"/>
+    <parent link="base_link"/>
+    <child link="fc"/>
+    <axis xyz="0. 0. 0."/>
+    <origin xyz="0.0070466 0.0026714 -0.1145" rpy="-0.36239265358979345 1.5707926535897934 3.141592653589793"/>
+  </joint>
   <material name="__unnamed_material_1">
-    <color rgba="0.75294118 0.75294118 0.75294118 1.        "/>
+    <color rgba="0.75294 0.75294 0.75294 1.     "/>
   </material>
   <material name="__unnamed_material_2">
     <color rgba="0.79216 0.81961 0.93333 1.     "/>
   </material>
   <material name="__unnamed_material_3">
-    <color rgba="0.79216 0.81961 0.93333 1.     "/>
+    <color rgba="1. 1. 1. 1."/>
   </material>
   <material name="__unnamed_material_4">
     <color rgba="0.79216 0.81961 0.93333 1.     "/>
   </material>
   <material name="__unnamed_material_5">
-    <color rgba="0.79216 0.81961 0.93333 1.     "/>
+    <color rgba="1. 1. 1. 1."/>
   </material>
   <material name="__unnamed_material_6">
     <color rgba="0.79216 0.81961 0.93333 1.     "/>
   </material>
   <material name="__unnamed_material_7">
-    <color rgba="0.79215686 0.81960784 0.93333333 1.        "/>
+    <color rgba="1. 1. 1. 1."/>
   </material>
   <material name="__unnamed_material_8">
     <color rgba="0.79216 0.81961 0.93333 1.     "/>
   </material>
   <material name="__unnamed_material_9">
+    <color rgba="1. 1. 1. 1."/>
+  </material>
+  <material name="__unnamed_material_10">
     <color rgba="0.79216 0.81961 0.93333 1.     "/>
   </material>
-  <xacro:property name="min_t" value="-20.0" />
-  <xacro:property name="max_t" value="20.0" />
-
-  <xacro:add_rotor_and_thrust id="1" parent="booster_0" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/> 
-  <xacro:add_rotor_and_thrust id="2" parent="booster_1" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="3" parent="booster_2" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="4" parent="booster_3" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="5" parent="booster_4" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="6" parent="booster_5" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/>
-  <xacro:add_rotor_and_thrust id="7" parent="booster_6" min_thrust="${min_t}" max_thrust="${max_t}" direction="1"/>
-  <xacro:add_rotor_and_thrust id="8" parent="booster_7" min_thrust="${min_t}" max_thrust="${max_t}" direction="-1"/> 
-
-</robot>
+  <material name="__unnamed_material_11">
+    <color rgba="0.79215686 0.81960784 0.93333333 1.        "/>
+  </material>
+  <material name="__unnamed_material_12">
+    <color rgba="1. 1. 1. 1."/>
+  </material>
+  <material name="__unnamed_material_13">
+    <color rgba="0.79215686 0.81960784 0.93333333 1.        "/>
+  </material>
+  <material name="__unnamed_material_14">
+    <color rgba="1. 1. 1. 1."/>
+  </material>
+  <material name="__unnamed_material_15">
+    <color rgba="0.79215686 0.81960784 0.93333333 1.        "/>
+  </material>
+  <material name="__unnamed_material_16">
+    <color rgba="1. 1. 1. 1."/>
+  </material>
+</robot> 
