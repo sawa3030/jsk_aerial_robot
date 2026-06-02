@@ -1,0 +1,7 @@
+package:
+  ["uuv_d"]
+
+uuv_d:
+  input: ["robots/quad/default_mode_201907/robot.urdf.xacro"]
+  filename: ["quad/default_mode_201907"]
+  meshdir: "urdf/mesh"

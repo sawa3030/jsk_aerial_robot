@@ -1,0 +1,5 @@
+<library path="lib/libuuv_d_controller_pluginlib">
+  <class name="aerial_robot_control/uuv_d_controller" type="aerial_robot_control::UUVDController" base_class_type="aerial_robot_control::ControlBase">
+    <description>Base pose-linear controller plugin for uuv_d</description>
+  </class>
+</library>
