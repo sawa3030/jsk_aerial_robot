@@ -4,7 +4,7 @@
   <arg name="real_machine" default="True" />
   <arg name="simulation" default="False" />
   <arg name="type" default="quad" />
-  <arg name="onboards_model" default="default_mode_201907" />
+  <arg name="onboards_model" default="prototype_202605" />
   <arg name="estimate_mode"  default= "1" />
   <arg name="sim_estimate_mode"  default= "2" />
   <arg name="headless" default="True" />
@@ -20,7 +20,7 @@
   <arg name="spawn_yaw" default="0.0"/>
   <arg name="robot_id" default="" />
   <arg name="robot_ns" value="uuv_d$(arg robot_id)" />
-  <arg name="config_dir" default="$(find uuv_d)/config/$(arg type)" />
+  <arg name="config_dir" default="$(find uuv_d)/config" />
   <arg name="mujoco" default="False" />
   <arg name="demo" default="True" />
 
@@ -73,7 +73,7 @@
   <arg name="description_mode" value="gazebo" if="$(arg simulation)" />
   <include file="$(find aerial_robot_model)/launch/aerial_robot_model.launch" >
     <arg name="headless" value="$(arg headless)" />
-    <arg name="robot_model" value="$(find uuv_d)/robots/$(arg type)/$(arg onboards_model)/robot.$(arg description_mode).xacro" unless="$(arg direct_model)"/>
+    <arg name="robot_model" value="$(find uuv_d)/robots/$(arg onboards_model)/robot.$(arg description_mode).xacro" unless="$(arg direct_model)"/>
     <arg name="robot_model" value="$(arg direct_model_name)" if="$(arg direct_model)"/>
     <arg name="robot_ns" value="$(arg robot_ns)" />
     <arg name="rviz_config" value="$(find uuv_d)/config/rviz_config" />
@@ -82,7 +82,7 @@
   </include>
 
   ###########  Sensors ###########
-  <include file="$(find uuv_d)/launch/includes/$(arg onboards_model)/sensors.launch.xml" >
+  <include file="$(find uuv_d)/launch/includes/sensors.launch.xml" >
     <arg name="real_machine" value="$(arg real_machine)" />
     <arg name="simulation" value="$(arg simulation)" />
     <arg name="robot_ns" value="$(arg robot_ns)" />
@@ -112,7 +112,7 @@
   <include file="$(find aerial_robot_simulation)/launch/mujoco.launch" if="$(eval arg('simulation') and not arg('real_machine') and arg('mujoco'))" >
     <arg name="robot_ns" value="$(arg robot_ns)" />
     <arg name="headless" value="$(arg headless)"/>
-    <arg name="mujoco_model" value="$(find uuv_d)/mujoco/$(arg type)/$(arg onboards_model)/robot.xml"/>
+    <arg name="mujoco_model" value="$(find uuv_d)/mujoco/$(arg onboards_model)/robot.xml"/>
   </include>
 
   ########## Simple Demo #########

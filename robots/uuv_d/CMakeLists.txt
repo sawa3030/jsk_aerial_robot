@@ -46,35 +46,15 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(uuv_d_robot_model
-  src/hydrus_robot_model.cpp
-  src/hydrus_tilted_robot_model.cpp)
-target_link_libraries(uuv_d_robot_model ${catkin_LIBRARIES})
 
 ### flight control plugin
 add_library(uuv_d_controller_pluginlib
   src/uuv_d_controller.cpp)
-target_link_libraries(uuv_d_controller_pluginlib uuv_d_robot_model ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES})
+target_link_libraries(uuv_d_controller_pluginlib ${catkin_LIBRARIES} ${EIGEN3_LIBRARIES})
 add_dependencies(uuv_d_controller_pluginlib aerial_robot_msgs_generate_messages_cpp spinal_generate_messages_cpp)
-
-# test
-# pre-build test code
-add_library(uuv_d_numerical_jacobians test/uuv_d/numerical_jacobians.cpp)
-target_link_libraries(uuv_d_numerical_jacobians uuv_d_robot_model ${catkin_LIBRARIES})
-add_executable(hydrus_jacobian_test test/uuv_d/jacobian_test.cpp)
-target_link_libraries(hydrus_jacobian_test uuv_d_numerical_jacobians ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
-
 
 install(DIRECTORY include/uuv_d/ test/uuv_d/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-install(TARGETS hydrus_jacobian_test
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(TARGETS uuv_d_robot_model uuv_d_controller_pluginlib uuv_d_numerical_jacobians
-  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
 
 install(DIRECTORY config scripts plugins launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
