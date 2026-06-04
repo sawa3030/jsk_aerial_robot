@@ -134,13 +134,6 @@ void UUVDController::setAttitudeGains()
   spinal::RollPitchYawTerms rpy_gain_msg; //for rosserial
   /* to flight controller via rosserial scaling by 1000 */
   rpy_gain_msg.motors.resize(1);
-  // rpy_gain_msg.motors.at(0).roll_p = pid_controllers_.at(ROLL).getPGain() * 1000;
-  // rpy_gain_msg.motors.at(0).roll_i = pid_controllers_.at(ROLL).getIGain() * 1000;
-  // rpy_gain_msg.motors.at(0).roll_d = pid_controllers_.at(ROLL).getDGain() * 1000;
-  // rpy_gain_msg.motors.at(0).pitch_p = pid_controllers_.at(PITCH).getPGain() * 1000;
-  // rpy_gain_msg.motors.at(0).pitch_i = pid_controllers_.at(PITCH).getIGain() * 1000;
-  // rpy_gain_msg.motors.at(0).pitch_d = pid_controllers_.at(PITCH).getDGain() * 1000;
-  // rpy_gain_msg.motors.at(0).yaw_d = pid_controllers_.at(YAW).getDGain() * 1000;
   rpy_gain_msg.motors.at(0).roll_p = 0.0;
   rpy_gain_msg.motors.at(0).roll_i = 0.0;
   rpy_gain_msg.motors.at(0).roll_d = 0.0;
