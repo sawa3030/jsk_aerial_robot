@@ -22,8 +22,7 @@
   <link name="base_link">
     <inertial>
       <origin xyz="-4.2558e-06 1.1226e-05 -0.2159" rpy="0.0 -0.0 0.0"/>
-      <!-- <mass value="1.9086"/> -->
-      <mass value="0.9086"/>
+      <mass value="1.9086"/>
       <inertia ixx="0.016242" ixy="4.5627e-05" ixz="-4.7038e-11" iyy="0.016844" iyz="-1.7865e-11" izz="0.0050227"/>
     </inertial>
     <visual>
@@ -48,7 +47,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t1.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t1.STL"/>
       </geometry>
       <material name="__unnamed_material_2"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -62,13 +61,13 @@
   </link>
   <link name="thrust1">
     <inertial>
-      <origin xyz="3.3307e-15 3.525e-15 -0.001" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.0028342"/>
-      <inertia ixx="6.5251e-07" ixy="-1.0853e-21" ixz="1.8529e-22" iyy="6.5251e-07" iyz="-3.7058e-22" izz="1.3031e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust1.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust1.STL"/>
       </geometry>
       <material name="__unnamed_material_3"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -88,7 +87,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t2.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t2.STL"/>
       </geometry>
       <material name="__unnamed_material_4"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -102,13 +101,13 @@
   </link>
   <link name="thrust2">
     <inertial>
-      <origin xyz="2.2204e-16 8.3267e-17 0.001" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.0028342"/>
-      <inertia ixx="6.5251e-07" ixy="-3.5867e-21" ixz="-2.647e-22" iyy="6.5251e-07" iyz="-1.3235e-22" izz="1.3031e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust2.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust2.STL"/>
       </geometry>
       <material name="__unnamed_material_5"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -128,7 +127,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t3.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t3.STL"/>
       </geometry>
       <material name="__unnamed_material_6"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -142,13 +141,13 @@
   </link>
   <link name="thrust3">
     <inertial>
-      <origin xyz="-2.22044604925031e-16 4.9960036108132e-16 0.00100000000000011" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.00283424938765202"/>
-      <inertia ixx="6.52506444943004e-07" ixy="5.12190235292835e-21" ixz="6.35274710440725e-22" iyy="6.52506444943007e-07" iyz="-2.64697796016969e-23" izz="1.30312339029424e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust3.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust3.STL"/>
       </geometry>
       <material name="__unnamed_material_7"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -168,7 +167,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t4.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t4.STL"/>
       </geometry>
       <material name="__unnamed_material_8"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -182,13 +181,13 @@
   </link>
   <link name="thrust4">
     <inertial>
-      <origin xyz="-3.33066907387547e-16 -2.4008572907519e-15 0.000999999999999834" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.00283424938765202"/>
-      <inertia ixx="6.52506444943007e-07" ixy="1.87935435172048e-21" ixz="-1.19114008207636e-22" iyy="6.52506444943005e-07" iyz="3.97046694025453e-22" izz="1.30312339029424e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust4.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust4.STL"/>
       </geometry>
       <material name="__unnamed_material_9"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -208,7 +207,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t5.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t5.STL"/>
       </geometry>
       <material name="__unnamed_material_10"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -222,9 +221,9 @@
   </link>
   <link name="thrust5">
     <inertial>
-      <origin xyz="0 0 0.001" rpy="0 0 0"/>
-      <mass value="0.0028342"/>
-      <inertia ixx="6.5251e-07" ixy="0.0" ixz="0.0" iyy="6.5251e-07" iyz="0.0" izz="1.3031e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
   </link>
   <link name="t6">
@@ -235,7 +234,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t6.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t6.STL"/>
       </geometry>
       <material name="__unnamed_material_11"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -249,13 +248,13 @@
   </link>
   <link name="thrust6">
     <inertial>
-      <origin xyz="4.05231403988182e-14 2.86715096109447e-14 0.0010000000000413" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.00283424938765202"/>
-      <inertia ixx="6.52506444942999e-07" ixy="-6.07481441858944e-21" ixz="-1.98523347012727e-22" iyy="6.52506444943014e-07" iyz="-2.38228016415272e-22" izz="1.30312339029425e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust6.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust6.STL"/>
       </geometry>
       <material name="__unnamed_material_12"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -275,7 +274,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t7.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t7.STL"/>
       </geometry>
       <material name="__unnamed_material_13"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -289,13 +288,13 @@
   </link>
   <link name="thrust7">
     <inertial>
-      <origin xyz="0.189044325927537 -1.16573417585641e-14 0.110144792463057" rpy="0.0 -0.0 0.0"/>
-      <mass value="0.00283424938765199"/>
-      <inertia ixx="1.14046915395644e-06" ixy="-2.35978085149128e-20" ixz="-2.81725401403391e-07" iyy="6.52506444942998e-07" iyz="5.05572790392411e-21" izz="8.15160681280793e-07"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust7.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/thrust7.STL"/>
       </geometry>
       <material name="__unnamed_material_14"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -315,7 +314,7 @@
     </inertial>
     <visual>
       <geometry>
-        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t8.dae"/>
+        <mesh filename="package://uuv_d/urdf/mesh/proto_type/meshes/t8.STL"/>
       </geometry>
       <material name="__unnamed_material_15"/>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 0.0"/>
@@ -329,9 +328,9 @@
   </link>
   <link name="thrust8">
     <inertial>
-      <origin xyz="0 0 0.001" rpy="0 0 0"/>
-      <mass value="0.0028342"/>
-      <inertia ixx="6.5251e-07" ixy="0.0" ixz="0.0" iyy="6.5251e-07" iyz="0.0" izz="1.3031e-06"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.00001"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
   </link>
   <link name="fc">
