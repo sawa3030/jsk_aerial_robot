@@ -52,16 +52,11 @@ void UUVDController::controlCore()
   q_mat_.topRows(3) = mass_inv * q_mat.topRows(3);
   q_mat_.bottomRows(3) = inertia_inv * q_mat.bottomRows(3);
   q_mat_inv_ = aerial_robot_model::pseudoinverse(q_mat_);
-  std::cout << "q_mat_: " << q_mat_ << std::endl;
-  std::cout << "q_mat_inv_: " << q_mat_inv_ << std::endl;
 
   Eigen::Matrix<double, 6, 1> target_wrench_acc;
   target_wrench_acc << target_acc_cog.x(), target_acc_cog.y(), target_acc_cog.z(),
       pid_controllers_.at(ROLL).result(), pid_controllers_.at(PITCH).result(), pid_controllers_.at(YAW).result();
   Eigen::VectorXd lambda = q_mat_inv_ * target_wrench_acc;
-  std::cout << "target_wrench_acc: " << target_wrench_acc.transpose() << std::endl;
-  std::cout << "lambda: " << lambda.transpose() << std::endl;
-  std::cout << std::endl;
 
   for (int i = 0; i < motor_num_; i++)
     {
