@@ -29,7 +29,7 @@ class PubSoftLinkJointStates(object):
         rospy.init_node("pub_soft_link_joint_states")
 
         self.publish_hz = rospy.get_param("~publish_hz", 500.0)
-        self.target_rotor13_distance = rospy.get_param("~rotor13_distance", 0.95)
+        self.target_rotor13_distance = rospy.get_param("~rotor13_distance", 0.8)
         self.distance_topic = rospy.get_param("~rotor13_distance_topic", "target_rotor13_distance")
         self.max_joint_abs_rad = rospy.get_param("~max_joint_abs_rad", 1.2)
         self.ik_max_iters = int(rospy.get_param("~ik_max_iters", 120))
@@ -291,10 +291,15 @@ class PubSoftLinkJointStates(object):
         rotor3 = fk["rotor_dash"][2]
         actual_d = math.hypot(rotor3[0] - rotor1[0], rotor3[1] - rotor1[1])
         end_x, end_y, end_yaw, end_theta_raw = fk["end_pose"]
-        rospy.loginfo_throttle(
-            1.0,
-            "IK solved: target d13_dash=%.4f, actual d13_dash=%.4f, end=(%.4f, %.4f, yaw=%.3fdeg, sum=%.3fdeg)",
-            target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw),
+        # rospy.loginfo_throttle(
+        #     1.0,
+        #     "IK solved: target d13_dash=%.4f, actual d13_dash=%.4f, end=(%.4f, %.4f, yaw=%.3fdeg, sum=%.3fdeg)",
+        #     target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw),
+        # )
+        print(
+            "IK solved: target d13_dash={0:.4f}, actual d13_dash={1:.4f}, end=({2:.4f}, {3:.4f}, yaw={4:.3f}deg, sum={5:.3f}deg)".format(
+                target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw)
+            )
         )
         q = [v * 2.0 for v in q]
         return q
