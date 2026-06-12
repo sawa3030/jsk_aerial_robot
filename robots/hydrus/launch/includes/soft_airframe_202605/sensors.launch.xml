@@ -24,6 +24,15 @@
           <arg name="port" value="/dev/leddarone" />
         </include> -->
 
+        <group ns="thrust4">
+          <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+            <arg name="time" value="2" />
+            <arg name="pkg" value="aerial_robot_base"/>
+            <arg name="file" value="mocap.launch"/>
+            <arg name="value" value="robot_id:=2"/>
+          </include>
+        </group>
+
       </group>
     </group>
 
