@@ -37,7 +37,7 @@ controller:
   roll_pitch:
     p_gain: 30.0
     i_gain: 1.0
-    d_gain: 5.0
+    d_gain: 9.0
     limit_sum: 20.0
     limit_p: 20.0
     limit_i: 20.0
