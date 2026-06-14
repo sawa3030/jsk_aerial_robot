@@ -29,15 +29,15 @@ class PubSoftLinkJointStates(object):
         rospy.init_node("pub_soft_link_joint_states")
 
         self.publish_hz = rospy.get_param("~publish_hz", 500.0)
-        self.target_rotor13_distance = rospy.get_param("~rotor13_distance", 0.8)
-        self.distance_topic = rospy.get_param("~rotor13_distance_topic", "target_rotor13_distance")
+        self.target_module24_distance = rospy.get_param("~module24_distance", 0.8)
+        self.distance_topic = rospy.get_param("~module24_distance_topic", "target_module24_distance")
         self.max_joint_abs_rad = rospy.get_param("~max_joint_abs_rad", 1.2)
         self.ik_max_iters = int(rospy.get_param("~ik_max_iters", 120))
         self.ik_ftol = rospy.get_param("~ik_ftol", 1.0e-6)
         self.w_pose_pos = rospy.get_param("~ik_weight_pose_pos", 50.0)
         self.w_pose_yaw = rospy.get_param("~ik_weight_pose_yaw", 20.0)
         self.w_sum_360 = rospy.get_param("~ik_weight_sum_360", 120.0)
-        self.w_rotor13 = rospy.get_param("~ik_weight_rotor13", 250.0)
+        self.w_module24 = rospy.get_param("~ik_weight_module24", 250.0)
         self.w_dash_sym = rospy.get_param("~ik_weight_dash_sym", 80.0)
         self.w_reg = rospy.get_param("~ik_weight_reg", 1.0)
         self.ik_restarts = int(rospy.get_param("~ik_restarts", 6))
@@ -73,25 +73,25 @@ class PubSoftLinkJointStates(object):
         self.distance_sub = rospy.Subscriber(self.distance_topic, Float64, self.distance_cb, queue_size=1)
 
         rospy.loginfo(
-            "publish %s soft joints to %s at %.3f Hz (target rotor1-rotor3 distance: %.4f m)",
+            "publish %s soft joints to %s at %.3f Hz (target module2-module4 center distance: %.4f m)",
             len(self.soft_joint_names),
             self.joint_control_topic_name,
             self.publish_hz,
-            self.target_rotor13_distance,
+            self.target_module24_distance,
         )
         rospy.loginfo("subscribe target distance topic: %s", self.distance_topic)
 
     def distance_cb(self, msg):
-        self.target_rotor13_distance = msg.data
+        self.target_module24_distance = msg.data
 
     def run(self):
         rate = rospy.Rate(self.publish_hz)
         while not rospy.is_shutdown():
-            self.target_rotor13_distance = rospy.get_param("~rotor13_distance", self.target_rotor13_distance)
+            self.target_module24_distance = rospy.get_param("~module24_distance", self.target_module24_distance)
             if (self._last_target_distance is None or
-                    abs(self.target_rotor13_distance - self._last_target_distance) > 1e-6):
-                self._last_joint_pos = self.compute_joint_positions(self.target_rotor13_distance)
-                self._last_target_distance = self.target_rotor13_distance
+                    abs(self.target_module24_distance - self._last_target_distance) > 1e-6):
+                self._last_joint_pos = self.compute_joint_positions(self.target_module24_distance)
+                self._last_target_distance = self.target_module24_distance
             joint_pos = list(self._last_joint_pos)
 
             msg = JointState()
@@ -99,7 +99,7 @@ class PubSoftLinkJointStates(object):
             msg.name = list(self.soft_joint_names)
             msg.position = joint_pos
             self.joint_states_pub.publish(msg)
-            self.target_soft_joint_pub.publish(msg)
+            # self.target_soft_joint_pub.publish(msg)
             rate.sleep()
 
     @staticmethod
@@ -148,6 +148,10 @@ class PubSoftLinkJointStates(object):
             physical.append(q)
             physical.append(q)
         return physical
+
+    @staticmethod
+    def _midpoint(a, b):
+        return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5)
 
     def forward_kinematics(self, logical_joints):
         # logical joints order: [s2,s3,s5,s6,s8,s9,s11,s12]
@@ -218,9 +222,18 @@ class PubSoftLinkJointStates(object):
     def ik_cost(self, joints, target_distance, ref_joints):
         fk = self.forward_kinematics(joints)
         end_x, end_y, end_yaw, end_theta_raw = fk["end_pose"]
-        rotor1 = fk["rotor_dash"][0]
-        rotor3 = fk["rotor_dash"][2]
-        rotor13 = math.hypot(rotor3[0] - rotor1[0], rotor3[1] - rotor1[1])
+        module2_center = self._midpoint(
+            fk["joint_pos"]["soft_joint5_b"],
+            fk["joint_pos"]["soft_joint6_a"],
+        )
+        module4_center = self._midpoint(
+            fk["joint_pos"]["soft_joint11_b"],
+            fk["joint_pos"]["soft_joint12_a"],
+        )
+        module24 = math.hypot(
+            module4_center[0] - module2_center[0],
+            module4_center[1] - module2_center[1],
+        )
 
         rotor1_dash = fk["rotor_dash"][0]
         rotor3_dash = fk["rotor_dash"][2]
@@ -233,7 +246,7 @@ class PubSoftLinkJointStates(object):
         pose_pos_err2 = end_x * end_x + end_y * end_y
         pose_yaw_err2 = self._wrap_to_pi(end_yaw) ** 2
         sum_360_err2 = (end_theta_raw - 2.0 * math.pi) ** 2
-        rotor13_err2 = (rotor13 - target_distance) ** 2
+        module24_err2 = (module24 - target_distance) ** 2
         reg = sum(q * q for q in joints)
         _ = ref_joints
 
@@ -241,7 +254,7 @@ class PubSoftLinkJointStates(object):
             self.w_pose_pos * pose_pos_err2
             # + self.w_pose_yaw * pose_yaw_err2
             + self.w_sum_360 * sum_360_err2
-            + self.w_rotor13 * rotor13_err2
+            + self.w_module24 * module24_err2
             + self.w_dash_sym * dash_sym_err2
             + self.w_reg * reg
         )
@@ -287,17 +300,26 @@ class PubSoftLinkJointStates(object):
     def compute_joint_positions(self, target_distance):
         q = self.solve_ik(target_distance)
         fk = self.forward_kinematics(q)
-        rotor1 = fk["rotor_dash"][0]
-        rotor3 = fk["rotor_dash"][2]
-        actual_d = math.hypot(rotor3[0] - rotor1[0], rotor3[1] - rotor1[1])
+        module2_center = self._midpoint(
+            fk["joint_pos"]["soft_joint5_b"],
+            fk["joint_pos"]["soft_joint6_a"],
+        )
+        module4_center = self._midpoint(
+            fk["joint_pos"]["soft_joint11_b"],
+            fk["joint_pos"]["soft_joint12_a"],
+        )
+        actual_d = math.hypot(
+            module4_center[0] - module2_center[0],
+            module4_center[1] - module2_center[1],
+        )
         end_x, end_y, end_yaw, end_theta_raw = fk["end_pose"]
         # rospy.loginfo_throttle(
         #     1.0,
-        #     "IK solved: target d13_dash=%.4f, actual d13_dash=%.4f, end=(%.4f, %.4f, yaw=%.3fdeg, sum=%.3fdeg)",
+        #     "IK solved: target d24_center=%.4f, actual d24_center=%.4f, end=(%.4f, %.4f, yaw=%.3fdeg, sum=%.3fdeg)",
         #     target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw),
         # )
         print(
-            "IK solved: target d13_dash={0:.4f}, actual d13_dash={1:.4f}, end=({2:.4f}, {3:.4f}, yaw={4:.3f}deg, sum={5:.3f}deg)".format(
+            "IK solved: target d24_center={0:.4f}, actual d24_center={1:.4f}, end=({2:.4f}, {3:.4f}, yaw={4:.3f}deg, sum={5:.3f}deg)".format(
                 target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw)
             )
         )
