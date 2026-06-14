@@ -13,7 +13,7 @@ def main():
     parser.add_argument("--param", default="pub_soft_link_joint_states/rotor13_distance")
     parser.add_argument("--start", type=float, default=None)
     parser.add_argument("--end", type=float, default=0.4)
-    parser.add_argument("--step", type=float, default=0.0005, help="Step size per update")
+    parser.add_argument("--step", type=float, default=0.005, help="Step size per update")
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument(
         "--confirm-interval",
