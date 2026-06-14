@@ -82,6 +82,11 @@ class SoftJointToServoNode:
         ("soft_joint8", "soft_joint9"),
         ("soft_joint11", "soft_joint12"),
     )
+    MODULE_FREE_JOINT_PAIRS = (
+        ("soft_joint5", "soft_joint6"),
+        ("soft_joint11", "soft_joint12"),
+    )
+    FREE_SERVO_TARGET = 8000
 
     def __init__(self):
         rospy.init_node("soft_joint_to_servo")
@@ -99,13 +104,21 @@ class SoftJointToServoNode:
     def cb(self, msg: JointState):
         # joint_states から必要な soft joint を取り出す
         required_joints = [j for pair in self.MODULE_JOINT_PAIRS for j in pair]
+        free_joints = {j for pair in self.MODULE_FREE_JOINT_PAIRS for j in pair}
+        free_pairs = set(self.MODULE_FREE_JOINT_PAIRS)
         soft = {joint_name: None for joint_name in required_joints}
+
+        # free module 側の joint が publish されてきた場合はこのメッセージを無視する
+        if any(name in free_joints for name in msg.name):
+            rospy.logwarn_throttle(1.0, "Received free joints in target_soft_joints_ctrl. Skip publishing.")
+            return
 
         for name, pos in zip(msg.name, msg.position):
             if name in soft:
                 soft[name] = pos
 
-        missing = [k for k, v in soft.items() if v is None]
+        # free module 側は target_soft_joints_ctrl に値が来ない前提なので欠損を許容
+        missing = [k for k, v in soft.items() if v is None and k not in free_joints]
         if missing:
             rospy.logwarn_throttle(1.0, f"Missing joints in joint_states: {missing}")
             return
@@ -119,6 +132,10 @@ class SoftJointToServoNode:
         # alpha_1 <- pair後半(joint{3*i}), alpha_2 <- pair前半(joint{3*i-1}) とする。
         servo_vals = []
         for joint_3i_minus_1, joint_3i in self.MODULE_JOINT_PAIRS:
+            if (joint_3i_minus_1, joint_3i) in free_pairs:
+                servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
+                continue
+
             alpha_1 = soft[joint_3i]  # short wire に効く側: joint{3*i}
             alpha_2 = soft[joint_3i_minus_1]
             y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(alpha_1, alpha_2)
