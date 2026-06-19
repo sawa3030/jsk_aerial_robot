@@ -19,7 +19,7 @@
   <arg name="robot_id" default="" />
   <arg name="robot_ns" value="hydrus$(arg robot_id)" />
   <arg name="config_dir" default="$(find hydrus)/config/$(arg type)" />
-  <arg name="mujoco" default="False" />
+  <arg name="mujoco" default="True" />
   <arg name="demo" default="True" />
 
   ###########  Parameters  ###########
