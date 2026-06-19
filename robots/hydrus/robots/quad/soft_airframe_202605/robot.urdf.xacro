@@ -59,7 +59,7 @@
 
   <!-- Four soft-link modules connected in series.
        Module i creates:
-         servo_link{i}, soft_link{3*i-2}, soft_link{3*i-1}, soft_link{3*i}, gimbal_link{i}, thrust{i}
+         servo_link{i}, soft_link{5*i-4..5*i}, gimbal_link{i}, thrust{i}
   -->
 
   <xacro:soft_link_module

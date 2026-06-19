@@ -9,25 +9,41 @@ servo_controller:
     # for simulation
     simulation:
       pid: {p: 50.0, i: 0.01, d: 2.0}
-      init_value: 0.7855
+      init_value: 0.3925
       type: effort_controllers/JointPositionController
 
     controller2:
       name: soft_joint2
     controller3:
       name: soft_joint3
-
+    controller4:
+      name: soft_joint4
     controller5:
       name: soft_joint5
-    controller6:
-      name: soft_joint6
 
+    controller7:
+      name: soft_joint7
     controller8:
       name: soft_joint8
     controller9:
       name: soft_joint9
-    
-    controller11:
-      name: soft_joint11
+    controller10:
+      name: soft_joint10
+
     controller12:
       name: soft_joint12
+    controller13:
+      name: soft_joint13
+    controller14:
+      name: soft_joint14
+    controller15:
+      name: soft_joint15
+
+    controller17:
+      name: soft_joint17
+    controller18:
+      name: soft_joint18
+    controller19:
+      name: soft_joint19
+    controller20:
+      name: soft_joint20
