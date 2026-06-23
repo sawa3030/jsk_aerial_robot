@@ -59,7 +59,7 @@
 
   <!-- Four soft-link modules connected in series.
        Module i creates:
-         servo_link{i}, soft_link{5*i-4..5*i}, gimbal_link{i}, thrust{i}
+         servo_link{i}, soft_link{3*i-2}, soft_link{3*i-1}, soft_link{3*i}, gimbal_link{i}, thrust{i}
   -->
 
   <xacro:soft_link_module
@@ -67,6 +67,7 @@
       parent="root"
       rotor_direction="-1"
       parent_to_servo_x="0.0"
+      prev_tilt_angle="0"
       tilt_angle="-0.174" />
 
   <xacro:soft_link_module
@@ -77,6 +78,7 @@
       servo_size_y="0.06"
       servo_size_z="0.01"
       servo_mass="0.18"
+      prev_tilt_angle="0.174"
       tilt_angle="0.174" />
 
   <!-- The third module has a slightly longer and larger servo body. -->
@@ -84,12 +86,14 @@
       i="3"
       parent="gimbal_link2"
       rotor_direction="-1"
+      prev_tilt_angle="-0.174"
       tilt_angle="-0.174" />
 
   <xacro:soft_link_module
       i="4"
       parent="gimbal_link3"
       rotor_direction="1"
+      prev_tilt_angle="0.174"
       tilt_angle="0.174" />
 
 </robot>
