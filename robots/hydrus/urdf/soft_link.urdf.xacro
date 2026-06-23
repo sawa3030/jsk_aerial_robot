@@ -49,6 +49,8 @@
       leg_size_y:=0.02
       leg_mass:=0.04993
       rotor_offset_x:=0.0735
+      tilt_angle:=-0.174
+      prev_tilt_angle:=0.174
       gimbal_mesh:=package://hydrus/urdf/mesh/5inch_propeller_duct_right_v2.dae
       propeller_mesh:=package://hydrus/urdf/mesh/TriBlade_5045.dae">
 
@@ -62,7 +64,7 @@
     <joint name="soft_joint${s0}" type="fixed">
       <parent link="${parent}"/>
       <child link="soft_link${s0}"/>
-      <origin xyz="${parent_to_servo_x} 0 0" rpy="0 0 0"/>
+      <origin xyz="${parent_to_servo_x} 0 0" rpy="0 ${prev_tilt_angle} 0"/>
     </joint>
 
     <joint name="soft_joint${s1}" type="revolute">
@@ -280,7 +282,7 @@
     <joint name="gimbal_joint${i}" type="fixed">
       <parent link="servo_link${i}"/>
       <child link="gimbal_link${i}"/>
-      <origin xyz="${servo_size_x} 0 0" rpy="0 0 0"/>
+      <origin xyz="${servo_size_x} 0 0" rpy="0 ${tilt_angle} 0"/>
       <axis xyz="1 0 0"/>
       <dynamics damping="0.9" friction="0.1"/>
     </joint>
