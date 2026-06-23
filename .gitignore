@@ -113,4 +113,6 @@ MUJOCO_LOG.txt
 # robots/**/mujoco
 robots/dragon/mujoco
 robots/hydrus_xi/mujoco
+robots/hydrus/mujoco/quad/default_mode_201907
+robots/hydrus/mujoco/quad/tilt_10deg_201907
 robots/mini_quadrotor/mujoco

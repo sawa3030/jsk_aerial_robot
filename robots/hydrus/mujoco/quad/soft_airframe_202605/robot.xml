@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mujoco model="serial_soft_airframe">
   <compiler angle="radian" autolimits="true" balanceinertia="true"/>
-  <statistic meansize="0.108464" extent="3.02122" center="1.44897 -0.00759719 -0.0207849"/>
+  <statistic meansize="0.111965" extent="3.02643" center="1.45157 -1.19924e-06 -0.00596076"/>
   <asset>
     <mesh name="spinal" file="spinal.stl"/>
     <mesh name="vim4" file="vim4.stl"/>
@@ -31,7 +31,7 @@
               <joint name="soft_joint5" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
               <geom name="soft_link5" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
               <geom name="servo_link1" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-              <geom name="gimbal_link1" pos="0.22825 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0" quat="0.70710678 -0.70710678 0 0"/>
+              <geom name="gimbal_link1" pos="0.22825 0 0" quat="0.996218 0 -0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
               <geom name="soft_link6" size="0.029375 0.015 0.02" pos="0.331125 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
               <geom name="leg3" size="0.01 0.01 0.06" pos="0.30175 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
               <geom name="leg2" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
@@ -59,7 +59,7 @@
                       <geom name="servo_link2" size="0.078 0.03 0.005" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
                       <geom name="fc_link" pos="0.10875 0 0.01" type="mesh" mesh="spinal" contype="1" conaffinity="0"/>
                       <geom name="vim4" pos="0.10875 0 -0.01" type="mesh" mesh="vim4" contype="1" conaffinity="0"/>
-                      <geom name="gimbal_link2" pos="0.28825 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0" quat="0.70710678 -0.70710678 0 0"/>
+                      <geom name="gimbal_link2" pos="0.28825 0 0" quat="0.996218 0 0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
                       <geom name="soft_link11" size="0.029375 0.015 0.02" pos="0.391125 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                       <geom name="leg5" size="0.01 0.01 0.06" pos="0.36175 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
                       <geom name="leg4" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
@@ -85,7 +85,7 @@
                               <joint name="soft_joint15" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                               <geom name="soft_link15" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                               <geom name="servo_link3" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-                              <geom name="gimbal_link3" pos="0.22825 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0" quat="0.70710678 -0.70710678 0 0"/>
+                              <geom name="gimbal_link3" pos="0.22825 0 0" quat="0.996218 0 -0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
                               <geom name="soft_link16" size="0.029375 0.015 0.02" pos="0.331125 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                               <geom name="leg7" size="0.01 0.01 0.06" pos="0.30175 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
                               <geom name="leg6" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
@@ -111,7 +111,7 @@
                                       <joint name="soft_joint20" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                       <geom name="soft_link20" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                       <geom name="servo_link4" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-                                      <geom name="gimbal_link4" pos="0.22825 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0" quat="0.70710678 -0.70710678 0 0"/>
+                                      <geom name="gimbal_link4" pos="0.22825 0 0" quat="0.996218 0 0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
                                       <geom name="leg8" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
                                       <body name="thrust4" pos="0.22825 0 0">
                                         <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0001" diaginertia="2e-05 1e-05 1e-05"/>
