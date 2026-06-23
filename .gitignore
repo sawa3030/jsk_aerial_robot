@@ -110,4 +110,7 @@ tags
 
 # mujoco
 MUJOCO_LOG.txt
-robots/**/mujoco
+# robots/**/mujoco
+robots/dragon/mujoco
+robots/hydrus_xi/mujoco
+robots/mini_quadrotor/mujoco
