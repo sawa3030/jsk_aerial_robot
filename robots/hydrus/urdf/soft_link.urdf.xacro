@@ -63,9 +63,9 @@
     <xacro:property name="s4" value="${5 * i}" />
     <xacro:property name="l0" value="${2 * i - 1}" />
     <xacro:property name="l1" value="${2 * i}" />
-    <!-- Keep tilted module connections close to the original height. -->
-    <xacro:property name="parent_tilt_z_offset" value="${-parent_to_servo_x * sin(prev_tilt_angle)}" />
-    <xacro:property name="gimbal_tilt_z_offset" value="${-rotor_offset_x * sin(tilt_angle)}" />
+    <!-- Keep gimbal height aligned without shifting the upstream soft-link chain. -->
+    <xacro:property name="parent_tilt_z_offset" value="0.0" />
+    <xacro:property name="gimbal_tilt_z_offset" value="${rotor_offset_x * sin(tilt_angle)}" />
 
     <!-- Five-segment soft continuum approximation (1/8, 1/4, 1/4, 1/4, 1/8). -->
     <joint name="soft_joint${s0}" type="fixed">
