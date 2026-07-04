@@ -379,7 +379,7 @@
 
     <link name="gimbal_link${i}">
       <inertial>
-        <origin xyz="0.0735 0 0" rpy="0 ${tilt_angle} 0"/>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
         <mass value="0.222"/>
         <inertia
             ixx="0.00022661" ixy="0.0" ixz="0.0"
@@ -387,7 +387,7 @@
             izz="0.000032533"/>
       </inertial>
       <visual>
-        <origin xyz="0.0735 0 0" rpy="0 ${tilt_angle} 0"/>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
         <geometry>
           <mesh filename="${gimbal_mesh}"/>
         </geometry>

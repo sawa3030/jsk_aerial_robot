@@ -68,7 +68,7 @@
       rotor_direction="-1"
       parent_to_servo_x="0.0"
       prev_tilt_angle="0"
-      tilt_angle="-0.174" />
+      tilt_angle="0.174" />
 
   <xacro:soft_link_module
       i="2"
@@ -78,22 +78,22 @@
       servo_size_y="0.06"
       servo_size_z="0.01"
       servo_mass="0.18"
-      prev_tilt_angle="0.174"
-      tilt_angle="0.174" />
+      prev_tilt_angle="-0.174"
+      tilt_angle="-0.174" />
 
   <!-- The third module has a slightly longer and larger servo body. -->
   <xacro:soft_link_module
       i="3"
       parent="gimbal_link2"
       rotor_direction="-1"
-      prev_tilt_angle="-0.174"
-      tilt_angle="-0.174" />
+      prev_tilt_angle="0.174"
+      tilt_angle="0.174" />
 
   <xacro:soft_link_module
       i="4"
       parent="gimbal_link3"
       rotor_direction="1"
-      prev_tilt_angle="0.174"
-      tilt_angle="0.174" />
+      prev_tilt_angle="-0.174"
+      tilt_angle="-0.174" />
 
 </robot>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mujoco model="serial_soft_airframe">
   <compiler angle="radian" autolimits="true" balanceinertia="true"/>
-  <statistic meansize="0.112777" extent="3.02371" center="1.45021 -1.19924e-06 0.000674524"/>
+  <statistic meansize="0.111584" extent="3.00824" center="1.44248 -1.19924e-06 -0.0247746"/>
   <asset>
     <mesh name="spinal" file="spinal.stl"/>
     <mesh name="vim4" file="vim4.stl"/>
@@ -27,20 +27,20 @@
             <joint name="soft_joint4" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
             <geom name="soft_link4" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
             <body name="soft_link5" pos="0.1175 0 0">
-              <inertial pos="0.182351 2.26114e-07 -0.016929" quat="0.541603 0.454656 0.454958 0.541265" mass="0.52186" diaginertia="0.00579955 0.00435259 0.00182704"/>
+              <inertial pos="0.182351 2.26114e-07 -0.035502" quat="0.460905 0.53624 0.536506 0.460624" mass="0.52186" diaginertia="0.00598769 0.00432944 0.00203833"/>
               <joint name="soft_joint5" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
               <geom name="soft_link5" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
               <geom name="servo_link1" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-              <geom name="gimbal_link1" pos="0.22714 0 0.0127246" quat="0.70710678 -0.70710678 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
-              <geom name="soft_link6" size="0.029375 0.015 0.02" pos="0.328905 0 0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
-              <geom name="leg3" size="0.01 0.01 0.06" pos="0.29953 0 -0.0755509" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
+              <geom name="gimbal_link1" pos="0.22714 0 -0.0127246" quat="0.996218 0 0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
+              <geom name="soft_link6" size="0.029375 0.015 0.02" pos="0.328905 0 -0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
+              <geom name="leg3" size="0.01 0.01 0.06" pos="0.29953 0 -0.126449" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
               <geom name="leg2" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
-              <body name="thrust1" pos="0.22714 0 0.0127246" quat="0.996218 0 -0.0868903 0">
+              <body name="thrust1" pos="0.22714 0 -0.0127246" quat="0.996218 0 0.0868903 0">
                 <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0001" diaginertia="2e-05 1e-05 1e-05"/>
                 <geom name="thrust1" pos="-0.045 0.055 0.06" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.9 0.25 0.25 1" mesh="TriBlade_5045" contype="1" conaffinity="0"/>
                 <site name="rotor1" pos="0 0 0"/>
               </body>
-              <body name="soft_link7" pos="0.35828 0 0.0254491">
+              <body name="soft_link7" pos="0.35828 0 -0.0254491">
                 <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                 <joint name="soft_joint7" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                 <geom name="soft_link7" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
@@ -53,22 +53,22 @@
                     <joint name="soft_joint9" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                     <geom name="soft_link9" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                     <body name="soft_link10" pos="0.1175 0 0">
-                      <inertial pos="0.196808 0.000265429 -0.0273378" quat="0.466556 0.532085 0.532288 0.464629" mass="0.653881" diaginertia="0.010157 0.00839357 0.00219143"/>
+                      <inertial pos="0.196808 0.000265429 -0.0125147" quat="0.516446 0.483993 0.484271 0.514312" mass="0.653881" diaginertia="0.0098469 0.00830879 0.00196615"/>
                       <joint name="soft_joint10" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                       <geom name="soft_link10" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                       <geom name="servo_link2" size="0.078 0.03 0.005" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
                       <geom name="fc_link" pos="0.10875 0 0.01" type="mesh" mesh="spinal" contype="1" conaffinity="0"/>
                       <geom name="vim4" pos="0.10875 0 -0.01" type="mesh" mesh="vim4" contype="1" conaffinity="0"/>
-                      <geom name="gimbal_link2" pos="0.28714 0 -0.0127246" quat="0.70710678 -0.70710678 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
-                      <geom name="soft_link11" size="0.029375 0.015 0.02" pos="0.388905 0 -0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
-                      <geom name="leg5" size="0.01 0.01 0.06" pos="0.35953 0 -0.126449" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
+                      <geom name="gimbal_link2" pos="0.28714 0 0.0127246" quat="0.996218 0 -0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
+                      <geom name="soft_link11" size="0.029375 0.015 0.02" pos="0.388905 0 0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
+                      <geom name="leg5" size="0.01 0.01 0.06" pos="0.35953 0 -0.0755509" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
                       <geom name="leg4" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
-                      <body name="thrust2" pos="0.28714 0 -0.0127246" quat="0.996218 0 0.0868903 0">
+                      <body name="thrust2" pos="0.28714 0 0.0127246" quat="0.996218 0 -0.0868903 0">
                         <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0001" diaginertia="2e-05 1e-05 1e-05"/>
                         <geom name="thrust2" pos="-0.045 0.055 0.06" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.9 0.25 0.25 1" mesh="TriBlade_5045" contype="1" conaffinity="0"/>
                         <site name="rotor2" pos="0 0 0"/>
                       </body>
-                      <body name="soft_link12" pos="0.41828 0 -0.0254491">
+                      <body name="soft_link12" pos="0.41828 0 0.0254491">
                         <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                         <joint name="soft_joint12" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                         <geom name="soft_link12" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
@@ -81,20 +81,20 @@
                             <joint name="soft_joint14" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                             <geom name="soft_link14" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                             <body name="soft_link15" pos="0.1175 0 0">
-                              <inertial pos="0.182351 2.26114e-07 -0.016929" quat="0.541603 0.454656 0.454958 0.541265" mass="0.52186" diaginertia="0.00579955 0.00435259 0.00182704"/>
+                              <inertial pos="0.182351 2.26114e-07 -0.035502" quat="0.460905 0.53624 0.536506 0.460624" mass="0.52186" diaginertia="0.00598769 0.00432944 0.00203833"/>
                               <joint name="soft_joint15" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                               <geom name="soft_link15" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                               <geom name="servo_link3" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-                              <geom name="gimbal_link3" pos="0.22714 0 0.0127246" quat="0.70710678 -0.70710678 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
-                              <geom name="soft_link16" size="0.029375 0.015 0.02" pos="0.328905 0 0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
-                              <geom name="leg7" size="0.01 0.01 0.06" pos="0.29953 0 -0.0755509" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
+                              <geom name="gimbal_link3" pos="0.22714 0 -0.0127246" quat="0.996218 0 0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
+                              <geom name="soft_link16" size="0.029375 0.015 0.02" pos="0.328905 0 -0.0254491" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
+                              <geom name="leg7" size="0.01 0.01 0.06" pos="0.29953 0 -0.126449" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
                               <geom name="leg6" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
-                              <body name="thrust3" pos="0.22714 0 0.0127246" quat="0.996218 0 -0.0868903 0">
+                              <body name="thrust3" pos="0.22714 0 -0.0127246" quat="0.996218 0 0.0868903 0">
                                 <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0001" diaginertia="2e-05 1e-05 1e-05"/>
                                 <geom name="thrust3" pos="-0.045 0.055 0.06" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.9 0.25 0.25 1" mesh="TriBlade_5045" contype="1" conaffinity="0"/>
                                 <site name="rotor3" pos="0 0 0"/>
                               </body>
-                              <body name="soft_link17" pos="0.35828 0 0.0254491">
+                              <body name="soft_link17" pos="0.35828 0 -0.0254491">
                                 <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                                 <joint name="soft_joint17" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                 <geom name="soft_link17" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
@@ -107,13 +107,13 @@
                                     <joint name="soft_joint19" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                     <geom name="soft_link19" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                     <body name="soft_link20" pos="0.1175 0 0">
-                                      <inertial pos="0.159355 1.33354e-07 -0.0218459" quat="0.566273 0.423576 0.423889 0.565894" mass="0.44243" diaginertia="0.00343218 0.00277353 0.000936501"/>
+                                      <inertial pos="0.159355 1.33354e-07 -0.00907614" quat="0.60002 0.374333 0.374665 0.599565" mass="0.44243" diaginertia="0.00360688 0.00305745 0.000827279"/>
                                       <joint name="soft_joint20" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                       <geom name="soft_link20" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                       <geom name="servo_link4" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
-                                      <geom name="gimbal_link4" pos="0.22714 0 -0.0127246" quat="0.70710678 -0.70710678 0 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
+                                      <geom name="gimbal_link4" pos="0.22714 0 0.0127246" quat="0.996218 0 -0.0868903 0" type="mesh" rgba="0.2 0.7 0.4 1" mesh="5inch_propeller_duct_right_v2" contype="1" conaffinity="0"/>
                                       <geom name="leg8" size="0.01 0.01 0.06" pos="0.05875 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
-                                      <body name="thrust4" pos="0.22714 0 -0.0127246" quat="0.996218 0 0.0868903 0">
+                                      <body name="thrust4" pos="0.22714 0 0.0127246" quat="0.996218 0 -0.0868903 0">
                                         <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0001" diaginertia="2e-05 1e-05 1e-05"/>
                                         <geom name="thrust4" pos="-0.045 0.055 0.06" quat="0.707107 0.707107 0 0" type="mesh" rgba="0.9 0.25 0.25 1" mesh="TriBlade_5045" contype="1" conaffinity="0"/>
                                         <site name="rotor4" pos="0 0 0"/>
