@@ -29,21 +29,21 @@ controller:
     p_gain: 8.0
     i_gain: 1.0
     d_gain: 4.0
-    limit_sum: 6.0 # N for clamping thrust force
-    limit_p: 4.0
-    limit_i: 4.0
-    limit_d: 4.0
-    limit_err_p: 0.4
+    limit_sum: 1.5 # N for clamping thrust force
+    limit_p: 1.5
+    limit_i: 1.5
+    limit_d: 1.5
+    limit_err_p: 1.5
     need_d_control: true
 
   roll_pitch:
     p_gain: 30.0
     i_gain: 1.0
     d_gain: 9.0
-    limit_sum: 20.0
-    limit_p: 20.0
-    limit_i: 20.0
-    limit_d: 20.0
+    limit_sum: 13.0
+    limit_p: 13.0
+    limit_i: 13.0
+    limit_d: 13.0
   
   # LQI gain generator
   lqi:
