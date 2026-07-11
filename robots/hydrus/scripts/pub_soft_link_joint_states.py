@@ -66,7 +66,7 @@ class PubSoftLinkJointStates(object):
             self.joint_states_pub = rospy.Publisher("joints_ctrl", JointState, queue_size=1)
             self.joint_control_topic_name = "joints_ctrl"
         else:
-            self.joint_states_pub = rospy.Publisher("joint_states", JointState, queue_size=1)
+            self.joint_states_pub = rospy.Publisher("dummy_joint_states", JointState, queue_size=1)
             self.joint_control_topic_name = "joint_states"
         self.target_soft_joint_pub = rospy.Publisher("target_soft_joints_ctrl", JointState, queue_size=1)
         self.distance_sub = rospy.Subscriber(self.distance_topic, Float64, self.distance_cb, queue_size=1)
