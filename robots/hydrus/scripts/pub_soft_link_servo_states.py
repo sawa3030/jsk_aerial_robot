@@ -51,6 +51,11 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
     ref_alpha = math.radians(22.5)
 
     def get_wire_lengths(a1, a2, a3, a4):
+        # Servo contribution per module:
+        # 4*i + 0: bend soft_joint(5*i+2..5) in plus direction
+        # 4*i + 1: bend soft_joint(5*i+2..5) in minus direction
+        # 4*i + 2: bend soft_joint(5*i+4..5) in minus direction
+        # 4*i + 3: bend soft_joint(5*i+4..5) in plus direction
         plus_long_wire = (
             get_plus_pos_wire_length(a1, r_joint_2, divide_num)
             + d
@@ -70,14 +75,14 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
             + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         plus_short_wire = (
-            get_plus_pos_wire_length(a1, r_joint_2, divide_num)
+            get_plus_pos_wire_length(a3, r_joint_2, divide_num)
             + d
-            + get_plus_pos_wire_length(a2, r_joint_2, divide_num)
+            + get_plus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         minus_short_wire = (
-            get_minus_pos_wire_length(a1, r_joint_2, divide_num)
+            get_minus_pos_wire_length(a3, r_joint_2, divide_num)
             + d
-            + get_minus_pos_wire_length(a2, r_joint_2, divide_num)
+            + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         return plus_long_wire, minus_long_wire, plus_short_wire, minus_short_wire
 
@@ -138,11 +143,12 @@ class SoftJointToServoNode:
         free_joints = {j for group in self.MODULE_FREE_JOINT_GROUPS for j in group}
         free_groups = set(self.MODULE_FREE_JOINT_GROUPS)
         soft = {joint_name: None for joint_name in required_joints}
+        print(f"Received joint_states: {msg.name}, {msg.position}")
 
         # free module 側の joint が publish されてきた場合はこのメッセージを無視する
-        if any(name in free_joints for name in msg.name):
-            rospy.logwarn_throttle(1.0, "Received free joints in target_soft_joints_ctrl. Skip publishing.")
-            return
+        # if any(name in free_joints for name in msg.name):
+        #     rospy.logwarn_throttle(1.0, "Received free joints in target_soft_joints_ctrl. Skip publishing.")
+        #     return
 
         for name, pos in zip(msg.name, msg.position):
             if name in soft:
@@ -158,9 +164,9 @@ class SoftJointToServoNode:
         # a1..a4 をそのまま wire モデルに渡して長さ差分を計算する。
         servo_vals = []
         for joint_group in self.MODULE_JOINT_GROUPS:
-            if joint_group in free_groups:
-                servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
-                continue
+            # if joint_group in free_groups:
+            #     servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
+            #     continue
 
             q0, q1, q2, q3 = (soft[jn] for jn in joint_group)
             y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(q0, q1, q2, q3)

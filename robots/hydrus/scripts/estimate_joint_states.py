@@ -55,6 +55,11 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
     ref_alpha = math.radians(22.5)
 
     def get_wire_lengths(a1, a2, a3, a4):
+        # Servo contribution per module:
+        # 4*i + 0: bend soft_joint(5*i+2..5) in plus direction
+        # 4*i + 1: bend soft_joint(5*i+2..5) in minus direction
+        # 4*i + 2: bend soft_joint(5*i+4..5) in minus direction
+        # 4*i + 3: bend soft_joint(5*i+4..5) in plus direction
         plus_long_wire = (
             get_plus_pos_wire_length(a1, r_joint_2, divide_num)
             + d
@@ -74,14 +79,14 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
             + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         plus_short_wire = (
-            get_plus_pos_wire_length(a1, r_joint_2, divide_num)
+            get_plus_pos_wire_length(a3, r_joint_2, divide_num)
             + d
-            + get_plus_pos_wire_length(a2, r_joint_2, divide_num)
+            + get_plus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         minus_short_wire = (
-            get_minus_pos_wire_length(a1, r_joint_2, divide_num)
+            get_minus_pos_wire_length(a3, r_joint_2, divide_num)
             + d
-            + get_minus_pos_wire_length(a2, r_joint_2, divide_num)
+            + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
         )
         return plus_long_wire, minus_long_wire, plus_short_wire, minus_short_wire
 
@@ -134,6 +139,9 @@ class EstimateJointStatesNode:
         self.w_sum_360 = float(rospy.get_param("~weight_sum_360", 120.0))
         self.w_adjacent = float(rospy.get_param("~weight_adjacent", 5))
         self.minimize_maxiter = int(rospy.get_param("~ik_max_iters", 120))
+        self.joint_lpf_alpha = self._clamp(
+            float(rospy.get_param("~joint_lpf_alpha", 0.2)), 0.0, 1.0
+        )
         servo_topic = rospy.get_param("~servo_states_topic", "servo/states")
         joint_topic = rospy.get_param("~joint_states_topic", "joint_states")
 
@@ -142,11 +150,13 @@ class EstimateJointStatesNode:
 
         q0 = math.radians(22.5)
         self.prev_est = [q0] * (len(self.MODULE_JOINT_GROUPS) * 4)
+        self.prev_filtered_positions = None
 
         rospy.loginfo(
-            "estimate_joint_states started. sub=%s, pub=%s",
+            "estimate_joint_states started. sub=%s, pub=%s, joint_lpf_alpha=%.3f",
             servo_topic,
             joint_topic,
+            self.joint_lpf_alpha,
         )
 
     @staticmethod
@@ -203,6 +213,19 @@ class EstimateJointStatesNode:
         )
         return [float(v) for v in res.x]
 
+    def _low_pass_filter_positions(self, positions):
+        if self.prev_filtered_positions is None or self.joint_lpf_alpha >= 1.0:
+            filtered = list(positions)
+        else:
+            alpha = self.joint_lpf_alpha
+            filtered = [
+                prev + alpha * (current - prev)
+                for prev, current in zip(self.prev_filtered_positions, positions)
+            ]
+
+        self.prev_filtered_positions = list(filtered)
+        return filtered
+
     def cb(self, msg):
         servo_map = {int(sv.index): int(sv.angle) for sv in msg.servos}
 
@@ -249,7 +272,7 @@ class EstimateJointStatesNode:
         out = JointState()
         out.header.stamp = rospy.Time.now()
         out.name = names
-        out.position = [logical_joint_values[n] for n in names]
+        out.position = self._low_pass_filter_positions([logical_joint_values[n] for n in names])
         self.pub.publish(out)
 
         rospy.loginfo_throttle(
