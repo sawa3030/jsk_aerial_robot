@@ -70,13 +70,13 @@ void SoftAirframeController::controlCore()
       target_roll_ = atan2(-target_acc_dash.y(), sqrt(target_acc_dash.x() * target_acc_dash.x() + target_acc_dash.z() * target_acc_dash.z()));
       z_rpy_ddot(0) = target_acc_w.length();
     }
-  // z_rpy_ddot(1) = pid_controllers_.at(ROLL).result();
-  // z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
-  // z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
+  z_rpy_ddot(1) = pid_controllers_.at(ROLL).result();
+  z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
+  z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
 
-  z_rpy_ddot(1) = 0.0;
-  z_rpy_ddot(2) = 0.0;
-  z_rpy_ddot(3) = 0.0;
+  // z_rpy_ddot(1) = 0.0;
+  // z_rpy_ddot(2) = 0.0;
+  // z_rpy_ddot(3) = 0.0;
 
   // solve the thrust allocation with QP
   Eigen::MatrixXd H = Eigen::MatrixXd::Zero(motor_num_, motor_num_);
@@ -285,20 +285,20 @@ void SoftAirframeController::setAttitudeGains()
   spinal::RollPitchYawTerms rpy_gain_msg; //for rosserial
   /* to flight controller via rosserial scaling by 1000 */
   rpy_gain_msg.motors.resize(1);
-  rpy_gain_msg.motors.at(0).roll_p = pid_controllers_.at(ROLL).getPGain() * 1000;
-  rpy_gain_msg.motors.at(0).roll_i = pid_controllers_.at(ROLL).getIGain() * 1000;
-  rpy_gain_msg.motors.at(0).roll_d = pid_controllers_.at(ROLL).getDGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_p = pid_controllers_.at(PITCH).getPGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_i = pid_controllers_.at(PITCH).getIGain() * 1000;
-  rpy_gain_msg.motors.at(0).pitch_d = pid_controllers_.at(PITCH).getDGain() * 1000;
-  rpy_gain_msg.motors.at(0).yaw_d = pid_controllers_.at(YAW).getDGain() * 1000;
-  // rpy_gain_msg.motors.at(0).roll_p = 0;
-  // rpy_gain_msg.motors.at(0).roll_i = 0;
-  // rpy_gain_msg.motors.at(0).roll_d = 0;
-  // rpy_gain_msg.motors.at(0).pitch_p = 0;
-  // rpy_gain_msg.motors.at(0).pitch_i = 0;
-  // rpy_gain_msg.motors.at(0).pitch_d = 0;
-  // rpy_gain_msg.motors.at(0).yaw_d = 0;
+  // rpy_gain_msg.motors.at(0).roll_p = pid_controllers_.at(ROLL).getPGain() * 1000;
+  // rpy_gain_msg.motors.at(0).roll_i = pid_controllers_.at(ROLL).getIGain() * 1000;
+  // rpy_gain_msg.motors.at(0).roll_d = pid_controllers_.at(ROLL).getDGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_p = pid_controllers_.at(PITCH).getPGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_i = pid_controllers_.at(PITCH).getIGain() * 1000;
+  // rpy_gain_msg.motors.at(0).pitch_d = pid_controllers_.at(PITCH).getDGain() * 1000;
+  // rpy_gain_msg.motors.at(0).yaw_d = pid_controllers_.at(YAW).getDGain() * 1000;
+  rpy_gain_msg.motors.at(0).roll_p = 0;
+  rpy_gain_msg.motors.at(0).roll_i = 0;
+  rpy_gain_msg.motors.at(0).roll_d = 0;
+  rpy_gain_msg.motors.at(0).pitch_p = 0;
+  rpy_gain_msg.motors.at(0).pitch_i = 0;
+  rpy_gain_msg.motors.at(0).pitch_d = 0;
+  rpy_gain_msg.motors.at(0).yaw_d = 0;
   rpy_gain_pub_.publish(rpy_gain_msg);
 }
 
