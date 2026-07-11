@@ -1,6 +1,8 @@
 aerial_robot_control_name: aerial_robot_control/soft_airframe_controller
 
 controller:
+  z_rpy_ddot_lpf_alpha: 0.2
+
   xy:
     p_gain: 3.0
     i_gain: 0.02
@@ -64,4 +66,3 @@ controller:
 
     trans_constraint_weight: 100
     att_control_weight: 1
-

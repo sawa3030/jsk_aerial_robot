@@ -74,6 +74,19 @@ void SoftAirframeController::controlCore()
   z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
   z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
 
+  static bool z_rpy_ddot_lpf_initialized = false;
+  static Eigen::VectorXd z_rpy_ddot_lpf = Eigen::VectorXd::Zero(4);
+    if(!z_rpy_ddot_lpf_initialized)
+    {
+      z_rpy_ddot_lpf = z_rpy_ddot;
+      z_rpy_ddot_lpf_initialized = true;
+    }
+  else
+    {
+      z_rpy_ddot_lpf = z_rpy_ddot_lpf_alpha_ * z_rpy_ddot + (1.0 - z_rpy_ddot_lpf_alpha_) * z_rpy_ddot_lpf;
+    }
+  z_rpy_ddot = z_rpy_ddot_lpf;
+
   // z_rpy_ddot(1) = 0.0;
   // z_rpy_ddot(2) = 0.0;
   // z_rpy_ddot(3) = 0.0;
@@ -278,6 +291,7 @@ void SoftAirframeController::rosParamInit()
   ros::NodeHandle control_nh(nh_, "controller");
   getParam<bool>(control_nh, "hovering_approximate", hovering_approximate_, false);
   getParam<double>(control_nh, "torque_allocation_matrix_inv_pub_interval", torque_allocation_matrix_inv_pub_interval_, 0.05);
+  getParam<double>(control_nh, "z_rpy_ddot_lpf_alpha", z_rpy_ddot_lpf_alpha_, 0.2);
 }
 
 void SoftAirframeController::setAttitudeGains()

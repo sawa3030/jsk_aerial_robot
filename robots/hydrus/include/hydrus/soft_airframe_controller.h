@@ -48,6 +48,7 @@ protected:
  
   // double z_limit_;
   bool hovering_approximate_;
+  double z_rpy_ddot_lpf_alpha_;
 
   double gimbal_angle_diff_ = 0.0;
   // double gimbal_current_angle = 0.0;
