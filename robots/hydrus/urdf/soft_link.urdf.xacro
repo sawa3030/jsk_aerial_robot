@@ -38,7 +38,7 @@
       servo_size_x:=0.096
       servo_size_y:=0.05
       servo_size_z:=0.05
-      servo_mass:=0.141
+      servo_mass:=0.189
       soft_l1:=0.05875
       soft_l2:=0.1175
       soft_l3:=0.1175

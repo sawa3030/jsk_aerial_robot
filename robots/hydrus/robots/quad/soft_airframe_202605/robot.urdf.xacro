@@ -77,7 +77,7 @@
       servo_size_x="0.156"
       servo_size_y="0.06"
       servo_size_z="0.01"
-      servo_mass="0.18"
+      servo_mass="0.229"
       prev_tilt_angle="-0.174"
       tilt_angle="-0.174" />
 
