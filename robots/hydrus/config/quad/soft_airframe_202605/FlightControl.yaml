@@ -1,7 +1,7 @@
 aerial_robot_control_name: aerial_robot_control/soft_airframe_controller
 
 controller:
-  z_rpy_ddot_lpf_alpha: 0.2
+  z_rpy_ddot_lpf_alpha: 0.3
 
   xy:
     p_gain: 3.0
