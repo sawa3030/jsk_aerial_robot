@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <mujoco model="serial_soft_airframe">
   <compiler angle="radian" autolimits="true" balanceinertia="true"/>
-  <statistic meansize="0.111197" extent="3.00824" center="1.44248 -1.19924e-06 -0.0123353"/>
+  <statistic meansize="0.111728" extent="3.00824" center="1.44248 -1.19924e-06 -0.0123353"/>
   <asset>
     <mesh name="spinal" file="spinal.stl"/>
     <mesh name="vim4" file="vim4.stl"/>
@@ -10,24 +10,24 @@
   </asset>
   <worldbody>
     <body name="soft_link1" pos="0 0 0.2">
-      <inertial pos="0.029375 0.000002 0" mass="0.0295" fullinertia="0.000027165 0.0000591975 0.00005751375 0.00000004125 0.0 -0.00000046125"/>
+      <inertial pos="0.029375 0.000002 0" mass="0.031375" fullinertia="0.000027165 0.0000591975 0.00005751375 0.00000004125 0.0 -0.00000046125"/>
       <freejoint/>
       <geom name="soft_link1" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
       <geom name="leg1" size="0.01 0.01 0.06" pos="0 0 -0.101" type="box" rgba="0.25 0.25 0.3 1" contype="1" conaffinity="0"/>
       <body name="soft_link2" pos="0.05875 0 0">
-        <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+        <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.06275" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
         <joint name="soft_joint2" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
         <geom name="soft_link2" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
         <body name="soft_link3" pos="0.1175 0 0">
-          <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+          <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.06275" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
           <joint name="soft_joint3" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
           <geom name="soft_link3" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
           <body name="soft_link4" pos="0.1175 0 0">
-            <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+            <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.06275" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
             <joint name="soft_joint4" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
             <geom name="soft_link4" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
             <body name="soft_link5" pos="0.1175 0 0">
-              <inertial pos="0.182351 2.26114e-07 -0.0281522" quat="0.490309 0.509512 0.509772 0.490028" mass="0.52186" diaginertia="0.00598323 0.00428069 0.00208263"/>
+              <inertial pos="0.181224 2.2916e-07 -0.0241569" quat="0.48878 0.510976 0.51123 0.48851" mass="0.61311" diaginertia="0.00656405 0.00480622 0.00213791"/>
               <joint name="soft_joint5" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
               <geom name="soft_link5" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
               <geom name="servo_link1" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
@@ -41,19 +41,19 @@
                 <site name="rotor1" pos="0 0 0"/>
               </body>
               <body name="soft_link7" pos="0.35828 0 -0.0127246">
-                <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                 <joint name="soft_joint7" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                 <geom name="soft_link7" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                 <body name="soft_link8" pos="0.1175 0 0">
-                  <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                  <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                   <joint name="soft_joint8" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                   <geom name="soft_link8" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                   <body name="soft_link9" pos="0.1175 0 0">
-                    <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                    <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                     <joint name="soft_joint9" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                     <geom name="soft_link9" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                     <body name="soft_link10" pos="0.1175 0 0">
-                      <inertial pos="0.196808 0.000265429 -0.0183805" quat="0.499678 0.501221 0.501567 0.497525" mass="0.653881" diaginertia="0.00982795 0.00828424 0.00197176"/>
+                      <inertial pos="0.19566 0.000230347 -0.0157894" quat="0.50006 0.500711 0.501026 0.498198" mass="0.753631" diaginertia="0.0110557 0.00947737 0.00200642"/>
                       <joint name="soft_joint10" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                       <geom name="soft_link10" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                       <geom name="servo_link2" size="0.078 0.03 0.005" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
@@ -69,19 +69,19 @@
                         <site name="rotor2" pos="0 0 0"/>
                       </body>
                       <body name="soft_link12" pos="0.41828 0 0.0127246">
-                        <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                        <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                         <joint name="soft_joint12" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                         <geom name="soft_link12" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                         <body name="soft_link13" pos="0.1175 0 0">
-                          <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                          <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                           <joint name="soft_joint13" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                           <geom name="soft_link13" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                           <body name="soft_link14" pos="0.1175 0 0">
-                            <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                            <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                             <joint name="soft_joint14" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                             <geom name="soft_link14" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                             <body name="soft_link15" pos="0.1175 0 0">
-                              <inertial pos="0.182351 2.26114e-07 -0.0281522" quat="0.490309 0.509512 0.509772 0.490028" mass="0.52186" diaginertia="0.00598323 0.00428069 0.00208263"/>
+                              <inertial pos="0.179389 2.5056e-07 -0.0238649" quat="0.487012 0.512659 0.512914 0.486743" mass="0.62061" diaginertia="0.00673922 0.00497931 0.00214"/>
                               <joint name="soft_joint15" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                               <geom name="soft_link15" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                               <geom name="servo_link3" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>
@@ -95,19 +95,19 @@
                                 <site name="rotor3" pos="0 0 0"/>
                               </body>
                               <body name="soft_link17" pos="0.35828 0 -0.0127246">
-                                <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                                <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                                 <joint name="soft_joint17" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                 <geom name="soft_link17" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                 <body name="soft_link18" pos="0.1175 0 0">
-                                  <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                                  <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                                   <joint name="soft_joint18" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                   <geom name="soft_link18" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                   <body name="soft_link19" pos="0.1175 0 0">
-                                    <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.059" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
+                                    <inertial pos="0.05875 2e-06 0" quat="0.558736 0.433814 0.558399 0.433371" mass="0.07775" diaginertia="0.000474525 0.000459165 5.43297e-05"/>
                                     <joint name="soft_joint19" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                     <geom name="soft_link19" size="0.05875 0.015 0.02" pos="0.05875 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                     <body name="soft_link20" pos="0.1175 0 0">
-                                      <inertial pos="0.159355 1.33354e-07 -0.015461" quat="0.5847 0.397794 0.398117 0.584284" mass="0.44243" diaginertia="0.00350163 0.00289875 0.000880724"/>
+                                      <inertial pos="0.15718 1.462e-07 -0.0128626" quat="0.572247 0.415479 0.415778 0.571873" mass="0.531805" diaginertia="0.00391483 0.00324184 0.000950835"/>
                                       <joint name="soft_joint20" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" damping="150" frictionloss="0.1"/>
                                       <geom name="soft_link20" size="0.029375 0.015 0.02" pos="0.029375 0 0" type="box" rgba="0.2 0.55 0.95 1" contype="1" conaffinity="0"/>
                                       <geom name="servo_link4" size="0.048 0.025 0.025" pos="0.11545 0 0" type="box" rgba="0.95 0.55 0.2 1" contype="1" conaffinity="0"/>

@@ -53,6 +53,7 @@
       rotor_offset_x:=0.0735
       tilt_angle:=-0.174
       prev_tilt_angle:=0.174
+      soft_weight_sum:=0.311
       gimbal_mesh:=package://hydrus/urdf/mesh/5inch_propeller_duct_right_v2.dae
       propeller_mesh:=package://hydrus/urdf/mesh/TriBlade_5045.dae">
 
@@ -113,7 +114,7 @@
     <link name="soft_link${s0}">
       <inertial>
         <origin xyz="${soft_l1 * 0.5} 0.000002 0" rpy="0 0 0"/>
-        <mass value="0.0295"/>
+        <mass value="${soft_weight_sum/4/2}"/>
         <inertia
             ixx="0.000027165" ixy="0.00000004125" ixz="0.0"
             iyy="0.0000591975" iyz="-0.00000046125"
@@ -136,7 +137,7 @@
     <link name="soft_link${s1}">
       <inertial>
         <origin xyz="${soft_l2 * 0.5} 0.000002 0" rpy="0 0 0"/>
-        <mass value="0.059"/>
+        <mass value="${soft_weight_sum/4}"/>
         <inertia
             ixx="0.00005433" ixy="0.00000033" ixz="0.0"
             iyy="0.00047358" iyz="-0.00000369"
@@ -159,7 +160,7 @@
     <link name="soft_link${s2}">
       <inertial>
         <origin xyz="${soft_l3 * 0.5} 0.000002 0" rpy="0 0 0"/>
-        <mass value="0.059"/>
+        <mass value="${soft_weight_sum/4}"/>
         <inertia
             ixx="0.00005433" ixy="0.00000033" ixz="0.0"
             iyy="0.00047358" iyz="-0.00000369"
@@ -182,7 +183,7 @@
     <link name="soft_link${s3}">
       <inertial>
         <origin xyz="${soft_l4 * 0.5} 0.000002 0" rpy="0 0 0"/>
-        <mass value="0.059"/>
+        <mass value="${soft_weight_sum/4}"/>
         <inertia
             ixx="0.00005433" ixy="0.00000033" ixz="0.0"
             iyy="0.00047358" iyz="-0.00000369"
@@ -205,7 +206,7 @@
     <link name="soft_link${s4}">
       <inertial>
         <origin xyz="${soft_l5 * 0.5} 0.000002 0" rpy="0 0 0"/>
-        <mass value="0.0295"/>
+        <mass value="${soft_weight_sum/4/2}"/>
         <inertia
             ixx="0.000027165" ixy="0.00000004125" ixz="0.0"
             iyy="0.0000591975" iyz="-0.00000046125"
@@ -383,7 +384,8 @@
     <link name="gimbal_link${i}">
       <inertial>
         <origin xyz="0.0735 0 0" rpy="0 0 0"/>
-        <mass value="0.222"/>
+        <!-- 0.032 is the mass of ESC -->
+        <mass value="${0.222 + 0.032}"/>
         <inertia
             ixx="0.00022661" ixy="0.0" ixz="0.0"
             iyy="0.00015451" iyz="0.0"
