@@ -137,7 +137,7 @@ class EstimateJointStatesNode:
         self.w_prev = float(rospy.get_param("~weight_previous", 0.02))
         self.w_pose_pos = float(rospy.get_param("~weight_pose_pos", 500.0))
         self.w_sum_360 = float(rospy.get_param("~weight_sum_360", 120.0))
-        self.w_adjacent = float(rospy.get_param("~weight_adjacent", 5))
+        self.w_adjacent = float(rospy.get_param("~weight_adjacent", 50))
         self.minimize_maxiter = int(rospy.get_param("~ik_max_iters", 120))
         self.joint_lpf_alpha = self._clamp(
             float(rospy.get_param("~joint_lpf_alpha", 0.2)), 0.0, 1.0
