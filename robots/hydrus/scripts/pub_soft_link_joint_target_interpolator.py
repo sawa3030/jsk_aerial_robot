@@ -26,6 +26,25 @@ class PubSoftLinkJointTargetInterpolator(object):
         "soft_joint20",
     ]
 
+    FIXED_TARGET = [
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0, 
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+        22.5 * math.pi / 180.0,
+    ]
+
     # 四角・検証した
     # FIXED_TARGET = [
     #     0.774,
@@ -110,36 +129,38 @@ class PubSoftLinkJointTargetInterpolator(object):
     #     # 0.020912614675746767,
     # ]
 
-    # ひょうたん型（微妙）
-    FIXED_TARGET = [
-        0.6319032719917186, 
-        0.4747083935062192, 
-        -0.03217889642088992, 
-        -0.1709806088575641,
-        -0.08678767447058687,
-        0.2506095907464262,
-        0.9464722722649892,
-        1.112192152535221,
-        0.5024190851016197,
-        0.3305181262930987,
-        0.1657310365042583,
-        -0.11463426490730001,
-        0.23227979333272689,
-        0.33692812239370007,
-        0.8390933913969154,
-        0.9488552435402303
-    ]
+    # ひょうたん型・検証済
+    # FIXED_TARGET = [
+    #     0.6319032719917186, 
+    #     0.6747083935062192, 
+    #     -0.03217889642088992, 
+    #     -0.1709806088575641,
+    #     -0.08678767447058687,
+    #     0.2506095907464262,
+    #     1.1464722722649892,
+    #     1.112192152535221,
+    #     0.7024190851016197,
+    #     0.7305181262930987,
+    #     -0.1657310365042583,
+    #     -0.11463426490730001,
+    #     -0.23227979333272689,
+    #     -0.33692812239370007,
+    #     1.190933913969154,
+    #     1.1488552435402303
+    # ]
 
     def __init__(self):
         rospy.init_node("pub_soft_link_joint_target_interpolator")
 
-        self.publish_hz = rospy.get_param("~publish_hz", 200.0)
-        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 2.0))
+        self.publish_hz = rospy.get_param("~publish_hz", 10.0)
+        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 10.0))
         self.output_topic = rospy.get_param("~output_topic", "soft_joint_reference_interp")
         self.joint_states_topic = rospy.get_param("~joint_states_topic", "joint_states")
         self.joint_names = list(self.TARGET_JOINT_NAMES)
         self.current = [math.radians(22.5)] * len(self.joint_names)
         self.target = list(self.current)
+        self.start = list(self.current)
+        self.interp_start_time = rospy.Time.now()
         self.initialized_from_joint_states = False
 
         self.pub = rospy.Publisher(self.output_topic, JointState, queue_size=1)
@@ -151,6 +172,8 @@ class PubSoftLinkJointTargetInterpolator(object):
         if mode != "preset":
             rospy.logwarn("unsupported mode '%s', fallback to 'preset'", mode)
         self.target = list(self.FIXED_TARGET)
+        self.start = list(self.current)
+        self.interp_start_time = rospy.Time.now()
 
         rospy.loginfo("interpolator mode: preset")
         rospy.loginfo("publish interpolated target to: %s", self.output_topic)
@@ -170,18 +193,25 @@ class PubSoftLinkJointTargetInterpolator(object):
             return
 
         self.current = [name_to_pos[name] for name in self.joint_names]
+        self.start = list(self.current)
+        self.interp_start_time = rospy.Time.now()
         self.initialized_from_joint_states = True
         rospy.loginfo("initialized current joints from %s", self.joint_states_topic)
 
     def _blend_step(self):
-        alpha = 1.0 / max(1.0, self.publish_hz * self.transition_time)
+        elapsed = (rospy.Time.now() - self.interp_start_time).to_sec()
+        alpha = elapsed / self.transition_time
         alpha = max(0.0, min(1.0, alpha))
         for i in range(len(self.current)):
-            self.current[i] += alpha * (self.target[i] - self.current[i])
+            self.current[i] = self.start[i] + alpha * (self.target[i] - self.start[i])
 
     def run(self):
         rate = rospy.Rate(self.publish_hz)
         while not rospy.is_shutdown():
+            if not self.initialized_from_joint_states:
+                rate.sleep()
+                continue
+
             self._blend_step()
 
             msg = JointState()
