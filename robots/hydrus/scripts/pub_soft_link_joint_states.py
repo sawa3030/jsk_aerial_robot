@@ -41,7 +41,7 @@ class PubSoftLinkJointStates(object):
         self.w_pose_pos = rospy.get_param("~ik_weight_pose_pos", 50.0)
         self.w_pose_yaw = rospy.get_param("~ik_weight_pose_yaw", 20.0)
         self.w_sum_360 = rospy.get_param("~ik_weight_sum_360", 120.0)
-        self.w_rotor13 = rospy.get_param("~ik_weight_rotor13", 250.0)
+        self.w_interp_ref = rospy.get_param("~ik_weight_interp_ref", 40.0)
         self.w_dash_sym = rospy.get_param("~ik_weight_dash_sym", 80.0)
         self.w_reg = rospy.get_param("~ik_weight_reg", 1.0)
         self.w_adjacent = rospy.get_param("~ik_weight_adjacent", 5.0)
@@ -51,6 +51,9 @@ class PubSoftLinkJointStates(object):
         self.soft_joint_names = list(self.logical_joint_names)
         self._last_target_distance = None
         self._last_joint_pos = [math.radians(22.5)] * len(self.soft_joint_names)
+        self.interp_ref_topic = rospy.get_param("~interp_ref_topic", "soft_joint_reference_interp")
+        self._interp_ref_map = None
+        self._needs_update = True
 
         self.soft_l1 = rospy.get_param("~soft_l1", DEFAULT_SOFT_L1)
         self.soft_l2 = rospy.get_param("~soft_l2", DEFAULT_SOFT_L2)
@@ -70,6 +73,7 @@ class PubSoftLinkJointStates(object):
             self.joint_control_topic_name = "joint_states"
         self.target_soft_joint_pub = rospy.Publisher("target_soft_joints_ctrl", JointState, queue_size=1)
         self.distance_sub = rospy.Subscriber(self.distance_topic, Float64, self.distance_cb, queue_size=1)
+        self.interp_ref_sub = rospy.Subscriber(self.interp_ref_topic, JointState, self.interp_ref_cb, queue_size=1)
 
         rospy.loginfo(
             "publish %s soft joints to %s at %.3f Hz (target rotor1-rotor3 distance: %.4f m)",
@@ -79,9 +83,26 @@ class PubSoftLinkJointStates(object):
             self.target_rotor13_distance,
         )
         rospy.loginfo("subscribe target distance topic: %s", self.distance_topic)
+        rospy.loginfo("subscribe interpolated reference topic: %s", self.interp_ref_topic)
 
     def distance_cb(self, msg):
         self.target_rotor13_distance = msg.data
+
+    def interp_ref_cb(self, msg):
+        if not msg.name or not msg.position:
+            return
+        name_to_pos = {}
+        max_len = min(len(msg.name), len(msg.position))
+        for i in range(max_len):
+            name_to_pos[msg.name[i]] = float(msg.position[i])
+        self._interp_ref_map = name_to_pos
+        self._needs_update = True
+        self._update_and_publish_once()
+
+    def _current_interp_ref(self):
+        if not self._interp_ref_map:
+            return [math.radians(22.5)] * len(self.logical_joint_names)
+        return [self._interp_ref_map.get(name, math.radians(22.5)) for name in self.logical_joint_names]
 
     def run(self):
         rate = rospy.Rate(self.publish_hz)
@@ -91,17 +112,22 @@ class PubSoftLinkJointStates(object):
                 self._last_target_distance is None
                 or abs(self.target_rotor13_distance - self._last_target_distance) > 1e-6
             ):
-                self._last_joint_pos = self.compute_joint_positions(self.target_rotor13_distance)
-                self._last_target_distance = self.target_rotor13_distance
-            joint_pos = list(self._last_joint_pos)
-
-            msg = JointState()
-            msg.header.stamp = rospy.Time.now()
-            msg.name = list(self.soft_joint_names)
-            msg.position = joint_pos
-            self.joint_states_pub.publish(msg)
-            self.target_soft_joint_pub.publish(msg)
+                self._needs_update = True
+            self._update_and_publish_once()
             rate.sleep()
+
+    def _update_and_publish_once(self):
+        if self._needs_update:
+            self._last_joint_pos = self.compute_joint_positions(self.target_rotor13_distance)
+            self._last_target_distance = self.target_rotor13_distance
+            self._needs_update = False
+
+        msg = JointState()
+        msg.header.stamp = rospy.Time.now()
+        msg.name = list(self.soft_joint_names)
+        msg.position = list(self._last_joint_pos)
+        self.joint_states_pub.publish(msg)
+        self.target_soft_joint_pub.publish(msg)
 
     def _yaw_from_rot(self, r):
         return math.atan2(r[1][0], r[0][0])
@@ -158,12 +184,11 @@ class PubSoftLinkJointStates(object):
             "joint_pos": joint_pos_map,
         }
 
-    def ik_cost(self, joints, target_distance, ref_joints):
+    def ik_cost(self, joints, target_distance, ref_joints, interp_ref_joints):
         fk = self.forward_kinematics(joints)
         end_x, end_y, end_yaw, _ = fk["end_pose"]
         rotor1_dash = fk["rotor_dash"][0]
         rotor3_dash = fk["rotor_dash"][2]
-        rotor13 = math.hypot(rotor3_dash[0] - rotor1_dash[0], rotor3_dash[1] - rotor1_dash[1])
 
         module4_first = fk["joint_pos"]["soft_joint17"]
         module1_last = fk["joint_pos"]["soft_joint5"]
@@ -181,7 +206,6 @@ class PubSoftLinkJointStates(object):
             soft_l5=self.soft_l5,
         )
         pose_yaw_err2 = self._wrap_to_pi(end_yaw) ** 2
-        rotor13_err2 = (rotor13 - target_distance) ** 2
         adjacent_err2 = 0.0
         for module_i in range(len(self.MODULE_JOINT_GROUPS)):
             off = 4 * module_i
@@ -191,18 +215,19 @@ class PubSoftLinkJointStates(object):
                 + (joints[off + 2] - joints[off + 3]) ** 2
             )
         reg = sum((q - q_ref) ** 2 for q, q_ref in zip(joints, ref_joints))
+        interp_ref_err2 = sum((q - q_ref) ** 2 for q, q_ref in zip(joints, interp_ref_joints))
 
         return (
             self.w_pose_pos * pose_pos_err2
             + self.w_pose_yaw * pose_yaw_err2
             + self.w_sum_360 * sum_360_err2
-            + self.w_rotor13 * rotor13_err2
-            + self.w_dash_sym * dash_sym_err2
+            # + self.w_dash_sym * dash_sym_err2
             + self.w_adjacent * adjacent_err2
-            + self.w_reg * reg
+            # + self.w_reg * reg
+            + self.w_interp_ref * interp_ref_err2
         )
 
-    def solve_ik(self, target_distance):
+    def solve_ik(self, target_distance, interp_ref_joints):
         q_ref = [math.radians(22.5)] * len(self.logical_joint_names)
         max_abs = abs(self.max_joint_abs_rad)
         seeds = [list(q_ref), [0.0] * len(q_ref), [-v for v in q_ref]]
@@ -210,10 +235,10 @@ class PubSoftLinkJointStates(object):
         bounds = [(-max_abs, max_abs)] * len(self.logical_joint_names)
 
         def objective(q):
-            return self.ik_cost(q, target_distance, q_ref)
+            return self.ik_cost(q, target_distance, q_ref, interp_ref_joints)
 
         best_q = list(q_ref)
-        best_cost = self.ik_cost(best_q, target_distance, q_ref)
+        best_cost = self.ik_cost(best_q, target_distance, q_ref, interp_ref_joints)
 
         for seed in seeds:
             x0 = [max(-max_abs, min(max_abs, v)) for v in seed]
@@ -228,7 +253,7 @@ class PubSoftLinkJointStates(object):
                 cand_q = [float(v) for v in res.x]
             else:
                 cand_q = list(x0)
-            cand_cost = self.ik_cost(cand_q, target_distance, q_ref)
+            cand_cost = self.ik_cost(cand_q, target_distance, q_ref, interp_ref_joints)
 
             if cand_cost < best_cost:
                 best_cost = cand_cost
@@ -237,7 +262,8 @@ class PubSoftLinkJointStates(object):
         return best_q
 
     def compute_joint_positions(self, target_distance):
-        q = self.solve_ik(target_distance)
+        interp_ref_joints = self._current_interp_ref()
+        q = self.solve_ik(target_distance, interp_ref_joints)
         fk = self.forward_kinematics(q)
         rotor1 = fk["rotor_dash"][0]
         rotor3 = fk["rotor_dash"][2]
