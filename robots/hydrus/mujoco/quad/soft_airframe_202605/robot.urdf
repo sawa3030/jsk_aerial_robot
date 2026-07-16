@@ -94,7 +94,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link1"/>
     <child link="soft_link2"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -102,7 +102,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link2"/>
     <child link="soft_link3"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -110,7 +110,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link3"/>
     <child link="soft_link4"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -118,29 +118,29 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link4"/>
     <child link="soft_link5"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
   <link name="soft_link1">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.031375"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link1">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link1">
@@ -152,23 +152,23 @@
   </gazebo>
   <link name="soft_link2">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.06275"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link2">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link2">
@@ -180,23 +180,23 @@
   </gazebo>
   <link name="soft_link3">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.06275"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link3">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link3">
@@ -208,23 +208,23 @@
   </gazebo>
   <link name="soft_link4">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.06275"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link4">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link4">
@@ -236,23 +236,23 @@
   </gazebo>
   <link name="soft_link5">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.031375"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link5">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link5">
@@ -265,27 +265,27 @@
   <joint name="servo_joint1" type="fixed">
     <parent link="soft_link5"/>
     <child link="servo_link1"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
   </joint>
   <link name="servo_link1">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
       <mass value="0.189"/>
       <inertia ixx="0.00006467" ixy="0.0" ixz="0.0" iyy="0.00012455" iyz="0.0" izz="0.00009760"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </visual>
     <collision name="servo_link1">
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </collision>
   </link>
   <gazebo reference="servo_link1">
@@ -331,7 +331,7 @@
   <joint name="leg_joint2" type="fixed">
     <parent link="soft_link5"/>
     <child link="leg2"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 -0.041"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 -0.041"/>
   </joint>
   <link name="leg2">
     <inertial>
@@ -364,7 +364,7 @@
   <joint name="gimbal_joint1" type="fixed">
     <parent link="servo_link1"/>
     <child link="gimbal_link1"/>
-    <origin rpy="0 0.174 0" xyz="0.096 0 0.012724564326109165"/>
+    <origin rpy="0 0.174 0" xyz="0.099 0 0.012724564326109165"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.9" friction="0.1"/>
   </joint>
@@ -430,13 +430,13 @@
   <joint name="soft_joint6" type="fixed">
     <parent link="gimbal_link1"/>
     <child link="soft_link6"/>
-    <origin rpy="0 -0.174 0" xyz="0.147 0 0.0"/>
+    <origin rpy="0 -0.174 0" xyz="0.15 0 0.0"/>
   </joint>
   <joint name="soft_joint7" type="revolute">
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link6"/>
     <child link="soft_link7"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -444,7 +444,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link7"/>
     <child link="soft_link8"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -452,7 +452,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link8"/>
     <child link="soft_link9"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -460,29 +460,29 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link9"/>
     <child link="soft_link10"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
   <link name="soft_link6">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link6">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link6">
@@ -494,23 +494,23 @@
   </gazebo>
   <link name="soft_link7">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link7">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link7">
@@ -522,23 +522,23 @@
   </gazebo>
   <link name="soft_link8">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link8">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link8">
@@ -550,23 +550,23 @@
   </gazebo>
   <link name="soft_link9">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link9">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link9">
@@ -578,23 +578,23 @@
   </gazebo>
   <link name="soft_link10">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link10">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link10">
@@ -607,27 +607,27 @@
   <joint name="servo_joint2" type="fixed">
     <parent link="soft_link10"/>
     <child link="servo_link2"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
   </joint>
   <link name="servo_link2">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
       <mass value="0.229"/>
       <inertia ixx="0.00006467" ixy="0.0" ixz="0.0" iyy="0.00012455" iyz="0.0" izz="0.00009760"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.156 0.06 0.01"/>
+        <box size="0.149 0.06 0.01"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </visual>
     <collision name="servo_link2">
       <geometry>
-        <box size="0.156 0.06 0.01"/>
+        <box size="0.149 0.06 0.01"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </collision>
   </link>
   <gazebo reference="servo_link2">
@@ -673,7 +673,7 @@
   <joint name="leg_joint4" type="fixed">
     <parent link="soft_link10"/>
     <child link="leg4"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 -0.041"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 -0.041"/>
   </joint>
   <link name="leg4">
     <inertial>
@@ -706,7 +706,7 @@
   <joint name="gimbal_joint2" type="fixed">
     <parent link="servo_link2"/>
     <child link="gimbal_link2"/>
-    <origin rpy="0 -0.174 0" xyz="0.156 0 -0.012724564326109165"/>
+    <origin rpy="0 -0.174 0" xyz="0.149 0 -0.012724564326109165"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.9" friction="0.1"/>
   </joint>
@@ -772,13 +772,13 @@
   <joint name="soft_joint11" type="fixed">
     <parent link="gimbal_link2"/>
     <child link="soft_link11"/>
-    <origin rpy="0 0.174 0" xyz="0.147 0 0.0"/>
+    <origin rpy="0 0.174 0" xyz="0.15 0 0.0"/>
   </joint>
   <joint name="soft_joint12" type="revolute">
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link11"/>
     <child link="soft_link12"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -786,7 +786,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link12"/>
     <child link="soft_link13"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -794,7 +794,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link13"/>
     <child link="soft_link14"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -802,29 +802,29 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link14"/>
     <child link="soft_link15"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
   <link name="soft_link11">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link11">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link11">
@@ -836,23 +836,23 @@
   </gazebo>
   <link name="soft_link12">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link12">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link12">
@@ -864,23 +864,23 @@
   </gazebo>
   <link name="soft_link13">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link13">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link13">
@@ -892,23 +892,23 @@
   </gazebo>
   <link name="soft_link14">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link14">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link14">
@@ -920,23 +920,23 @@
   </gazebo>
   <link name="soft_link15">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link15">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link15">
@@ -949,27 +949,27 @@
   <joint name="servo_joint3" type="fixed">
     <parent link="soft_link15"/>
     <child link="servo_link3"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
   </joint>
   <link name="servo_link3">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
       <mass value="0.189"/>
       <inertia ixx="0.00006467" ixy="0.0" ixz="0.0" iyy="0.00012455" iyz="0.0" izz="0.00009760"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </visual>
     <collision name="servo_link3">
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </collision>
   </link>
   <gazebo reference="servo_link3">
@@ -1015,7 +1015,7 @@
   <joint name="leg_joint6" type="fixed">
     <parent link="soft_link15"/>
     <child link="leg6"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 -0.041"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 -0.041"/>
   </joint>
   <link name="leg6">
     <inertial>
@@ -1048,7 +1048,7 @@
   <joint name="gimbal_joint3" type="fixed">
     <parent link="servo_link3"/>
     <child link="gimbal_link3"/>
-    <origin rpy="0 0.174 0" xyz="0.096 0 0.012724564326109165"/>
+    <origin rpy="0 0.174 0" xyz="0.099 0 0.012724564326109165"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.9" friction="0.1"/>
   </joint>
@@ -1114,13 +1114,13 @@
   <joint name="soft_joint16" type="fixed">
     <parent link="gimbal_link3"/>
     <child link="soft_link16"/>
-    <origin rpy="0 -0.174 0" xyz="0.147 0 0.0"/>
+    <origin rpy="0 -0.174 0" xyz="0.15 0 0.0"/>
   </joint>
   <joint name="soft_joint17" type="revolute">
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link16"/>
     <child link="soft_link17"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -1128,7 +1128,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link17"/>
     <child link="soft_link18"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -1136,7 +1136,7 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link18"/>
     <child link="soft_link19"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
@@ -1144,29 +1144,29 @@
     <limit effort="5.0" lower="-3.141592653589793" upper="3.141592653589793" velocity="0.5"/>
     <parent link="soft_link19"/>
     <child link="soft_link20"/>
-    <origin rpy="0 0 0" xyz="0.1175 0 0"/>
+    <origin rpy="0 0 0" xyz="0.123 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2" friction="0.1"/>
   </joint>
   <link name="soft_link16">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link16">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link16">
@@ -1178,23 +1178,23 @@
   </gazebo>
   <link name="soft_link17">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link17">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link17">
@@ -1206,23 +1206,23 @@
   </gazebo>
   <link name="soft_link18">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link18">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link18">
@@ -1234,23 +1234,23 @@
   </gazebo>
   <link name="soft_link19">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.05875 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0.000002 0"/>
       <mass value="0.07775"/>
       <inertia ixx="0.00005433" ixy="0.00000033" ixz="0.0" iyy="0.00047358" iyz="-0.00000369" izz="0.00046011"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </visual>
     <collision name="soft_link19">
       <geometry>
-        <box size="0.1175 0.03 0.04"/>
+        <box size="0.123 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0615 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link19">
@@ -1262,23 +1262,23 @@
   </gazebo>
   <link name="soft_link20">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.029375 0.000002 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0.000002 0"/>
       <mass value="0.038875"/>
       <inertia ixx="0.000027165" ixy="0.00000004125" ixz="0.0" iyy="0.0000591975" iyz="-0.00000046125" izz="0.00005751375"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </visual>
     <collision name="soft_link20">
       <geometry>
-        <box size="0.05875 0.03 0.04"/>
+        <box size="0.0615 0.03 0.04"/>
       </geometry>
       <material name="soft_link_material"/>
-      <origin rpy="0 0 0" xyz="0.029375 0 0"/>
+      <origin rpy="0 0 0" xyz="0.03075 0 0"/>
     </collision>
   </link>
   <gazebo reference="soft_link20">
@@ -1291,27 +1291,27 @@
   <joint name="servo_joint4" type="fixed">
     <parent link="soft_link20"/>
     <child link="servo_link4"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 0"/>
   </joint>
   <link name="servo_link4">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
       <mass value="0.189"/>
       <inertia ixx="0.00006467" ixy="0.0" ixz="0.0" iyy="0.00012455" iyz="0.0" izz="0.00009760"/>
     </inertial>
     <visual>
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </visual>
     <collision name="servo_link4">
       <geometry>
-        <box size="0.096 0.05 0.05"/>
+        <box size="0.099 0.05 0.05"/>
       </geometry>
       <material name="servo_link_material"/>
-      <origin rpy="0 0 0" xyz="0.0567 0 0"/>
+      <origin rpy="0 0 0" xyz="0.0495 0 0"/>
     </collision>
   </link>
   <gazebo reference="servo_link4">
@@ -1357,7 +1357,7 @@
   <joint name="leg_joint8" type="fixed">
     <parent link="soft_link20"/>
     <child link="leg8"/>
-    <origin rpy="0 0 0" xyz="0.05875 0 -0.041"/>
+    <origin rpy="0 0 0" xyz="0.0615 0 -0.041"/>
   </joint>
   <link name="leg8">
     <inertial>
@@ -1390,7 +1390,7 @@
   <joint name="gimbal_joint4" type="fixed">
     <parent link="servo_link4"/>
     <child link="gimbal_link4"/>
-    <origin rpy="0 -0.174 0" xyz="0.096 0 -0.012724564326109165"/>
+    <origin rpy="0 -0.174 0" xyz="0.099 0 -0.012724564326109165"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.9" friction="0.1"/>
   </joint>
