@@ -4,17 +4,19 @@
 import math
 
 DEFAULT_MODULE_PARAMS = [
-    {"parent_to_servo_x": 0.0, "servo_size_x": 0.096},
-    {"parent_to_servo_x": 0.147, "servo_size_x": 0.156},
-    {"parent_to_servo_x": 0.147, "servo_size_x": 0.096},
-    {"parent_to_servo_x": 0.147, "servo_size_x": 0.096},
+    {"parent_to_soft_root_x": 0.150, "servo_size_x": 0.099},
+    {"parent_to_soft_root_x": 0.150, "servo_size_x": 0.149},
+    {"parent_to_soft_root_x": 0.150, "servo_size_x": 0.099},
+    {"parent_to_soft_root_x": 0.150, "servo_size_x": 0.099},
 ]
-# from robots/hydrus/urdf/soft_link.urdf.xacro (soft_link_module defaults)
-DEFAULT_SOFT_L1 = 0.05875
-DEFAULT_SOFT_L2 = 0.1175
-DEFAULT_SOFT_L3 = 0.1175
-DEFAULT_SOFT_L4 = 0.1175
-DEFAULT_SOFT_L5 = 0.05875
+# from robots/hydrus/urdf/soft_link.urdf.xacro and
+# robots/hydrus/robots/quad/soft_airframe_202605/robot.urdf.xacro
+DEFAULT_SOFT_L1 = 0.0615
+DEFAULT_SOFT_L2 = 0.123
+DEFAULT_SOFT_L3 = 0.123
+DEFAULT_SOFT_L4 = 0.123
+DEFAULT_SOFT_L5 = 0.0615
+DEFAULT_ROTOR_OFFSET_X = 0.0735
 
 
 def rot(theta):
@@ -37,7 +39,7 @@ def rotate_vec(r, v):
     )
 
 
-def compute_end_pose_error_sq(
+def compute_planar_chain_state(
     joints,
     module_params=None,
     soft_l1=DEFAULT_SOFT_L1,
@@ -45,6 +47,7 @@ def compute_end_pose_error_sq(
     soft_l3=DEFAULT_SOFT_L3,
     soft_l4=DEFAULT_SOFT_L4,
     soft_l5=DEFAULT_SOFT_L5,
+    rotor_offset_x=DEFAULT_ROTOR_OFFSET_X,
 ):
     if module_params is None:
         module_params = DEFAULT_MODULE_PARAMS
@@ -52,11 +55,12 @@ def compute_end_pose_error_sq(
     p = (0.0, 0.0)
     r = ((1.0, 0.0), (0.0, 1.0))
     theta_raw = 0.0
-
     soft_lengths = [soft_l1, soft_l2, soft_l3, soft_l4, soft_l5]
+    gimbal_positions = []
+    rotor_positions = []
 
     for module_i, module in enumerate(module_params):
-        module_offset = rotate_vec(r, (module["parent_to_servo_x"], 0.0))
+        module_offset = rotate_vec(r, (module["parent_to_soft_root_x"], 0.0))
         p = (p[0] + module_offset[0], p[1] + module_offset[1])
 
         module_joints = joints[4 * module_i : 4 * module_i + 4]
@@ -68,10 +72,64 @@ def compute_end_pose_error_sq(
                 theta_raw += q
                 r = mat_mul(r, rot(q))
 
-        tail = rotate_vec(r, (module["servo_size_x"], 0.0))
-        p = (p[0] + tail[0], p[1] + tail[1])
+        # In the planar reduction, the gimbal origin sits at the servo tip.
+        servo_tail = rotate_vec(r, (module["servo_size_x"], 0.0))
+        p = (p[0] + servo_tail[0], p[1] + servo_tail[1])
+        gimbal_positions.append(p)
 
-    end_x, end_y = p
+        rotor_offset = rotate_vec(r, (rotor_offset_x, 0.0))
+        rotor_positions.append((p[0] + rotor_offset[0], p[1] + rotor_offset[1]))
+
+    return {
+        "end_position": p,
+        "rotation": r,
+        "theta_raw": theta_raw,
+        "gimbals": gimbal_positions,
+        "rotors": rotor_positions,
+    }
+
+
+def compute_end_pose_closure_residuals(
+    joints,
+    module_params=None,
+    soft_l1=DEFAULT_SOFT_L1,
+    soft_l2=DEFAULT_SOFT_L2,
+    soft_l3=DEFAULT_SOFT_L3,
+    soft_l4=DEFAULT_SOFT_L4,
+    soft_l5=DEFAULT_SOFT_L5,
+):
+    fk = compute_planar_chain_state(
+        joints,
+        module_params=module_params,
+        soft_l1=soft_l1,
+        soft_l2=soft_l2,
+        soft_l3=soft_l3,
+        soft_l4=soft_l4,
+        soft_l5=soft_l5,
+    )
+    end_x, end_y = fk["gimbals"][-1]
+    theta_residual = fk["theta_raw"] - 2.0 * math.pi
+    return end_x, end_y, theta_residual
+
+
+def compute_end_pose_error_sq(
+    joints,
+    module_params=None,
+    soft_l1=DEFAULT_SOFT_L1,
+    soft_l2=DEFAULT_SOFT_L2,
+    soft_l3=DEFAULT_SOFT_L3,
+    soft_l4=DEFAULT_SOFT_L4,
+    soft_l5=DEFAULT_SOFT_L5,
+):
+    end_x, end_y, theta_residual = compute_end_pose_closure_residuals(
+        joints,
+        module_params=module_params,
+        soft_l1=soft_l1,
+        soft_l2=soft_l2,
+        soft_l3=soft_l3,
+        soft_l4=soft_l4,
+        soft_l5=soft_l5,
+    )
     pose_pos_err2 = end_x * end_x + end_y * end_y
-    sum_360_err2 = (theta_raw - 2.0 * math.pi) ** 2
+    sum_360_err2 = theta_residual ** 2
     return pose_pos_err2, sum_360_err2

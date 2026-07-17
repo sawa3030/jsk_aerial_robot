@@ -9,11 +9,13 @@ from std_msgs.msg import Float64
 
 from fk import (
     DEFAULT_MODULE_PARAMS,
+    DEFAULT_ROTOR_OFFSET_X,
     DEFAULT_SOFT_L1,
     DEFAULT_SOFT_L2,
     DEFAULT_SOFT_L3,
     DEFAULT_SOFT_L4,
     DEFAULT_SOFT_L5,
+    compute_end_pose_closure_residuals,
     compute_end_pose_error_sq,
     mat_mul,
     rot,
@@ -60,8 +62,8 @@ class PubSoftLinkJointStates(object):
         self.soft_l3 = rospy.get_param("~soft_l3", DEFAULT_SOFT_L3)
         self.soft_l4 = rospy.get_param("~soft_l4", DEFAULT_SOFT_L4)
         self.soft_l5 = rospy.get_param("~soft_l5", DEFAULT_SOFT_L5)
-        self.rotor_offset_x = rospy.get_param("~rotor_offset_x", 0.0735)
-        self.module_params = list(DEFAULT_MODULE_PARAMS)
+        self.rotor_offset_x = rospy.get_param("~rotor_offset_x", DEFAULT_ROTOR_OFFSET_X)
+        self.module_params = [dict(module) for module in DEFAULT_MODULE_PARAMS]
 
         print("is_simulation: ", self.is_simulation())
 
@@ -150,7 +152,7 @@ class PubSoftLinkJointStates(object):
         soft_lengths = [self.soft_l1, self.soft_l2, self.soft_l3, self.soft_l4, self.soft_l5]
 
         for module_i, module in enumerate(self.module_params):
-            module_offset = rotate_vec(r, (module["parent_to_servo_x"], 0.0))
+            module_offset = rotate_vec(r, (module["parent_to_soft_root_x"], 0.0))
             p = (p[0] + module_offset[0], p[1] + module_offset[1])
 
             module_joints = joints[4 * module_i : 4 * module_i + 4]
@@ -184,18 +186,14 @@ class PubSoftLinkJointStates(object):
             "joint_pos": joint_pos_map,
         }
 
-    def ik_cost(self, joints, target_distance, ref_joints, interp_ref_joints):
+    def _compute_cost_terms(self, joints, target_distance, interp_ref_joints):
         fk = self.forward_kinematics(joints)
-        end_x, end_y, end_yaw, _ = fk["end_pose"]
         rotor1_dash = fk["rotor_dash"][0]
         rotor3_dash = fk["rotor_dash"][2]
+        rotor13 = math.hypot(rotor3_dash[0] - rotor1_dash[0], rotor3_dash[1] - rotor1_dash[1])
 
-        module4_first = fk["joint_pos"]["soft_joint17"]
-        module1_last = fk["joint_pos"]["soft_joint5"]
-        d1 = math.hypot(rotor1_dash[0] - module4_first[0], rotor1_dash[1] - module4_first[1])
-        d3 = math.hypot(rotor3_dash[0] - module1_last[0], rotor3_dash[1] - module1_last[1])
-        dash_sym_err2 = (d1 - d3) ** 2
-
+        distance_err2 = (rotor13 - target_distance) ** 2
+        interp_ref_err2 = sum((q - q_ref) ** 2 for q, q_ref in zip(joints, interp_ref_joints))
         pose_pos_err2, sum_360_err2 = compute_end_pose_error_sq(
             joints,
             module_params=self.module_params,
@@ -205,40 +203,37 @@ class PubSoftLinkJointStates(object):
             soft_l4=self.soft_l4,
             soft_l5=self.soft_l5,
         )
-        pose_yaw_err2 = self._wrap_to_pi(end_yaw) ** 2
-        adjacent_err2 = 0.0
-        for module_i in range(len(self.MODULE_JOINT_GROUPS)):
-            off = 4 * module_i
-            adjacent_err2 += (
-                (joints[off] - joints[off + 1]) ** 2
-                + (joints[off + 1] - joints[off + 2]) ** 2
-                + (joints[off + 2] - joints[off + 3]) ** 2
-            )
-        reg = sum((q - q_ref) ** 2 for q, q_ref in zip(joints, ref_joints))
-        interp_ref_err2 = sum((q - q_ref) ** 2 for q, q_ref in zip(joints, interp_ref_joints))
-
-        return (
-            self.w_pose_pos * pose_pos_err2
-            + self.w_pose_yaw * pose_yaw_err2
-            + self.w_sum_360 * sum_360_err2
-            # + self.w_dash_sym * dash_sym_err2
-            + self.w_adjacent * adjacent_err2
-            # + self.w_reg * reg
-            + self.w_interp_ref * interp_ref_err2
-        )
+        total = distance_err2 + self.w_interp_ref * interp_ref_err2
+        return total, distance_err2, interp_ref_err2, pose_pos_err2, sum_360_err2
 
     def solve_ik(self, target_distance, interp_ref_joints):
-        q_ref = [math.radians(22.5)] * len(self.logical_joint_names)
         max_abs = abs(self.max_joint_abs_rad)
-        seeds = [list(q_ref), [0.0] * len(q_ref), [-v for v in q_ref]]
+        q_ref = [math.radians(22.5)] * len(self.logical_joint_names)
+        seeds = [list(interp_ref_joints), list(self._last_joint_pos), list(q_ref), [0.0] * len(q_ref)]
         seeds = seeds[: max(1, min(len(seeds), 1 + self.ik_restarts))]
         bounds = [(-max_abs, max_abs)] * len(self.logical_joint_names)
 
         def objective(q):
-            return self.ik_cost(q, target_distance, q_ref, interp_ref_joints)
+            q_clamped = [max(-max_abs, min(max_abs, float(v))) for v in q]
+            total, _, _, _, _ = self._compute_cost_terms(q_clamped, target_distance, interp_ref_joints)
+            return total
 
-        best_q = list(q_ref)
-        best_cost = self.ik_cost(best_q, target_distance, q_ref, interp_ref_joints)
+        def closure_constraint(q):
+            q_clamped = [max(-max_abs, min(max_abs, float(v))) for v in q]
+            return compute_end_pose_closure_residuals(
+                q_clamped,
+                module_params=self.module_params,
+                soft_l1=self.soft_l1,
+                soft_l2=self.soft_l2,
+                soft_l3=self.soft_l3,
+                soft_l4=self.soft_l4,
+                soft_l5=self.soft_l5,
+            )
+
+        best_q = list(seeds[0])
+        best_cost = float("inf")
+        best_violation = float("inf")
+        best_is_feasible = False
 
         for seed in seeds:
             x0 = [max(-max_abs, min(max_abs, v)) for v in seed]
@@ -247,17 +242,45 @@ class PubSoftLinkJointStates(object):
                 x0,
                 method="SLSQP",
                 bounds=bounds,
+                constraints=({"type": "eq", "fun": closure_constraint},),
                 options={"maxiter": max(1, self.ik_max_iters), "ftol": self.ik_ftol, "disp": False},
             )
             if hasattr(res, "x"):
                 cand_q = [float(v) for v in res.x]
             else:
                 cand_q = list(x0)
-            cand_cost = self.ik_cost(cand_q, target_distance, q_ref, interp_ref_joints)
+            cand_q = [max(-max_abs, min(max_abs, v)) for v in cand_q]
+            cand_cost, _, _, _, _ = self._compute_cost_terms(
+                cand_q, target_distance, interp_ref_joints
+            )
+            closure_residuals = compute_end_pose_closure_residuals(
+                cand_q,
+                module_params=self.module_params,
+                soft_l1=self.soft_l1,
+                soft_l2=self.soft_l2,
+                soft_l3=self.soft_l3,
+                soft_l4=self.soft_l4,
+                soft_l5=self.soft_l5,
+            )
+            cand_violation = max(abs(v) for v in closure_residuals)
 
-            if cand_cost < best_cost:
+            is_feasible = cand_violation < 1.0e-5
+            if is_feasible:
+                if (not best_is_feasible) or cand_cost < best_cost:
+                    best_cost = cand_cost
+                    best_violation = cand_violation
+                    best_is_feasible = True
+                    best_q = cand_q
+            elif (not best_is_feasible) and (
+                cand_violation < best_violation
+                or (abs(cand_violation - best_violation) < 1.0e-9 and cand_cost < best_cost)
+            ):
+                best_violation = cand_violation
                 best_cost = cand_cost
                 best_q = cand_q
+
+            if hasattr(res, "success") and not res.success:
+                rospy.logwarn_throttle(1.0, "Soft joint IK did not fully converge: %s", res.message)
 
         return best_q
 
@@ -269,10 +292,31 @@ class PubSoftLinkJointStates(object):
         rotor3 = fk["rotor_dash"][2]
         actual_d = math.hypot(rotor3[0] - rotor1[0], rotor3[1] - rotor1[1])
         end_x, end_y, end_yaw, end_theta_raw = fk["end_pose"]
+        _, distance_err2, interp_ref_err2, pose_pos_err2, sum_360_err2 = self._compute_cost_terms(
+            q, target_distance, interp_ref_joints
+        )
         print(
-            "IK solved: target d13_dash={0:.4f}, actual d13_dash={1:.4f}, end=({2:.4f}, {3:.4f}, yaw={4:.3f}deg, sum={5:.3f}deg)".format(
-                target_distance, actual_d, end_x, end_y, math.degrees(end_yaw), math.degrees(end_theta_raw)
+            "IK solved: target d13_dash={0:.4f}, actual d13_dash={1:.4f}, dist_err2={2:.6f}, interp_ref_err2={3:.6f}, closure=({4:.6e}, {5:.6e}, {6:.6e}), end=({7:.4f}, {8:.4f}, yaw={9:.3f}deg, sum={10:.3f}deg)".format(
+                target_distance,
+                actual_d,
+                distance_err2,
+                interp_ref_err2,
+                end_x,
+                end_y,
+                end_theta_raw - 2.0 * math.pi,
+                end_x,
+                end_y,
+                math.degrees(end_yaw),
+                math.degrees(end_theta_raw),
             )
+        )
+        rospy.loginfo_throttle(
+            0.5,
+            "soft joint IK cost: dist_err2=%.6f, interp_ref_err2=%.6f, pose_pos_err2=%.6f, sum_360_err2=%.6f",
+            distance_err2,
+            interp_ref_err2,
+            pose_pos_err2,
+            sum_360_err2,
         )
         return q
 
