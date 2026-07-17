@@ -13,6 +13,26 @@
 
 uint8_t IMU::adc_[SENSOR_DATA_LENGTH];
 
+namespace {
+constexpr uint8_t MPU9250_WHO_AM_I = 0x75;
+constexpr uint8_t MPU9250_WHO_AM_I_VALUE = 0x71;
+constexpr uint8_t MPU6500_WHO_AM_I_VALUE = 0x70;
+
+#ifdef STM32G4
+constexpr uint8_t ICM42686_WHO_AM_I_VALUE = 0x6B;
+constexpr uint8_t ICM426XX_DEVICE_CONFIG = 0x11;
+constexpr uint8_t ICM426XX_ACCEL_DATA_X1 = 0x1F;
+constexpr uint8_t ICM426XX_GYRO_DATA_X1 = 0x25;
+constexpr uint8_t ICM426XX_PWR_MGMT0 = 0x4E;
+constexpr uint8_t ICM426XX_GYRO_CONFIG0 = 0x4F;
+constexpr uint8_t ICM426XX_ACCEL_CONFIG0 = 0x50;
+constexpr uint8_t ICM426XX_GYRO_ACCEL_CONFIG0 = 0x52;
+constexpr uint8_t ICM426XX_GYRO_FS_2000DPS_ODR_1KHZ = 0x06;
+constexpr uint8_t ICM426XX_ACCEL_FS_8G_ODR_1KHZ = 0x46;
+constexpr uint8_t ICM426XX_UI_FILTER_BW_ODR_DIV_4 = 0x11;
+#endif
+}
+
 void IMU::init(SPI_HandleTypeDef* hspi)
 {
   acc_.fill(0);
@@ -21,6 +41,9 @@ void IMU::init(SPI_HandleTypeDef* hspi)
 
   ahb_tx_suspend_flag_ = false;
 
+  // Keep the sensor deselected until each SPI transaction begins explicitly.
+  IMU_SPI_CS_H;
+
   for(int i =0; i < SENSOR_DATA_LENGTH; i++)
     {
       dummy_[i] = 0;
@@ -28,12 +51,26 @@ void IMU::init(SPI_HandleTypeDef* hspi)
     }
 
   hspi_ = hspi;
-  gyroInit();
-  accInit();
-  magInit();
+  sensor_type_ = detectSensorType();
 
-  /* change to 13.5Mhz for polling sensor data from acc, gyro and mag */
+#ifdef STM32G4
+  if (sensor_type_ == SENSOR_TYPE_ICM42686) {
+    icm42686Init();
+  } else
+#endif
+  {
+    gyroInit();
+    accInit();
+    magInit();
+  }
+
+  /* increase SPI speed after the sensor has been identified and configured */
   hspi_->Instance->CR1 &= (uint32_t)(~SPI_BAUDRATEPRESCALER_256); //reset
+#ifdef STM32G4
+  if (sensor_type_ == SENSOR_TYPE_ICM42686)
+    hspi_->Instance->CR1 |= (uint32_t)(SPI_BAUDRATEPRESCALER_16);
+  else
+#endif
   hspi_->Instance->CR1 |= (uint32_t)(SPI_BAUDRATEPRESCALER_8); //8 = 13.5Mhz
 
   Flashmemory::addValue(&send_data_flag_, 2);
@@ -42,6 +79,12 @@ void IMU::init(SPI_HandleTypeDef* hspi)
 
 void IMU::update()
 {
+#ifdef STM32G4
+  if (sensor_type_ == SENSOR_TYPE_ICM42686) {
+    icm42686PollingRead();
+    return;
+  }
+#endif
   pollingRead(); //read from SPI
 }
 
@@ -65,12 +108,29 @@ uint8_t IMU::mpuRead(uint8_t address)
   return temp;
 }
 
+IMU::SensorType IMU::detectSensorType()
+{
+  HAL_Delay(10);
+  const uint8_t who_am_i = mpuRead(MPU9250_WHO_AM_I);
+
+  if (who_am_i == MPU9250_WHO_AM_I_VALUE || who_am_i == MPU6500_WHO_AM_I_VALUE) {
+    return SENSOR_TYPE_MPU9250;
+  }
+
+#ifdef STM32G4
+  if (who_am_i == ICM42686_WHO_AM_I_VALUE) {
+    return SENSOR_TYPE_ICM42686;
+  }
+#endif
+
+  return SENSOR_TYPE_MPU9250;
+}
+
 void IMU::gyroInit(void)
 {
   HAL_Delay(100);
-  //  mpuWrite( 0x6B, 0x80);             //PWR_MGMT_1    -- DEVICE_RESET 1
+  mpuWrite(0x6B, 0x01);                 // PWR_MGMT_1 -- wake up and use PLL as clock source
   HAL_Delay(10);
-  //mpuWrite( 0x6B, 0x01);             //PWR_MGMT_1    -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
   HAL_Delay(1); //very important!, some duration for process the setting
   mpuWrite( 0x6A, 0x10);             //disable i2c communication
   HAL_Delay(1); //very importnat! between gyro and acc
@@ -186,6 +246,54 @@ void IMU::pollingRead()
 
   update_ = true;
 }
+
+#ifdef STM32G4
+void IMU::icm42686Init(void)
+{
+  HAL_Delay(100);
+
+  mpuWrite(ICM426XX_DEVICE_CONFIG, 0x01);
+  HAL_Delay(2);
+
+  mpuWrite(ICM426XX_PWR_MGMT0, 0x0F);
+  HAL_Delay(2);
+
+  mpuWrite(ICM426XX_GYRO_CONFIG0, ICM426XX_GYRO_FS_2000DPS_ODR_1KHZ);
+  HAL_Delay(1);
+  mpuWrite(ICM426XX_ACCEL_CONFIG0, ICM426XX_ACCEL_FS_8G_ODR_1KHZ);
+  HAL_Delay(1);
+  mpuWrite(ICM426XX_GYRO_ACCEL_CONFIG0, ICM426XX_UI_FILTER_BW_ODR_DIV_4);
+  HAL_Delay(1);
+
+  mag_.fill(0);
+}
+
+void IMU::icm42686PollingRead(void)
+{
+  uint8_t reg = ICM426XX_GYRO_DATA_X1 | 0x80;
+  IMU_SPI_CS_L;
+  HAL_SPI_Transmit(hspi_, &reg, 1, 1000);
+  HAL_SPI_Receive(hspi_, adc_, 6, 1000);
+  IMU_SPI_CS_H;
+
+  gyro_[0] = (int16_t)(adc_[0] << 8 | adc_[1]);
+  gyro_[1] = (int16_t)(adc_[2] << 8 | adc_[3]);
+  gyro_[2] = (int16_t)(adc_[4] << 8 | adc_[5]);
+
+  reg = ICM426XX_ACCEL_DATA_X1 | 0x80;
+  IMU_SPI_CS_L;
+  HAL_SPI_Transmit(hspi_, &reg, 1, 1000);
+  HAL_SPI_Receive(hspi_, adc_, 6, 1000);
+  IMU_SPI_CS_H;
+
+  acc_[0] = (int16_t)(adc_[0] << 8 | adc_[1]);
+  acc_[1] = (int16_t)(adc_[2] << 8 | adc_[3]);
+  acc_[2] = (int16_t)(adc_[4] << 8 | adc_[5]);
+
+  mag_.fill(0);
+  update_ = true;
+}
+#endif
 
 void IMU::sendData()
 {

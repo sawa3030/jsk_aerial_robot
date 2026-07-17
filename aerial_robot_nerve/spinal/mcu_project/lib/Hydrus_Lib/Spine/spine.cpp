@@ -5,6 +5,8 @@
  ------------------------------------------------------------------*/
 
 #include "spine.h"
+#include <cstdio>
+#include <std_msgs/String.h>
 
 namespace Spine
 {
@@ -32,12 +34,21 @@ namespace Spine
 
     /* ros */
     constexpr uint8_t SERVO_PUB_INTERVAL = 20; //[ms]
+    constexpr uint8_t NEURON_IMU_PUB_INTERVAL = 5; //[ms]
     constexpr uint32_t SERVO_TORQUE_PUB_INTERVAL = 1000; //[ms]
     spinal::ServoStates servo_state_msg_;
     spinal::ServoTorqueStates servo_torque_state_msg_;
     ros::Publisher servo_state_pub_("servo/states", &servo_state_msg_);
     // merge torque_states to states
     ros::Publisher servo_torque_state_pub_("servo/torque_states", &servo_torque_state_msg_);
+    std_msgs::String neuron_imu_diag_msg_;
+    char neuron_imu_diag_buf_[256];
+    ros::Publisher neuron_imu_diag_pub_("debug/neuron_imu_diag", &neuron_imu_diag_msg_);
+    std::vector<spinal::Imu*> neuron_imu_msg_;
+    std::vector<ros::Publisher*> neuron_imu_pub_;
+    std::vector<char*> neuron_imu_topic_name_;
+    std::vector<uint32_t> neuron_imu_diag_last_warn_time_;
+    std::vector<uint32_t> neuron_imu_diag_last_pub_time_;
 
     // rename following subscriber.
     // taget_states -> target_position
@@ -53,6 +64,7 @@ namespace Spine
 
     ros::NodeHandle* nh_;
     uint32_t servo_last_pub_time_ = 0;
+    uint32_t neuron_imu_last_pub_time_ = 0;
     uint32_t servo_torque_last_pub_time_ = 0;
     unsigned int can_idle_count_ = 0;
     bool servo_control_flag_ = true;
@@ -183,6 +195,24 @@ namespace Spine
 
     nh_->advertiseService(board_info_srv_);
     nh_->advertiseService(board_config_srv_);
+    neuron_imu_diag_msg_.data = neuron_imu_diag_buf_;
+    nh_->advertise(neuron_imu_diag_pub_);
+
+    neuron_imu_msg_.reserve(slave_num_);
+    neuron_imu_pub_.reserve(slave_num_);
+    neuron_imu_topic_name_.reserve(slave_num_);
+    neuron_imu_diag_last_warn_time_.assign(slave_num_, 0);
+    neuron_imu_diag_last_pub_time_.assign(slave_num_, 0);
+    for (unsigned int i = 0; i < slave_num_; i++) {
+      char* topic_name = new char[20];
+      snprintf(topic_name, 20, "imu/neuron%u", neuron_.at(i).getSlaveId());
+      spinal::Imu* imu_msg = new spinal::Imu();
+      ros::Publisher* imu_pub = new ros::Publisher(topic_name, imu_msg);
+      neuron_imu_topic_name_.push_back(topic_name);
+      neuron_imu_msg_.push_back(imu_msg);
+      neuron_imu_pub_.push_back(imu_pub);
+      nh_->advertise(*imu_pub);
+    }
 
     /* uav model: special rule based on the number of gimbals (no send data flag servos) */
     uint8_t gimbal_servo_num = servo_num_ - servo_with_send_flag_.size();
@@ -276,6 +306,7 @@ namespace Spine
       neuron_.at(i).can_imu_.update();
 
     /* ros publish */
+    neuronImuPublish();
     servoPublish();
 
     CANDeviceManager::tick(1);
@@ -360,5 +391,123 @@ namespace Spine
         servo_torque_state_pub_.publish(&servo_torque_state_msg_);
         servo_torque_last_pub_time_ = now_time;
       }
+  }
+
+  void neuronImuPublish()
+  {
+    if (slave_num_ == 0) return;
+
+    uint32_t now_time = HAL_GetTick();
+    if (now_time - neuron_imu_last_pub_time_ < NEURON_IMU_PUB_INTERVAL) return;
+    neuron_imu_last_pub_time_ = now_time;
+
+    float qx = 0.0f;
+    float qy = 0.0f;
+    float qz = 0.0f;
+    float qw = 1.0f;
+    // CAN IMU returns only gyro/acc/mag, so reuse the current spinal attitude estimate.
+    if (estimator_ && estimator_->getAttEstimator() && estimator_->getAttEstimator()->getEstimator()) {
+      ap::Quaternion q = estimator_->getAttEstimator()->getEstimator()->getQuaternion();
+      qx = q[1];
+      qy = q[2];
+      qz = q[3];
+      qw = q[0];
+    }
+
+    ros::Time stamp = nh_->now();
+    for (unsigned int i = 0; i < slave_num_; i++) {
+      CANIMU& can_imu = neuron_.at(i).can_imu_;
+      ap::Vector3f acc = can_imu.getAcc();
+      ap::Vector3f gyro = can_imu.getGyro();
+      ap::Vector3f mag = can_imu.getMag();
+      int32_t acc_milli_x = static_cast<int32_t>(acc[0] * 1000.0f);
+      int32_t acc_milli_y = static_cast<int32_t>(acc[1] * 1000.0f);
+      int32_t acc_milli_z = static_cast<int32_t>(acc[2] * 1000.0f);
+      int32_t mag_milli_x = static_cast<int32_t>(mag[0] * 1000.0f);
+      int32_t mag_milli_y = static_cast<int32_t>(mag[1] * 1000.0f);
+      int32_t mag_milli_z = static_cast<int32_t>(mag[2] * 1000.0f);
+
+      if (now_time - neuron_imu_diag_last_pub_time_.at(i) > 1000) {
+        snprintf(neuron_imu_diag_buf_, sizeof(neuron_imu_diag_buf_),
+                 "neuron%u imu state: send=%u g=%u a=%u m=%u age=%lu/%lu/%lu acc_raw=%d,%d,%d mag_raw=%d,%d,%d acc_mg=%ld,%ld,%ld mag_milli=%ld,%ld,%ld",
+                 neuron_.at(i).getSlaveId(),
+                 can_imu.getSendDataFlag() ? 1 : 0,
+                 can_imu.hasGyroData() ? 1 : 0,
+                 can_imu.hasAccData() ? 1 : 0,
+                 can_imu.hasMagData() ? 1 : 0,
+                 static_cast<unsigned long>(now_time - can_imu.getLastGyroReceiveTime()),
+                 static_cast<unsigned long>(now_time - can_imu.getLastAccReceiveTime()),
+                 static_cast<unsigned long>(now_time - can_imu.getLastMagReceiveTime()),
+                 can_imu.getRawAccData(0),
+                 can_imu.getRawAccData(1),
+                 can_imu.getRawAccData(2),
+                 can_imu.getRawMagData(0),
+                 can_imu.getRawMagData(1),
+                 can_imu.getRawMagData(2),
+                 static_cast<long>(acc_milli_x),
+                 static_cast<long>(acc_milli_y),
+                 static_cast<long>(acc_milli_z),
+                 static_cast<long>(mag_milli_x),
+                 static_cast<long>(mag_milli_y),
+                 static_cast<long>(mag_milli_z));
+        neuron_imu_diag_pub_.publish(&neuron_imu_diag_msg_);
+        neuron_imu_diag_last_pub_time_.at(i) = now_time;
+      }
+
+      if (!can_imu.getSendDataFlag()) continue;
+
+      if (!can_imu.hasData()) {
+        if (can_imu.hasGyroData() &&
+            (!can_imu.hasAccData() || !can_imu.hasMagData()) &&
+            now_time - neuron_imu_diag_last_warn_time_.at(i) > 1000) {
+          char log_msg[96];
+          snprintf(log_msg, sizeof(log_msg),
+                   "neuron%u imu missing: gyro=%u acc=%u mag=%u",
+                   neuron_.at(i).getSlaveId(),
+                   can_imu.hasGyroData() ? 1 : 0,
+                   can_imu.hasAccData() ? 1 : 0,
+                   can_imu.hasMagData() ? 1 : 0);
+          snprintf(neuron_imu_diag_buf_, sizeof(neuron_imu_diag_buf_), "%s", log_msg);
+          nh_->logwarn(log_msg);
+          neuron_imu_diag_pub_.publish(&neuron_imu_diag_msg_);
+          neuron_imu_diag_last_warn_time_.at(i) = now_time;
+        }
+        continue;
+      }
+
+      uint32_t gyro_age = now_time - can_imu.getLastGyroReceiveTime();
+      uint32_t acc_age = now_time - can_imu.getLastAccReceiveTime();
+      uint32_t mag_age = now_time - can_imu.getLastMagReceiveTime();
+      if (gyro_age < 100 && (acc_age > 100 || mag_age > 100) &&
+          now_time - neuron_imu_diag_last_warn_time_.at(i) > 1000) {
+        char log_msg[96];
+        snprintf(log_msg, sizeof(log_msg),
+                 "neuron%u imu stale: gyro=%lums acc=%lums mag=%lums",
+                 neuron_.at(i).getSlaveId(),
+                 static_cast<unsigned long>(gyro_age),
+                 static_cast<unsigned long>(acc_age),
+                 static_cast<unsigned long>(mag_age));
+        snprintf(neuron_imu_diag_buf_, sizeof(neuron_imu_diag_buf_), "%s", log_msg);
+        nh_->logwarn(log_msg);
+        neuron_imu_diag_pub_.publish(&neuron_imu_diag_msg_);
+        neuron_imu_diag_last_warn_time_.at(i) = now_time;
+      }
+
+      spinal::Imu* imu_msg = neuron_imu_msg_.at(i);
+      imu_msg->stamp = stamp;
+
+      for (int axis = 0; axis < 3; axis++) {
+        imu_msg->acc[axis] = acc[axis];
+        imu_msg->gyro[axis] = gyro[axis];
+        imu_msg->mag[axis] = mag[axis];
+      }
+
+      imu_msg->quaternion[0] = qx;
+      imu_msg->quaternion[1] = qy;
+      imu_msg->quaternion[2] = qz;
+      imu_msg->quaternion[3] = qw;
+
+      neuron_imu_pub_.at(i)->publish(imu_msg);
+    }
   }
 };

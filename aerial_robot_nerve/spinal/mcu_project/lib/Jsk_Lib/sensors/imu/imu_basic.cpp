@@ -19,7 +19,10 @@ void IMU::init()
   gyro_.zero();
   mag_.zero();
   mag_outlier_counter_ = 0;
+  acc_bias_.zero();
   gyro_bias_.zero();
+  mag_bias_.zero();
+  mag_scale_ = Vector3f(1, 1, 1);
   calib_gyro_ = true;
   calib_acc_ = false;
   calib_mag_ = false;
@@ -241,5 +244,4 @@ void IMU::resetCalib()
   mag_max_ = Vector3f(-1000,-1000,-1000);
   mag_scale_ = Vector3f(1,1,1);
 }
-
 

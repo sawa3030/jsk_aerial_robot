@@ -33,6 +33,12 @@ class Initializer;
 
 class IMU : public CANDevice {
 public:
+  enum SensorType : uint8_t {
+    SENSOR_TYPE_MPU9250 = 0,
+#ifdef STM32G4
+    SENSOR_TYPE_ICM42686 = 1,
+#endif
+  };
 
   IMU(){}
   IMU(uint8_t slave_id):CANDevice(CAN::DEVICEID_IMU, slave_id){}
@@ -70,6 +76,7 @@ public:
 private:
 
   SPI_HandleTypeDef* hspi_;
+  SensorType sensor_type_;
 
   Vector3d acc_, gyro_, mag_;
 
@@ -85,10 +92,17 @@ private:
 
   void pollingRead (void);
 
+  SensorType detectSensorType(void);
+
   void process (void);
 
   void mpuWrite(uint8_t address, uint8_t value);
   uint8_t mpuRead(uint8_t address);
+
+#ifdef STM32G4
+  void icm42686Init(void);
+  void icm42686PollingRead(void);
+#endif
 
   friend class Initializer;
 };

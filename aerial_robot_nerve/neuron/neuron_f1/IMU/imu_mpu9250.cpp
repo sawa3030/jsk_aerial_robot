@@ -21,6 +21,9 @@ void IMU::init(SPI_HandleTypeDef* hspi)
 
   ahb_tx_suspend_flag_ = false;
 
+  // Keep the sensor deselected until each SPI transaction begins explicitly.
+  IMU_SPI_CS_H;
+
   for(int i =0; i < SENSOR_DATA_LENGTH; i++)
     {
       dummy_[i] = 0;
@@ -68,9 +71,8 @@ uint8_t IMU::mpuRead(uint8_t address)
 void IMU::gyroInit(void)
 {
   HAL_Delay(100);
-  //  mpuWrite( 0x6B, 0x80);             //PWR_MGMT_1    -- DEVICE_RESET 1
+  mpuWrite(0x6B, 0x01);                 // PWR_MGMT_1 -- wake up and use PLL as clock source
   HAL_Delay(10);
-  //mpuWrite( 0x6B, 0x01);             //PWR_MGMT_1    -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
   HAL_Delay(1); //very important!, some duration for process the setting
   mpuWrite( 0x6A, 0x10);             //disable i2c communication
   HAL_Delay(1); //very importnat! between gyro and acc

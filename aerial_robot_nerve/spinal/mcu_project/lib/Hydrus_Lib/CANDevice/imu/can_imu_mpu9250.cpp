@@ -33,12 +33,18 @@ void CANIMU::receiveDataCallback(uint8_t slave_id, uint8_t message_id, uint32_t 
 	switch (message_id) {
 	case CAN::MESSAGEID_SEND_GYRO:
 		memcpy(r_gyro_data, data, sizeof(uint8_t) * 6);
+		last_gyro_receive_time_ = HAL_GetTick();
+		gyro_received_ = true;
 		break;
 	case CAN::MESSAGEID_SEND_ACC:
 		memcpy(r_acc_data, data, sizeof(uint8_t) * 6);
+		last_acc_receive_time_ = HAL_GetTick();
+		acc_received_ = true;
 		break;
 	case CAN::MESSAGEID_SEND_MAG:
 		memcpy(r_mag_data, data, sizeof(uint8_t) * 6);
+		last_mag_receive_time_ = HAL_GetTick();
+		mag_received_ = true;
 		break;
 	}
 }
