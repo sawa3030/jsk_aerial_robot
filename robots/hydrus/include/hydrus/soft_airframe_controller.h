@@ -7,7 +7,6 @@
 #include <spinal/ServoControlCmd.h>
 #include <spinal/ServoStates.h>
 #include <std_msgs/Float32MultiArray.h>
-#include <OsqpEigen/OsqpEigen.h>
 
 namespace aerial_robot_control
 {
@@ -31,6 +30,7 @@ protected:
   ros::Publisher gimbal_control_pub_;
   ros::Publisher q_mat_pub_;
   ros::Publisher rotor_attitude_contributions_pub_;
+  ros::Publisher z_rpy_ddot_pub_;
   ros::Subscriber joint_state_sub_;
   ros::Subscriber rpy_pid_sub_;
   double torque_allocation_matrix_inv_pub_stamp_;
@@ -49,14 +49,17 @@ protected:
   // double z_limit_;
   bool hovering_approximate_;
   double z_rpy_ddot_lpf_alpha_;
+  bool z_rpy_ddot_lpf_initialized_ = false;
+  Eigen::Vector4d z_rpy_ddot_lpf_ = Eigen::Vector4d::Zero();
 
   double gimbal_angle_diff_ = 0.0;
   // double gimbal_current_angle = 0.0;
   // ros::Time gimbal_update_time;
 
   Eigen::VectorXd prev_target_vectoring_f_;
-  OsqpEigen::Solver target_vectoring_qp_solver_;
-  int n_constraints;
+
+  double getYawDecreasingRate(const Eigen::Vector4d& z_rpy_ddot, const Eigen::VectorXd& target_vectoring_f) const;
+  bool solveTargetVectoringForce(const Eigen::Vector4d& z_rpy_ddot, Eigen::VectorXd& target_vectoring_f) const;
   
   void setAttitudeGains();
   virtual void rosParamInit();
@@ -67,6 +70,7 @@ protected:
   virtual void jointStateCallback(const sensor_msgs::JointState& msg);
   virtual void sendTorqueAllocationMatrixInv();
   virtual void publishQMat();
+  virtual void publishZRpyDdot(const Eigen::Vector4d& z_rpy_ddot);
   virtual void publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_);
 };
 }  // namespace aerial_robot_control

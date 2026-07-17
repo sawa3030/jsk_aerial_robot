@@ -1,4 +1,7 @@
 #include <hydrus/soft_airframe_controller.h>
+
+#include <cmath>
+
 using namespace aerial_robot_control;
 
 SoftAirframeController::SoftAirframeController() : PoseLinearController()
@@ -23,6 +26,7 @@ void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
   torque_allocation_matrix_inv_pub_ = nh_.advertise<spinal::TorqueAllocationMatrixInv>("torque_allocation_matrix_inv", 1);
   q_mat_pub_ = nh_.advertise<std_msgs::Float32MultiArray>("q_matrix", 1);
   rotor_attitude_contributions_pub_ = nh_.advertise<std_msgs::Float32MultiArray>("rotor_attitude_contributions", 1);
+  z_rpy_ddot_pub_ = nh_.advertise<std_msgs::Float32MultiArray>("z_rpy_ddot", 1);
   
   // subscriber
   joint_state_sub_ = nh_.subscribe("joint_states", 1, &SoftAirframeController::jointStateCallback, this);
@@ -31,7 +35,8 @@ void SoftAirframeController::initialize(ros::NodeHandle nh, ros::NodeHandle nhp,
   torque_allocation_matrix_inv_pub_stamp_ = 0.0;
   q_mat_update_stamp_ = 0.0;
   prev_target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_);
-  n_constraints = motor_num_ + 4;
+  z_rpy_ddot_lpf_initialized_ = false;
+  z_rpy_ddot_lpf_.setZero();
 }
 
 void SoftAirframeController::controlCore()
@@ -56,8 +61,11 @@ void SoftAirframeController::controlCore()
     q_mat_inv_ = aerial_robot_model::pseudoinverse(q_mat_);
   }
 
+  constexpr double thrust_min = 0.0;
+  constexpr double thrust_max = 20.0;
+
   Eigen::VectorXd target_vectoring_f_ = Eigen::VectorXd::Zero(motor_num_);
-  Eigen::VectorXd z_rpy_ddot = Eigen::VectorXd::Zero(4);
+  Eigen::Vector4d z_rpy_ddot = Eigen::Vector4d::Zero();
   if(hovering_approximate_)
     {
       target_pitch_ = target_acc_dash.x() / aerial_robot_estimation::G;
@@ -74,97 +82,44 @@ void SoftAirframeController::controlCore()
   z_rpy_ddot(2) = pid_controllers_.at(PITCH).result();
   z_rpy_ddot(3) = pid_controllers_.at(YAW).result();
 
-  static bool z_rpy_ddot_lpf_initialized = false;
-  static Eigen::VectorXd z_rpy_ddot_lpf = Eigen::VectorXd::Zero(4);
-    if(!z_rpy_ddot_lpf_initialized)
+  if(!z_rpy_ddot_lpf_initialized_)
     {
-      z_rpy_ddot_lpf = z_rpy_ddot;
-      z_rpy_ddot_lpf_initialized = true;
+      z_rpy_ddot_lpf_ = z_rpy_ddot;
+      z_rpy_ddot_lpf_initialized_ = true;
     }
   else
     {
-      z_rpy_ddot_lpf = z_rpy_ddot_lpf_alpha_ * z_rpy_ddot + (1.0 - z_rpy_ddot_lpf_alpha_) * z_rpy_ddot_lpf;
+      z_rpy_ddot_lpf_ = z_rpy_ddot_lpf_alpha_ * z_rpy_ddot + (1.0 - z_rpy_ddot_lpf_alpha_) * z_rpy_ddot_lpf_;
     }
-  z_rpy_ddot = z_rpy_ddot_lpf;
+  z_rpy_ddot = z_rpy_ddot_lpf_;
 
-  // z_rpy_ddot(1) = 0.0;
-  // z_rpy_ddot(2) = 0.0;
-  // z_rpy_ddot(3) = 0.0;
+  bool solved = solveTargetVectoringForce(z_rpy_ddot, target_vectoring_f_);
 
-  // solve the thrust allocation with QP
-  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(motor_num_, motor_num_);
-  H.diagonal().setConstant(2.0);
-  Eigen::VectorXd g = prev_target_vectoring_f_ * -2.0;
+  if (!solved && std::fabs(z_rpy_ddot(3)) > 1e-6)
+    {
+      const double yaw_decreasing_rate = getYawDecreasingRate(z_rpy_ddot, target_vectoring_f_);
+      z_rpy_ddot(3) *= (1.0 + yaw_decreasing_rate);
+      solved = solveTargetVectoringForce(z_rpy_ddot, target_vectoring_f_);
+      std::cout << "yaw command scaled by " << (1.0 + yaw_decreasing_rate) << " due to thrust saturation" << std::endl;
+    }
 
-  Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_constraints, motor_num_);
-  A.topRows(4) = q_mat_;
-  for (int i = 0; i < motor_num_; i++)
-  {
-    A(i + 4, i) = 1.0;
-  }
-
-  Eigen::VectorXd lb(n_constraints);
-  Eigen::VectorXd ub(n_constraints);
-
-  lb.head(4) = z_rpy_ddot;
-  for (int i = 0; i < motor_num_; i++)
-  {
-    lb(i + 4) = 0.0;
-  }
-
-  ub.head(4) = z_rpy_ddot;
-  for (int i = 0; i < motor_num_; i++)
-  {
-    ub(i + 4) = 20.0;
-  }
-
-  
-  Eigen::SparseMatrix<double> H_s = H.sparseView();
-  Eigen::SparseMatrix<double> A_s = A.sparseView();
-  if(!target_vectoring_qp_solver_.isInitialized())
-  {
-    target_vectoring_qp_solver_.settings()->setVerbosity(false);
-    target_vectoring_qp_solver_.settings()->setWarmStart(true);
-    target_vectoring_qp_solver_.settings()->setPolish(false);
-    target_vectoring_qp_solver_.settings()->setMaxIteraction(1000);
-    target_vectoring_qp_solver_.settings()->setAbsoluteTolerance(1e-4);
-    target_vectoring_qp_solver_.settings()->setRelativeTolerance(1e-4);
-
-    target_vectoring_qp_solver_.data()->setNumberOfVariables(motor_num_);
-    target_vectoring_qp_solver_.data()->setNumberOfConstraints(n_constraints);
-    target_vectoring_qp_solver_.data()->setHessianMatrix(H_s);
-    target_vectoring_qp_solver_.data()->setGradient(g);
-    target_vectoring_qp_solver_.data()->setLinearConstraintsMatrix(A_s);
-    target_vectoring_qp_solver_.data()->setLowerBound(lb);
-    target_vectoring_qp_solver_.data()->setUpperBound(ub);
-    target_vectoring_qp_solver_.initSolver();
-  }
-  else
-  {
-    target_vectoring_qp_solver_.updateHessianMatrix(H_s);
-    target_vectoring_qp_solver_.updateGradient(g);
-    target_vectoring_qp_solver_.updateLinearConstraintsMatrix(A_s);
-    target_vectoring_qp_solver_.updateBounds(lb, ub);
-  }
-
-  bool solved = target_vectoring_qp_solver_.solve();
-  if(solved){
-    target_vectoring_f_ = target_vectoring_qp_solver_.getSolution();
-  } else {
+  if(!solved) {
     target_vectoring_f_ = q_mat_inv_ * z_rpy_ddot;
     target_vectoring_f_.noalias() += prev_target_vectoring_f_;
     target_vectoring_f_.noalias() -= q_mat_inv_ * (q_mat_ * prev_target_vectoring_f_);
-    std::cout << "QP not solved!: " << target_vectoring_f_.transpose() << std::endl;
+    std::cout << "target thrust is still saturated after yaw scaling: " << target_vectoring_f_.transpose() << std::endl;
   }
+  z_rpy_ddot_lpf_ = z_rpy_ddot;
+  publishZRpyDdot(z_rpy_ddot);
   ROS_DEBUG_STREAM("target vectoring f: \n" << target_vectoring_f_.transpose());
 
   for (int i = 0; i < motor_num_; i++)
   {
-    if (target_vectoring_f_(i) < lb(i + 4)){
-      target_vectoring_f_(i) = lb(i + 4);
+    if (target_vectoring_f_(i) < thrust_min){
+      target_vectoring_f_(i) = thrust_min;
     }
-    if (target_vectoring_f_(i) > ub(i + 4)){
-      target_vectoring_f_(i) = ub(i + 4);
+    if (target_vectoring_f_(i) > thrust_max){
+      target_vectoring_f_(i) = thrust_max;
     }
   }
   prev_target_vectoring_f_ = target_vectoring_f_;
@@ -180,7 +135,7 @@ void SoftAirframeController::controlCore()
     {
       if(q_mat_inv_(i, YAW - 2) > max_yaw_scale) max_yaw_scale = q_mat_inv_(i, YAW - 2);
     }
-  candidate_yaw_term_ = pid_controllers_.at(YAW).result() * max_yaw_scale;
+  candidate_yaw_term_ = z_rpy_ddot(3) * max_yaw_scale;
 
 
   navigator_->setTargetPitch(target_pitch_);
@@ -203,6 +158,57 @@ void SoftAirframeController::controlCore()
   pid_msg_.pitch.err_d = pid_controllers_.at(PITCH).getErrD();
 
   ROS_INFO_STREAM_THROTTLE(0.5, "[SoftAirframeController] controlCore");
+}
+
+bool SoftAirframeController::solveTargetVectoringForce(const Eigen::Vector4d& z_rpy_ddot, Eigen::VectorXd& target_vectoring_f) const
+{
+  constexpr double thrust_min = 0.0;
+  constexpr double thrust_max = 20.0;
+
+  target_vectoring_f = q_mat_inv_ * z_rpy_ddot;
+
+  for (int i = 0; i < motor_num_; i++)
+    {
+      if (target_vectoring_f(i) < thrust_min || target_vectoring_f(i) > thrust_max) return false;
+    }
+
+  return true;
+}
+
+double SoftAirframeController::getYawDecreasingRate(const Eigen::Vector4d& z_rpy_ddot, const Eigen::VectorXd& target_vectoring_f) const
+{
+  constexpr double thrust_min = 0.0;
+  constexpr double thrust_max = 20.0;
+  constexpr double eps = 1e-6;
+
+  Eigen::Vector4d z_rp_ddot = z_rpy_ddot;
+  z_rp_ddot(3) = 0.0;
+
+  const Eigen::VectorXd base_thrust = q_mat_inv_ * z_rp_ddot;
+  const Eigen::VectorXd yaw_thrust = target_vectoring_f - base_thrust;
+
+  double yaw_scale = 1.0;
+  for (int i = 0; i < motor_num_; i++)
+    {
+      const double target_thrust = target_vectoring_f(i);
+      const double yaw_term = yaw_thrust(i);
+
+      if (target_thrust > thrust_max + eps)
+        {
+          if (yaw_term <= eps) continue;
+          yaw_scale = std::min(yaw_scale, (thrust_max - base_thrust(i)) / yaw_term);
+        }
+      else if (target_thrust < thrust_min - eps)
+        {
+          if (yaw_term >= -eps) continue;
+          yaw_scale = std::min(yaw_scale, (thrust_min - base_thrust(i)) / yaw_term);
+        }
+    }
+
+  if (yaw_scale < 0.0) yaw_scale = 0.0;
+  if (yaw_scale > 1.0) yaw_scale = 1.0;
+
+  return yaw_scale - 1.0;
 }
 
 Eigen::MatrixXd SoftAirframeController::getQMat()
@@ -239,6 +245,8 @@ void SoftAirframeController::reset()
 {
   PoseLinearController::reset();
 
+  z_rpy_ddot_lpf_initialized_ = false;
+  z_rpy_ddot_lpf_.setZero();
   setAttitudeGains();
 }
 
@@ -335,6 +343,23 @@ void SoftAirframeController::publishQMat()
         }
       }
   q_mat_pub_.publish(q_mat_msg);
+}
+
+void SoftAirframeController::publishZRpyDdot(const Eigen::Vector4d& z_rpy_ddot)
+{
+  std_msgs::Float32MultiArray z_rpy_ddot_msg;
+  z_rpy_ddot_msg.layout.dim.resize(1);
+  z_rpy_ddot_msg.layout.dim[0].label = "z_rpy_ddot";
+  z_rpy_ddot_msg.layout.dim[0].size = z_rpy_ddot.size();
+  z_rpy_ddot_msg.layout.dim[0].stride = 1;
+  z_rpy_ddot_msg.data.resize(z_rpy_ddot.size());
+
+  for (int i = 0; i < z_rpy_ddot.size(); i++)
+    {
+      z_rpy_ddot_msg.data[i] = z_rpy_ddot(i);
+    }
+
+  z_rpy_ddot_pub_.publish(z_rpy_ddot_msg);
 }
 
 void SoftAirframeController::publishRotorAttitudeContributions(const spinal::RollPitchYawTerms &control_term_msg_)
