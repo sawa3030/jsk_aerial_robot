@@ -7,6 +7,16 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.optimize import minimize
 
+from fk import (
+    DEFAULT_MODULE_PARAMS,
+    DEFAULT_ROTOR_OFFSET_X,
+    DEFAULT_SOFT_L1,
+    DEFAULT_SOFT_L2,
+    DEFAULT_SOFT_L3,
+    DEFAULT_SOFT_L4,
+    DEFAULT_SOFT_L5,
+)
+
 
 class SoftLinkIKVisualizer(object):
     # Logical (optimization) joints:
@@ -43,17 +53,16 @@ class SoftLinkIKVisualizer(object):
         self.logical_joint_names = list(self.LOGICAL_JOINT_ORDER)
         self.soft_joint_names = list(self.JOINT_ORDER)
 
-        # Geometry from hydrus/urdf/soft_link.urdf.xacro
-        self.soft_l1 = 0.1175
-        self.soft_l2 = 0.235
-        self.soft_l3 = 0.1175
-        self.rotor_offset_x = 0.0735
-        self.module_params = [
-            {"parent_to_servo_x": 0.0, "servo_size_x": 0.096},   # module1
-            {"parent_to_servo_x": 0.147, "servo_size_x": 0.156}, # module2
-            {"parent_to_servo_x": 0.147, "servo_size_x": 0.096}, # module3
-            {"parent_to_servo_x": 0.147, "servo_size_x": 0.096}, # module4
+        # Geometry aligned with the current soft_airframe_202605 URDF.
+        self.soft_lengths = [
+            DEFAULT_SOFT_L1,
+            DEFAULT_SOFT_L2,
+            DEFAULT_SOFT_L3,
+            DEFAULT_SOFT_L4,
+            DEFAULT_SOFT_L5,
         ]
+        self.rotor_offset_x = DEFAULT_ROTOR_OFFSET_X
+        self.module_params = [dict(module) for module in DEFAULT_MODULE_PARAMS]
         self.soft_segment_divisions = 6
 
     @staticmethod
@@ -121,14 +130,14 @@ class SoftLinkIKVisualizer(object):
             m = self.module_params[i]
 
             # module start offset
-            module_offset = self._rotate_vec(r, (m["parent_to_servo_x"], 0.0))
+            module_offset = self._rotate_vec(r, (m["parent_to_soft_root_x"], 0.0))
             p = (p[0] + module_offset[0], p[1] + module_offset[1])
             chain_ps.append(p)
 
             # Split soft part into 6 equal segments with 4 joints in between:
             # segment1-(joint1), segment2-(joint2), segment3+4-(joint3),
             # segment5-(joint4), segment6.
-            soft_total = self.soft_l1 + self.soft_l2 + self.soft_l3
+            soft_total = sum(self.soft_lengths)
             soft_seg = soft_total / float(self.soft_segment_divisions)
             module_joints = [q1a, q1b, q2a, q2b]
             module_joint_names = [name1a, name1b, name2a, name2b]

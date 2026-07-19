@@ -107,14 +107,6 @@ class PubSoftLinkJointTargetInterpolator(object):
 
     # バナナ型・検証した
     FIXED_TARGET_BANANA = [
-        0.9714066551700795, 
-        0.865258353560416, 
-        0.4934516820102892, 
-        0.39800447877889933, 
-        0.2799090880334772, 
-        0.29974116448995536, 
-        0.2909256570517672, 
-        0.2775058170995593, 
         0.35430739133242517, 
         0.49542450708173463, 
         0.872327010803173, 
@@ -123,10 +115,14 @@ class PubSoftLinkJointTargetInterpolator(object):
         -0.27611482230761377, 
         -0.112416749196029583, 
         -0.120912614675746767,
-        # -0.22632777109260602, 
-        # -0.17611482230761377, 
-        # -0.012416749196029583, 
-        # 0.020912614675746767,
+        0.9714066551700795, 
+        0.865258353560416, 
+        0.4934516820102892, 
+        0.39800447877889933, 
+        0.2799090880334772, 
+        0.29974116448995536, 
+        0.2909256570517672, 
+        0.2775058170995593, 
     ]
 
     # ひょうたん型・検証済
@@ -153,7 +149,7 @@ class PubSoftLinkJointTargetInterpolator(object):
         rospy.init_node("pub_soft_link_joint_target_interpolator")
 
         self.publish_hz = rospy.get_param("~publish_hz", 10.0)
-        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 10.0))
+        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 50.0))
         self.output_topic = rospy.get_param("~output_topic", "soft_joint_reference_interp")
         self.joint_states_topic = rospy.get_param("~joint_states_topic", "joint_states")
         self.joint_names = list(self.TARGET_JOINT_NAMES)

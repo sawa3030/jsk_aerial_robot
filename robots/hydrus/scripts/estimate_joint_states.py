@@ -8,7 +8,7 @@ from scipy.optimize import minimize
 from sensor_msgs.msg import JointState
 from spinal.msg import ServoStates
 
-from fk import compute_end_pose_error_sq
+from fk import compute_end_pose_closure_residuals, compute_end_pose_error_sq
 
 # ---- Tail wire model params (pub_soft_link_servo_states.py と同じ) ----
 s = 230
@@ -186,7 +186,7 @@ class EstimateJointStatesNode:
                 + (q[off + 2] - q[off + 3]) ** 2
             )
 
-        smooth = self.w_prev * sum((q[i] - prev[i]) ** 2 for i in range(n_joints))
+        smooth = self.w_prev * sum((q[i]) ** 2 for i in range(n_joints))
         pose_pos_err2, sum_360_err2 = compute_end_pose_error_sq(q)
         closure = self.w_pose_pos * pose_pos_err2 + self.w_sum_360 * sum_360_err2
         adjacent_cost = self.w_adjacent * adjacent
@@ -198,19 +198,28 @@ class EstimateJointStatesNode:
 
         def objective(x):
             q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
-            fit, closure, smooth, adjacent_cost, _, _ = self._compute_cost_terms(
+            fit, _, smooth, adjacent_cost, _, _ = self._compute_cost_terms(
                 q, measured_by_module, prev
             )
-            return fit + smooth + closure + adjacent_cost
+            return fit + smooth + adjacent_cost
+
+        def closure_constraint(x):
+            q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
+            return compute_end_pose_closure_residuals(q)
 
         x0 = [self._clamp(v, -max_abs, max_abs) for v in prev]
         res = minimize(
             objective,
             x0,
-            method="L-BFGS-B",
+            method="SLSQP",
             bounds=[(-max_abs, max_abs)] * n_joints,
-            options={"maxiter": max(1, self.minimize_maxiter), "ftol": 1e-8},
+            constraints=({"type": "eq", "fun": closure_constraint},),
+            options={"maxiter": max(1, self.minimize_maxiter), "ftol": 1e-8, "disp": False},
         )
+        if not res.success:
+            rospy.logwarn_throttle(
+                1.0, "Joint estimation optimization did not fully converge: %s", res.message
+            )
         return [float(v) for v in res.x]
 
     def _low_pass_filter_positions(self, positions):
