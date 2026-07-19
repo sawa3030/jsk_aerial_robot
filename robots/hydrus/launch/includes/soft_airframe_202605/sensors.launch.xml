@@ -42,6 +42,15 @@
           </include>
         </group>
 
+        <!-- <group ns="thrust3">
+          <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+            <arg name="time" value="6" />
+            <arg name="pkg" value="aerial_robot_base"/>
+            <arg name="file" value="mocap.launch"/>
+            <arg name="value" value="robot_id:=4"/>
+          </include>
+        </group> -->
+
       </group>
     </group>
 
