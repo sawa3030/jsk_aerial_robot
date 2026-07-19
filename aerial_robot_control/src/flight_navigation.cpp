@@ -932,19 +932,21 @@ void BaseNavigator::generateNewTrajectory(std::vector<geometry_msgs::PoseStamped
         }
 
       double du = pose.header.stamp.toSec() - start_state.t;
-      if (du < 0.01) // if the target time is older or closer to the current time, reset the du by using an average velocity
+      double du_tran = (state.p - start_state.p).norm() / trajectory_mean_vel_;
+      double delta_yaw = state.getYaw() - start_state.getYaw();
+      if (delta_yaw > M_PI) delta_yaw -= 2 * M_PI;
+      if (delta_yaw < -M_PI) delta_yaw += 2 * M_PI;
+      double du_rot = fabs(delta_yaw) / trajectory_mean_yaw_rate_;
+      double min_du = std::max(du_tran, trajectory_min_du_);
+      if (!enable_latch_yaw_trajectory_)
         {
-          ROS_INFO("recalcualte the du");
-          double du_tran = (state.p - start_state.p).norm() / trajectory_mean_vel_;
-          double delta_yaw = state.getYaw() - start_state.getYaw();
-          if (delta_yaw > M_PI) delta_yaw -= 2 * M_PI;
-          if (delta_yaw < -M_PI) delta_yaw += 2 * M_PI;
-          double du_rot = fabs(delta_yaw) / trajectory_mean_yaw_rate_;
-          du = std::max(du_tran, trajectory_min_du_);
-          if (!enable_latch_yaw_trajectory_)
-            {
-              du = std::max(du_rot, du);
-            }
+          min_du = std::max(du_rot, min_du);
+        }
+
+      if (du < min_du)
+        {
+          ROS_INFO("[Nav] recalculate the du from %f to %f", du, min_du);
+          du = min_du;
         }
       state.t = start_state.t + du;
 
