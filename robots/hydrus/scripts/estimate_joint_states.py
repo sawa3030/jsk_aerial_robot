@@ -201,7 +201,8 @@ class EstimateJointStatesNode:
             fit, _, smooth, adjacent_cost, _, _ = self._compute_cost_terms(
                 q, measured_by_module, prev
             )
-            return fit + smooth + adjacent_cost
+            return fit + smooth
+            # return fit + smooth + adjacent_cost
 
         def closure_constraint(x):
             q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
