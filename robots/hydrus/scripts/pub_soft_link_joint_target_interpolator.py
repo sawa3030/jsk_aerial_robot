@@ -47,22 +47,22 @@ class PubSoftLinkJointTargetInterpolator(object):
 
     # 四角・検証した
     FIXED_TARGET_SQUARE = [
-        0.774,
-        0.538,
-        0.193,
-        -0.081,
-        -0.015,
-        0.27,
-        0.639,
-        0.902,
-        0.936,
-        0.672,
-        0.304,
-        0.022,
-        -0.147,
-        0.12,
-        0.456,
-        0.688,
+        45 * math.pi / 180.0,
+        45 * math.pi / 180.0, 
+        0,
+        0,
+        0,
+        0,
+        45 * math.pi / 180.0,
+        45 * math.pi / 180.0,
+        45 * math.pi / 180.0,
+        45 * math.pi / 180.0,
+        0,
+        0,
+        0,
+        0,
+        45 * math.pi / 180.0,
+        45 * math.pi / 180.0,
     ]
 
     # ハート型（rviz上で操作）
@@ -143,13 +143,55 @@ class PubSoftLinkJointTargetInterpolator(object):
         -0.33692812239370007,
         1.190933913969154,
         1.1488552435402303
+        # 0.782963182587731, 0.7297018718067665, -0.13763737046835461, -0.0273846473436901, -0.1035223590189148, 0.49977371071481996, 0.6390689523753239, 0.8221164313781499, 0.4236890464323058, 1.1843066174772106, 0.2036493616609574, -0.5192980738918661, 0.12636749152841142, -0.07993849609890533, 0.9879997944299389, 0.7513297936097018
+    ]
+
+    # 楕円形
+    FIXED_TARGET_ELLIPSE = [
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+        5 * math.pi / 180.0,
+    ]
+
+
+
+    FIXED_TARGET_TRIANGLE = [
+        0,
+        60 * math.pi / 180.0, 
+        60 * math.pi / 180.0,
+        0,
+        0,
+        0,
+        60 * math.pi / 180.0,
+        60 * math.pi / 180.0,
+        0,
+        0,
+        0,
+        0,
+        60 * math.pi / 180.0,
+        60 * math.pi / 180.0,
+        0,
+        0,
     ]
 
     def __init__(self):
         rospy.init_node("pub_soft_link_joint_target_interpolator")
 
         self.publish_hz = rospy.get_param("~publish_hz", 10.0)
-        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 50.0))
+        self.transition_time = max(1.0e-3, rospy.get_param("~transition_time", 15.0))
         self.output_topic = rospy.get_param("~output_topic", "soft_joint_reference_interp")
         self.joint_states_topic = rospy.get_param("~joint_states_topic", "joint_states")
         self.joint_names = list(self.TARGET_JOINT_NAMES)
@@ -158,6 +200,7 @@ class PubSoftLinkJointTargetInterpolator(object):
         self.start = list(self.current)
         self.interp_start_time = rospy.Time.now()
         self.initialized_from_joint_states = False
+        self.deformation_finished_printed = False
 
         self.pub = rospy.Publisher(self.output_topic, JointState, queue_size=1)
         self.joint_states_sub = rospy.Subscriber(
@@ -178,6 +221,10 @@ class PubSoftLinkJointTargetInterpolator(object):
             self.FIXED_TARGET = self.FIXED_TARGET_HYOTAN
         elif target_name == "i":
             self.FIXED_TARGET = self.FIXED_TARGET_INITIALIZE
+        elif target_name == "t":
+            self.FIXED_TARGET = self.FIXED_TARGET_TRIANGLE
+        elif target_name == "e":
+            self.FIXED_TARGET = self.FIXED_TARGET_ELLIPSE
         else:
             rospy.logwarn("unsupported target shape '%s', fallback to 'square'", target_name)
             self.FIXED_TARGET = self.FIXED_TARGET_INITIALIZE
@@ -214,6 +261,7 @@ class PubSoftLinkJointTargetInterpolator(object):
         alpha = max(0.0, min(1.0, alpha))
         for i in range(len(self.current)):
             self.current[i] = self.start[i] + alpha * (self.target[i] - self.start[i])
+        return alpha
 
     def run(self):
         rate = rospy.Rate(self.publish_hz)
@@ -222,13 +270,17 @@ class PubSoftLinkJointTargetInterpolator(object):
                 rate.sleep()
                 continue
 
-            self._blend_step()
+            alpha = self._blend_step()
 
             msg = JointState()
             msg.header.stamp = rospy.Time.now()
             msg.name = list(self.joint_names)
             msg.position = list(self.current)
             self.pub.publish(msg)
+
+            if alpha >= 1.0 and not self.deformation_finished_printed:
+                print("Deformation finished.")
+                self.deformation_finished_printed = True
             rate.sleep()
 
 

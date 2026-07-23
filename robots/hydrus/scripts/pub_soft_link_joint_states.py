@@ -37,7 +37,7 @@ class PubSoftLinkJointStates(object):
         self.publish_hz = rospy.get_param("~publish_hz", 500.0)
         self.target_rotor13_distance = rospy.get_param("~rotor13_distance", 0.8)
         self.distance_topic = rospy.get_param("~rotor13_distance_topic", "target_rotor13_distance")
-        self.max_joint_abs_rad = rospy.get_param("~max_joint_abs_rad", 1.2)
+        self.max_joint_abs_rad = rospy.get_param("~max_joint_abs_rad", 2)
         self.ik_max_iters = int(rospy.get_param("~ik_max_iters", 120))
         self.ik_ftol = rospy.get_param("~ik_ftol", 1.0e-6)
         self.w_pose_pos = rospy.get_param("~ik_weight_pose_pos", 50.0)
@@ -204,7 +204,7 @@ class PubSoftLinkJointStates(object):
             soft_l5=self.soft_l5,
         )
         total = distance_err2 + self.w_interp_ref * interp_ref_err2
-        return total, distance_err2, interp_ref_err2, pose_pos_err2, sum_360_err2
+        return self.w_interp_ref * interp_ref_err2, distance_err2, interp_ref_err2, pose_pos_err2, sum_360_err2
 
     def solve_ik(self, target_distance, interp_ref_joints):
         max_abs = abs(self.max_joint_abs_rad)
