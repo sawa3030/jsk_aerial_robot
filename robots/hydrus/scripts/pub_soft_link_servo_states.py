@@ -120,9 +120,7 @@ class SoftJointToServoNode:
     )
     MODULE_FREE_JOINT_GROUPS = (
         ("soft_joint2", "soft_joint3", "soft_joint4", "soft_joint5"),
-        ("soft_joint7", "soft_joint8", "soft_joint9", "soft_joint10"),
         ("soft_joint12", "soft_joint13", "soft_joint14", "soft_joint15"),
-        ("soft_joint17", "soft_joint18", "soft_joint19", "soft_joint20"),
     )
     FREE_SERVO_TARGET = 8000
 
@@ -166,9 +164,9 @@ class SoftJointToServoNode:
         # a1..a4 をそのまま wire モデルに渡して長さ差分を計算する。
         servo_vals = []
         for joint_group in self.MODULE_JOINT_GROUPS:
-            # if joint_group in free_groups:
-            #     servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
-            #     continue
+            if joint_group in free_groups:
+                servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
+                continue
 
             q0, q1, q2, q3 = (soft[jn] for jn in joint_group)
             y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(q0, q1, q2, q3)
