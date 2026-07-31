@@ -59,10 +59,346 @@
 
   <!-- Four soft-link modules connected in series.
        Module i creates:
-         soft_link{5*i-4} ... soft_link{5*i}, servo_link{i}, leg{2*i-1}, leg{2*i}, gimbal_link{i}, thrust{i}
+         soft_link{3*i-2} ... soft_link{3*i}, servo_link{i}, leg{2*i-1}, leg{2*i}, gimbal_link{i}, thrust{i}
   -->
 
-  <xacro:soft_link_module
+  <xacro:macro name="soft_link_module_2j" params="
+      module_index
+      parent
+      rotor_direction:=1
+      parent_to_soft_root_x:=0.150
+      servo_cog_x:=0.0495
+      servo_size_x:=0.099
+      servo_size_y:=0.05
+      servo_size_z:=0.05
+      servo_mass:=0.189
+      soft_l1:=0.0615
+      soft_l2:=0.123
+      soft_l3:=0.123
+      soft_l4:=0.123
+      soft_l5:=0.0615
+      soft_width:=0.03
+      soft_height:=0.04
+      leg_length:=0.120
+      leg_size_x:=0.02
+      leg_size_y:=0.02
+      leg_mass:=0.04993
+      rotor_offset_x:=0.0735
+      tilt_angle:=-0.174
+      prev_tilt_angle:=0.174
+      soft_weight_sum:=0.311
+      gimbal_mesh:=package://hydrus/urdf/mesh/5inch_propeller_duct_right_v2.dae
+      propeller_mesh:=package://hydrus/urdf/mesh/TriBlade_5045.dae">
+
+    <xacro:property name="s1" value="${3 * module_index - 2}" />
+    <xacro:property name="s2" value="${3 * module_index - 1}" />
+    <xacro:property name="s3" value="${3 * module_index}" />
+    <xacro:property name="l1" value="${2 * module_index - 1}" />
+    <xacro:property name="l2" value="${2 * module_index}" />
+    <xacro:property name="soft_root_tilt_z_offset" value="0.0" />
+    <xacro:property name="gimbal_tilt_z_offset" value="${rotor_offset_x * sin(tilt_angle)}" />
+    <xacro:property name="soft_total_len" value="${soft_l1 + soft_l2 + soft_l3 + soft_l4 + soft_l5}" />
+    <xacro:property name="soft_len_1" value="${soft_total_len * 0.25}" />
+    <xacro:property name="soft_len_2" value="${soft_total_len * 0.5}" />
+    <xacro:property name="soft_len_3" value="${soft_total_len * 0.25}" />
+    <xacro:property name="soft_mass_1" value="${soft_weight_sum * 0.25}" />
+    <xacro:property name="soft_mass_2" value="${soft_weight_sum * 0.5}" />
+    <xacro:property name="soft_mass_3" value="${soft_weight_sum * 0.25}" />
+
+    <joint name="soft_joint${s1}" type="fixed">
+      <parent link="${parent}"/>
+      <child link="soft_link${s1}"/>
+      <origin xyz="${parent_to_soft_root_x} 0 ${soft_root_tilt_z_offset}" rpy="0 ${prev_tilt_angle} 0"/>
+    </joint>
+
+    <joint name="soft_joint${s2}" type="revolute">
+      <limit effort="5.0" lower="${-pi}" upper="${pi}" velocity="0.5"/>
+      <parent link="soft_link${s1}"/>
+      <child link="soft_link${s2}"/>
+      <origin xyz="${soft_len_1} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.2" friction="0.1"/>
+    </joint>
+
+    <joint name="soft_joint${s3}" type="revolute">
+      <limit effort="5.0" lower="${-pi}" upper="${pi}" velocity="0.5"/>
+      <parent link="soft_link${s2}"/>
+      <child link="soft_link${s3}"/>
+      <origin xyz="${soft_len_2} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.2" friction="0.1"/>
+    </joint>
+
+    <link name="soft_link${s1}">
+      <inertial>
+        <origin xyz="${soft_len_1 * 0.5} 0.0 0" rpy="0 0 0"/>
+        <mass value="${soft_mass_1}"/>
+        <inertia
+            ixx="${soft_mass_1 * (soft_width * soft_width + soft_height * soft_height) / 12.0}"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="${soft_mass_1 * (soft_len_1 * soft_len_1 + soft_height * soft_height) / 12.0}"
+            iyz="0.0"
+            izz="${soft_mass_1 * (soft_len_1 * soft_len_1 + soft_width * soft_width) / 12.0}"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${soft_len_1} ${soft_width} ${soft_height}"/>
+        </geometry>
+        <material name="soft_link_material"/>
+        <origin xyz="${soft_len_1 * 0.5} 0 0" rpy="0 0 0"/>
+      </visual>
+    </link>
+    <gazebo reference="soft_link${s1}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="soft_link${s1}"/>
+
+    <link name="soft_link${s2}">
+      <inertial>
+        <origin xyz="${soft_len_2 * 0.5} 0.0 0" rpy="0 0 0"/>
+        <mass value="${soft_mass_2}"/>
+        <inertia
+            ixx="${soft_mass_2 * (soft_width * soft_width + soft_height * soft_height) / 12.0}"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="${soft_mass_2 * (soft_len_2 * soft_len_2 + soft_height * soft_height) / 12.0}"
+            iyz="0.0"
+            izz="${soft_mass_2 * (soft_len_2 * soft_len_2 + soft_width * soft_width) / 12.0}"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${soft_len_2} ${soft_width} ${soft_height}"/>
+        </geometry>
+        <material name="soft_link_material"/>
+        <origin xyz="${soft_len_2 * 0.5} 0 0" rpy="0 0 0"/>
+      </visual>
+    </link>
+    <gazebo reference="soft_link${s2}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="soft_link${s2}"/>
+
+    <link name="soft_link${s3}">
+      <inertial>
+        <origin xyz="${soft_len_3 * 0.5} 0.0 0" rpy="0 0 0"/>
+        <mass value="${soft_mass_3}"/>
+        <inertia
+            ixx="${soft_mass_3 * (soft_width * soft_width + soft_height * soft_height) / 12.0}"
+            ixy="0.0"
+            ixz="0.0"
+            iyy="${soft_mass_3 * (soft_len_3 * soft_len_3 + soft_height * soft_height) / 12.0}"
+            iyz="0.0"
+            izz="${soft_mass_3 * (soft_len_3 * soft_len_3 + soft_width * soft_width) / 12.0}"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${soft_len_3} ${soft_width} ${soft_height}"/>
+        </geometry>
+        <material name="soft_link_material"/>
+        <origin xyz="${soft_len_3 * 0.5} 0 0" rpy="0 0 0"/>
+      </visual>
+    </link>
+    <gazebo reference="soft_link${s3}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="soft_link${s3}"/>
+
+    <joint name="servo_joint${module_index}" type="fixed">
+      <parent link="soft_link${s3}"/>
+      <child link="servo_link${module_index}"/>
+      <origin xyz="${soft_len_3} 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="servo_link${module_index}">
+      <inertial>
+        <origin xyz="${servo_cog_x} 0 0" rpy="0 0 0"/>
+        <mass value="${servo_mass}"/>
+        <inertia
+            ixx="0.00006467" ixy="0.0" ixz="0.0"
+            iyy="0.00012455" iyz="0.0"
+            izz="0.00009760"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${servo_size_x} ${servo_size_y} ${servo_size_z}"/>
+        </geometry>
+        <material name="servo_link_material"/>
+        <origin xyz="${servo_cog_x} 0 0" rpy="0 0 0"/>
+      </visual>
+    </link>
+    <gazebo reference="servo_link${module_index}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="servo_link${module_index}"/>
+
+    <joint name="leg_joint${l1}" type="fixed">
+      <parent link="soft_link${s1}"/>
+      <child link="leg${l1}"/>
+      <origin xyz="0 0 -0.041" rpy="0 0 0"/>
+    </joint>
+
+    <link name="leg${l1}">
+      <inertial>
+        <origin xyz="0 0 -0.096" rpy="0 0 0"/>
+        <mass value="${leg_mass}"/>
+        <inertia
+            ixx="0.00009073" ixy="0.0" ixz="0.0"
+            iyy="0.00005301" iyz="0.0"
+            izz="0.00003904"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
+        </geometry>
+        <material name="leg_link_material"/>
+        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
+        </geometry>
+        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      </collision>
+    </link>
+    <gazebo reference="leg${l1}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="leg${l1}"/>
+
+    <joint name="leg_joint${l2}" type="fixed">
+      <parent link="soft_link${s3}"/>
+      <child link="leg${l2}"/>
+      <origin xyz="${soft_len_3} 0 -0.041" rpy="0 0 0"/>
+    </joint>
+
+    <link name="leg${l2}">
+      <inertial>
+        <origin xyz="0 0 -0.096" rpy="0 0 0"/>
+        <mass value="${leg_mass}"/>
+        <inertia
+            ixx="0.00009073" ixy="0.0" ixz="0.0"
+            iyy="0.00005301" iyz="0.0"
+            izz="0.00003904"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
+        </geometry>
+        <material name="leg_link_material"/>
+        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${leg_size_x} ${leg_size_y} ${leg_length}"/>
+        </geometry>
+        <origin xyz="0 0 ${-leg_length * 0.5}" rpy="0 0 0"/>
+      </collision>
+    </link>
+    <gazebo reference="leg${l2}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="leg${l2}"/>
+
+    <transmission name="soft_joint_tran_${s2}">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="soft_joint${s2}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="soft_joint_servo${s2}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <transmission name="soft_joint_tran_${s3}">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="soft_joint${s3}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="soft_joint_servo${s3}">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <joint name="gimbal_joint${module_index}" type="fixed">
+      <parent link="servo_link${module_index}"/>
+      <child link="gimbal_link${module_index}"/>
+      <origin xyz="${servo_size_x} 0 ${gimbal_tilt_z_offset}" rpy="0 ${tilt_angle} 0"/>
+      <axis xyz="1 0 0"/>
+      <dynamics damping="0.9" friction="0.1"/>
+    </joint>
+
+    <link name="gimbal_link${module_index}">
+      <inertial>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
+        <mass value="${0.222 + 0.032}"/>
+        <inertia
+            ixx="0.00022661" ixy="0.0" ixz="0.0"
+            iyy="0.00015451" iyz="0.0"
+            izz="0.000032533"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.0735 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${gimbal_mesh}"/>
+        </geometry>
+        <material name="gimbal_link_material"/>
+      </visual>
+    </link>
+    <gazebo reference="gimbal_link${module_index}">
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+    </gazebo>
+    <xacro:damping_factor link="gimbal_link${module_index}"/>
+
+    <joint name="rotor${module_index}" type="continuous">
+      <limit effort="0.0064" lower="0.0" upper="20.0" velocity="0.5"/>
+      <parent link="gimbal_link${module_index}"/>
+      <child link="thrust${module_index}"/>
+      <origin xyz="${rotor_offset_x} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 ${rotor_direction}"/>
+    </joint>
+
+    <link name="thrust${module_index}">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.0001"/>
+        <inertia
+            ixx="0.00001" ixy="0.0" ixz="0.0"
+            iyy="0.00001" iyz="0.0"
+            izz="0.00002"/>
+      </inertial>
+      <visual>
+        <origin rpy="${pi/2} 0 0" xyz="-0.045 0.055 0.06"/>
+        <geometry>
+          <mesh filename="${propeller_mesh}"/>
+        </geometry>
+        <material name="thrust_link_material"/>
+      </visual>
+    </link>
+    <xacro:damping_factor link="thrust${module_index}"/>
+
+    <transmission name="rotor_tran${module_index}">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="rotor${module_index}">
+        <hardwareInterface>RotorInterface</hardwareInterface>
+      </joint>
+      <actuator name="rotor${module_index}">
+        <hardwareInterface>RotorInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:soft_link_module_2j
       module_index="1"
       parent="root"
       rotor_direction="-1"
@@ -71,7 +407,7 @@
       tilt_angle="0.174"
       soft_weight_sum="0.251" />
 
-  <xacro:soft_link_module
+  <xacro:soft_link_module_2j
       module_index="2"
       parent="gimbal_link1"
       rotor_direction="1"
@@ -83,14 +419,14 @@
       tilt_angle="-0.174" />
 
   <!-- The third module has a slightly longer and larger servo body. -->
-  <xacro:soft_link_module
+  <xacro:soft_link_module_2j
       module_index="3"
       parent="gimbal_link2"
       rotor_direction="-1"
       prev_tilt_angle="0.174"
       tilt_angle="0.174" />
 
-  <xacro:soft_link_module
+  <xacro:soft_link_module_2j
       module_index="4"
       parent="gimbal_link3"
       rotor_direction="1"

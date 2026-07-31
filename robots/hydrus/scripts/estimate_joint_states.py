@@ -8,7 +8,7 @@ from scipy.optimize import minimize
 from sensor_msgs.msg import JointState
 from spinal.msg import ServoStates
 
-from fk import compute_end_pose_closure_residuals, compute_end_pose_error_sq
+from fk2 import compute_end_pose_closure_residuals, compute_end_pose_error_sq
 
 # ---- Tail wire model params (pub_soft_link_servo_states.py と同じ) ----
 s = 230
@@ -111,15 +111,15 @@ def angle_tick_to_wire_diff(tick_diff):
 
 class EstimateJointStatesNode:
     # soft_airframe_202605 logical joints:
-    # module1: soft_joint2, soft_joint3, soft_joint4,  soft_joint5
-    # module2: soft_joint7, soft_joint8, soft_joint9,  soft_joint10
-    # module3: soft_joint12,soft_joint13,soft_joint14, soft_joint15
-    # module4: soft_joint17,soft_joint18,soft_joint19, soft_joint20
+    # module1: soft_joint2,  soft_joint3
+    # module2: soft_joint5,  soft_joint6
+    # module3: soft_joint8,  soft_joint9
+    # module4: soft_joint11, soft_joint12
     MODULE_JOINT_GROUPS = (
-        ("soft_joint2", "soft_joint3", "soft_joint4", "soft_joint5"),
-        ("soft_joint7", "soft_joint8", "soft_joint9", "soft_joint10"),
-        ("soft_joint12", "soft_joint13", "soft_joint14", "soft_joint15"),
-        ("soft_joint17", "soft_joint18", "soft_joint19", "soft_joint20"),
+        ("soft_joint2", "soft_joint3"),
+        ("soft_joint5", "soft_joint6"),
+        ("soft_joint8", "soft_joint9"),
+        ("soft_joint11", "soft_joint12"),
     )
     # module1: 0-3, module2: 4-7, module3: 8-11, module4: 12-15
     MODULE_SERVO_INDICES = (
@@ -149,7 +149,7 @@ class EstimateJointStatesNode:
         self.sub = rospy.Subscriber(servo_topic, ServoStates, self.cb, queue_size=1)
 
         q0 = math.radians(22.5)
-        self.prev_est = [q0] * (len(self.MODULE_JOINT_GROUPS) * 4)
+        self.prev_est = [q0] * (len(self.MODULE_JOINT_GROUPS) * 2)
         self.prev_filtered_positions = None
 
         rospy.loginfo(
@@ -164,8 +164,8 @@ class EstimateJointStatesNode:
         return max(lo, min(hi, v))
 
     @staticmethod
-    def _residual_sq(a1, a2, a3, a4, measured):
-        y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(a1, a2, a3, a4)
+    def _residual_sq(q1, q2, measured):
+        y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(q1, q1, q2, q2)
         return (
             (y_plus_long - measured[0]) ** 2
             + (y_minus_long - measured[1]) ** 2
@@ -174,17 +174,13 @@ class EstimateJointStatesNode:
         )
 
     def _compute_cost_terms(self, q, measured_by_module, prev):
-        n_joints = len(self.MODULE_JOINT_GROUPS) * 4
+        n_joints = len(self.MODULE_JOINT_GROUPS) * 2
         fit = 0.0
         adjacent = 0.0
         for module_i, measured in enumerate(measured_by_module):
-            off = 4 * module_i
-            fit += self._residual_sq(q[off], q[off + 1], q[off + 2], q[off + 3], measured)
-            adjacent += (
-                (q[off] - q[off + 1]) ** 2
-                + (q[off + 1] - q[off + 2]) ** 2
-                + (q[off + 2] - q[off + 3]) ** 2
-            )
+            off = 2 * module_i
+            fit += self._residual_sq(q[off], q[off + 1], measured)
+            adjacent += (q[off] - q[off + 1]) ** 2
 
         smooth = self.w_prev * sum((q[i]) ** 2 for i in range(n_joints))
         pose_pos_err2, sum_360_err2 = compute_end_pose_error_sq(q)
@@ -194,7 +190,7 @@ class EstimateJointStatesNode:
 
     def _estimate_all_modules(self, measured_by_module, prev):
         max_abs = abs(self.max_joint_abs_rad)
-        n_joints = len(self.MODULE_JOINT_GROUPS) * 4
+        n_joints = len(self.MODULE_JOINT_GROUPS) * 2
 
         def objective(x):
             q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
@@ -266,12 +262,12 @@ class EstimateJointStatesNode:
         logical_joint_values = {}
         fitting_errors = []
         for module_i, joint_group in enumerate(self.MODULE_JOINT_GROUPS):
-            off = 4 * module_i
-            est = est_all[off : off + 4]
+            off = 2 * module_i
+            est = est_all[off : off + 2]
             for joint_name, q in zip(joint_group, est):
                 logical_joint_values[joint_name] = q
             measured = measured_by_module[module_i]
-            fitting_errors.append(math.sqrt(self._residual_sq(est[0], est[1], est[2], est[3], measured)))
+            fitting_errors.append(math.sqrt(self._residual_sq(est[0], est[1], measured)))
 
         fit, closure, smooth, adjacent_cost, pose_pos_err2, sum_360_err2 = self._compute_cost_terms(
             est_all, measured_by_module, prev_est
@@ -283,6 +279,7 @@ class EstimateJointStatesNode:
         out.header.stamp = rospy.Time.now()
         out.name = names
         out.position = self._low_pass_filter_positions([logical_joint_values[n] for n in names])
+        # out.position = self._low_pass_filter_positions([22.5 * math.pi / 180.0] * len(names))  # fixed value for testing
         self.pub.publish(out)
 
         rospy.loginfo_throttle(
