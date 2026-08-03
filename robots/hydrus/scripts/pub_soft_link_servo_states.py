@@ -4,7 +4,7 @@
 import math
 import rospy
 from sensor_msgs.msg import JointState
-from spinal.msg import ServoControlCmd
+from spinal.msg import ServoControlCmd, ServoStates
 
 # ---- Tail wire model params (あなたのスクリプトと同じ) ----
 s = 230
@@ -122,7 +122,13 @@ class SoftJointToServoNode:
         ("soft_joint2", "soft_joint3", "soft_joint4", "soft_joint5"),
         ("soft_joint12", "soft_joint13", "soft_joint14", "soft_joint15"),
     )
-    FREE_SERVO_TARGET = 8000
+    MODULE_SERVO_INDICES = (
+        (0, 1, 2, 3),
+        (4, 5, 6, 7),
+        (8, 9, 10, 11),
+        (12, 13, 14, 15),
+    )
+    FREE_SERVO_TARGET_OFFSET = 6000
 
     def __init__(self):
         rospy.init_node("soft_joint_to_servo")
@@ -131,11 +137,18 @@ class SoftJointToServoNode:
         # 4 servos / module x 4 modules = 16 servos.info
         # module1: 0-3, module2: 4-7, module3: 8-11, module4: 12-15
         self.servo_indices = list(range(16))
+        self.current_servo_angles = {}
 
         self.pub = rospy.Publisher("servo/target_states", ServoControlCmd, queue_size=1)
+        self.servo_state_sub = rospy.Subscriber(
+            "servo/states", ServoStates, self.servo_state_cb, queue_size=1
+        )
         self.sub = rospy.Subscriber("target_soft_joints_ctrl", JointState, self.cb, queue_size=1)
 
         rospy.loginfo("soft_joint_to_servo started.")
+
+    def servo_state_cb(self, msg: ServoStates):
+        self.current_servo_angles = {int(servo.index): int(servo.angle) for servo in msg.servos}
 
     def cb(self, msg: JointState):
         # joint_states から必要な soft joint を取り出す
@@ -163,9 +176,25 @@ class SoftJointToServoNode:
         # 5分割(1/8,1/4,1/4,1/4,1/8)で1モジュール4関節のため、
         # a1..a4 をそのまま wire モデルに渡して長さ差分を計算する。
         servo_vals = []
-        for joint_group in self.MODULE_JOINT_GROUPS:
+        for module_index, joint_group in enumerate(self.MODULE_JOINT_GROUPS):
             if joint_group in free_groups:
-                servo_vals.extend([self.FREE_SERVO_TARGET] * 4)
+                free_servo_indices = self.MODULE_SERVO_INDICES[module_index]
+                missing_indices = [
+                    idx for idx in free_servo_indices if idx not in self.current_servo_angles
+                ]
+                if missing_indices:
+                    rospy.logwarn_throttle(
+                        1.0,
+                        "Missing servo indices in servo/states for free module: %s",
+                        missing_indices,
+                    )
+                    return
+                servo_vals.extend(
+                    [
+                        self.current_servo_angles[idx] + self.FREE_SERVO_TARGET_OFFSET
+                        for idx in free_servo_indices
+                    ]
+                )
                 continue
 
             q0, q1, q2, q3 = (soft[jn] for jn in joint_group)
