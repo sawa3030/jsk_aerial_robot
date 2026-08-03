@@ -6,7 +6,7 @@ import rospy
 from sensor_msgs.msg import JointState
 
 JOINT_NAMES = ["soft_joint7", "soft_joint8", "soft_joint9", "soft_joint10", "soft_joint17", "soft_joint18", "soft_joint19", "soft_joint20",]
-DEFAULT_START_DEG = 22.5
+DEFAULT_START_DEG = 20
 STEP_DEG = 1
 CONFIRM_EVERY_DEG = 2.5
 PUBLISH_INTERVAL_SEC = 0.2
