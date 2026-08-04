@@ -11,47 +11,44 @@ from spinal.msg import ServoStates
 from fk import compute_end_pose_closure_residuals, compute_end_pose_error_sq
 
 # ---- Tail wire model params (pub_soft_link_servo_states.py と同じ) ----
-s = 230
-d = 5
+SECTION_LENGTH = 54
+SECTIONS_PER_ALPHA = 2
+r_joint_1 = 75 / 2
 r_joint_2 = 85 / 2
 r_wheel = 20
 
 
-def get_plus_pos_wire_length(alpha, r_joint, divide_num):
+def get_section_plus_pos_wire_length(alpha, r_joint):
     if alpha == 0:
-        return s + d
+        return SECTION_LENGTH
 
-    half_divide_num = divide_num / 2.0
-    r = (s - d * (half_divide_num - 1.0)) / abs(alpha)
+    r = SECTION_LENGTH / abs(alpha)
     if alpha > 0:
-        return (
-            divide_num * (r - r_joint - 1.5) * math.sin(abs(alpha) / divide_num)
-            + half_divide_num * d
-        )
-    return (
-        divide_num * (r + r_joint + 1.5) * math.sin(abs(alpha) / divide_num)
-        + half_divide_num * d
-    )
+        return 2.0 * (r - r_joint) * math.sin(abs(alpha) / 2.0)
+    return 2.0 * (r + r_joint) * math.sin(abs(alpha) / 2.0)
 
 
-def get_minus_pos_wire_length(alpha, r_joint, divide_num):
+def get_section_minus_pos_wire_length(alpha, r_joint):
     if alpha == 0:
-        return s + d
+        return SECTION_LENGTH
 
-    half_divide_num = divide_num / 2.0
-    r = (s - d * (half_divide_num - 1.0)) / abs(alpha)
+    r = SECTION_LENGTH / abs(alpha)
     if alpha > 0:
-        return (
-            divide_num * (r + r_joint + 1.5) * math.sin(abs(alpha) / divide_num)
-            + half_divide_num * d
-        )
-    return (
-        divide_num * (r - r_joint - 1.5) * math.sin(abs(alpha) / divide_num)
-        + half_divide_num * d
-    )
+        return 2.0 * (r + r_joint) * math.sin(abs(alpha) / 2.0)
+    return 2.0 * (r - r_joint) * math.sin(abs(alpha) / 2.0)
 
 
-def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
+def get_plus_pos_wire_length(alpha, r_joint):
+    section_alpha = alpha / float(SECTIONS_PER_ALPHA)
+    return SECTIONS_PER_ALPHA * get_section_plus_pos_wire_length(section_alpha, r_joint)
+
+
+def get_minus_pos_wire_length(alpha, r_joint):
+    section_alpha = alpha / float(SECTIONS_PER_ALPHA)
+    return SECTIONS_PER_ALPHA * get_section_minus_pos_wire_length(section_alpha, r_joint)
+
+
+def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4):
     ref_alpha = math.radians(22.5)
 
     def get_wire_lengths(a1, a2, a3, a4):
@@ -61,32 +58,22 @@ def get_wire_diff(alpha_1, alpha_2, alpha_3, alpha_4, divide_num=4):
         # 4*i + 2: bend soft_joint(5*i+4..5) in minus direction
         # 4*i + 3: bend soft_joint(5*i+4..5) in plus direction
         plus_long_wire = (
-            get_plus_pos_wire_length(a1, r_joint_2, divide_num)
-            + d
-            + get_plus_pos_wire_length(a2, r_joint_2, divide_num)
-            + d
-            + get_plus_pos_wire_length(a3, r_joint_2, divide_num)
-            + d
-            + get_plus_pos_wire_length(a4, r_joint_2, divide_num)
+            get_plus_pos_wire_length(a1, r_joint_2)
+            + get_plus_pos_wire_length(a2, r_joint_2)
+            + get_plus_pos_wire_length(a3, r_joint_2)
+            + get_plus_pos_wire_length(a4, r_joint_2)
         )
         minus_long_wire = (
-            get_minus_pos_wire_length(a1, r_joint_2, divide_num)
-            + d
-            + get_minus_pos_wire_length(a2, r_joint_2, divide_num)
-            + d
-            + get_minus_pos_wire_length(a3, r_joint_2, divide_num)
-            + d
-            + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
+            get_minus_pos_wire_length(a1, r_joint_2)
+            + get_minus_pos_wire_length(a2, r_joint_2)
+            + get_minus_pos_wire_length(a3, r_joint_2)
+            + get_minus_pos_wire_length(a4, r_joint_2)
         )
         plus_short_wire = (
-            get_plus_pos_wire_length(a3, r_joint_2, divide_num)
-            + d
-            + get_plus_pos_wire_length(a4, r_joint_2, divide_num)
+            get_plus_pos_wire_length(a3, r_joint_1) + get_plus_pos_wire_length(a4, r_joint_1)
         )
         minus_short_wire = (
-            get_minus_pos_wire_length(a3, r_joint_2, divide_num)
-            + d
-            + get_minus_pos_wire_length(a4, r_joint_2, divide_num)
+            get_minus_pos_wire_length(a3, r_joint_1) + get_minus_pos_wire_length(a4, r_joint_1)
         )
         return plus_long_wire, minus_long_wire, plus_short_wire, minus_short_wire
 
@@ -134,7 +121,7 @@ class EstimateJointStatesNode:
 
         self.servo_center = int(rospy.get_param("~servo_center", 2047))
         self.max_joint_abs_rad = float(rospy.get_param("~max_joint_abs_rad", 1.5))
-        self.w_prev = float(rospy.get_param("~weight_previous", 0.02))
+        self.w_prev = float(rospy.get_param("~weight_previous", 0.5))
         self.w_pose_pos = float(rospy.get_param("~weight_pose_pos", 500.0))
         self.w_sum_360 = float(rospy.get_param("~weight_sum_360", 120.0))
         self.w_adjacent = float(rospy.get_param("~weight_adjacent", 50))
