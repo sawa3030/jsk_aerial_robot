@@ -20,28 +20,16 @@ def make_box_inertia(mass, size_x, size_y, size_z):
 
 
 DEFAULT_TRANSFORM = {
-    "translation": (0.0, 0.4, 0.0),
+    "translation": (0.0, 0.35, 0.0),
     "rotation": (0.0, 0.0, 0.0, 1.0),
 }
 
 OBJECT_CONFIGS = (
     {
         "module_name": "object1",
-        "parent_link_name": "soft_link10",
+        "parent_link_name": "soft_link13",
         "transform": DEFAULT_TRANSFORM,
-        "inertia": make_box_inertia(0.370, 0.20, 0.48, 0.23),
-    },
-    {
-        "module_name": "object2",
-        "parent_link_name": "soft_link10",
-        "transform": DEFAULT_TRANSFORM,
-        "inertia": make_box_inertia(0.600, 0.30, 0.30, 0.38),
-    },
-    {
-        "module_name": "object3",
-        "parent_link_name": "soft_link10",
-        "transform": DEFAULT_TRANSFORM,
-        "inertia": make_box_inertia(0.300, 0.30, 0.30, 0.30),
+        "inertia": make_box_inertia(0.280, 0.70, 0.23, 0.18),
     },
 )
 
