@@ -43,10 +43,10 @@ class GoNarrowSpaceDemo():
         self.robot = RobotInterface()
         rospy.sleep(1.0) # wait for joint updated
 
-        self.robot.goPosYaw((-1.25, -0.25, 0.8), -3.14/4)
+        self.robot.goPosYaw((-1.25, -0.25, 0.8), -3.14/16*3, timeout = 20)
 
         input("Press Enter to start the demo...")
-        self.robot.goPosYaw((1.25, -0.25, 0.8), -3.14/4)
+        self.robot.goPosYaw((1.25, -0.25, 0.8), -3.14/16*3)
 
 if __name__ == '__main__':
 

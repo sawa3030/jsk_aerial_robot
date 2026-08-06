@@ -148,10 +148,6 @@ class PubSoftLinkJointTargetInterpolator(object):
 
     # 楕円形
     FIXED_TARGET_ELLIPSE = [
-        35 * math.pi / 180.0,
-        35 * math.pi / 180.0,
-        35 * math.pi / 180.0,
-        35 * math.pi / 180.0,
         5 * math.pi / 180.0,
         5 * math.pi / 180.0,
         5 * math.pi / 180.0,
@@ -164,6 +160,10 @@ class PubSoftLinkJointTargetInterpolator(object):
         5 * math.pi / 180.0,
         5 * math.pi / 180.0,
         5 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
+        35 * math.pi / 180.0,
     ]
 
 
