@@ -164,6 +164,38 @@ def topic_to_rotor_frame(topic):
     return rotor, "{}/{}".format(ns, rotor)
 
 
+def find_trigger_window(bag_path, trigger_topic, ignore_seconds, plot_duration):
+    with rosbag.Bag(bag_path, "r") as bag:
+        bag_start = bag.get_start_time()
+        bag_end = bag.get_end_time()
+        search_start = bag_start + ignore_seconds
+
+        trigger_time = None
+        for _, msg, bag_time in bag.read_messages(topics=[trigger_topic]):
+            sample_time = extract_stamp(msg, bag_time.to_sec())
+            if sample_time >= search_start:
+                trigger_time = sample_time
+                break
+
+    if trigger_time is None:
+        raise RuntimeError(
+            "No message on '{}' was found after {:.1f} seconds from bag start.".format(
+                trigger_topic, ignore_seconds
+            )
+        )
+
+    window_end = trigger_time + plot_duration
+    if bag_end < window_end:
+        raise RuntimeError(
+            "Bag ends at {:.3f}, but {:.1f} seconds are required after trigger time {:.3f}.".format(
+                bag_end, plot_duration, trigger_time
+            )
+        )
+    print(trigger_time -bag_start, window_end-bag_start)
+
+    return trigger_time, window_end
+
+
 def get_world_to_child(current_transforms, world_frame, child_frame, sample_time, max_age):
     world = normalize_name(world_frame)
     child = normalize_name(child_frame)
@@ -208,6 +240,8 @@ def collect_error_series(
     namespace,
     world_frame,
     max_tf_age,
+    window_start,
+    window_end,
     mocap_topics=None,
     tf_topic="/tf",
     tf_static_topic="/tf_static",
@@ -232,6 +266,8 @@ def collect_error_series(
 
         for topic, msg, bag_time in bag.read_messages(topics=topics_to_read):
             sample_time = bag_time.to_sec()
+            if sample_time > window_end:
+                break
 
             if topic == tf_topic or topic == tf_static_topic:
                 for transform in msg.transforms:
@@ -259,6 +295,11 @@ def collect_error_series(
                 continue
 
             mocap_time = extract_stamp(msg, sample_time)
+            if mocap_time < window_start:
+                continue
+            if mocap_time > window_end:
+                continue
+
             estimated = get_world_to_child(
                 current_transforms=current_transforms,
                 world_frame=world_frame,
@@ -281,7 +322,8 @@ def collect_error_series(
             series[rotor_name]["dxy"].append(float(np.linalg.norm(pos_error[:2])))
             series[rotor_name]["dz"].append(pos_error[2])
             series[rotor_name]["roll_deg"].append(math.degrees(wrap_to_pi(roll_err)))
-            series[rotor_name]["pitch_deg"].append(math.degrees(wrap_to_pi(pitch_err)))
+            series[rotor_name]["pitch_deg"].append(math.degrees(wrap_to_pi(pitch_err)) - 10 if rotor_name == "thrust1" else math.degrees(wrap_to_pi(pitch_err)) + 10)
+            # series[rotor_name]["pitch_deg"].append(math.degrees(wrap_to_pi(pitch_err)))
             series[rotor_name]["yaw_deg"].append(math.degrees(wrap_to_pi(yaw_err)))
             series[rotor_name]["angle_deg"].append(quaternion_angle_deg(delta_q))
             series[rotor_name]["tf_age"].append(estimated["max_age"])
@@ -431,20 +473,24 @@ def plot_series(series, output_path):
 
         ax_xy.plot(t, values["dx"], label="x error in mocap frame", color="#1f77b4", linewidth=1.2)
         ax_xy.plot(t, values["dy"], label="y error in mocap frame", color="#ff7f0e", linewidth=1.2)
-        ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
+        # ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
         ax_xy.set_title("{} position error in mocap frame".format(rotor_name))
         ax_xy.set_xlabel("time from first valid sample [s]")
         ax_xy.set_ylabel("position error in mocap frame [m]")
+        ax_xy.set_xlim(0, 25)
+        ax_xy.set_ylim(-0.15, 0.15)
         ax_xy.grid(True, linestyle=":", linewidth=0.8)
         ax_xy.legend(loc="best")
 
         ax_att.plot(t, values["roll_deg"], label="roll err", color="#9467bd", linewidth=1.1)
         ax_att.plot(t, values["pitch_deg"], label="pitch err", color="#8c564b", linewidth=1.1)
         ax_att.plot(t, values["yaw_deg"], label="yaw err", color="#e377c2", linewidth=1.1)
-        ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
+        # ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
         ax_att.set_title("{} attitude error".format(rotor_name))
         ax_att.set_xlabel("time from first valid sample [s]")
         ax_att.set_ylabel("attitude error [deg]")
+        ax_att.set_xlim(0, 25)
+        ax_att.set_ylim(-15.0, 15.0)
         ax_att.grid(True, linestyle=":", linewidth=0.8)
         ax_att.legend(loc="best")
 
@@ -463,6 +509,22 @@ def parse_args():
     parser.add_argument("bag", help="Input rosbag path")
     parser.add_argument("--namespace", default="hydrus", help="Robot namespace, e.g. hydrus")
     parser.add_argument("--world-frame", default="world", help="World frame name used in TF")
+    parser.add_argument(
+        "--ignore-seconds",
+        type=float,
+        default=30.0,
+        help="Ignore the first N seconds from bag start before searching the trigger topic",
+    )
+    parser.add_argument(
+        "--plot-duration",
+        type=float,
+        default=25.0,
+        help="Plot this many seconds from the first trigger message after --ignore-seconds",
+    )
+    parser.add_argument(
+        "--trigger-topic",
+        help="Trigger topic. Default: /<namespace>/soft_joint_reference_interp",
+    )
     parser.add_argument(
         "--max-tf-age",
         type=float,
@@ -487,6 +549,13 @@ def main():
 
     bag_path = os.path.abspath(args.bag)
     bag_stem = os.path.splitext(os.path.basename(bag_path))[0]
+    trigger_topic = args.trigger_topic or "/{}/soft_joint_reference_interp".format(normalize_name(args.namespace))
+    window_start, window_end = find_trigger_window(
+        bag_path=bag_path,
+        trigger_topic=trigger_topic,
+        ignore_seconds=args.ignore_seconds,
+        plot_duration=args.plot_duration,
+    )
     output_path = args.output or os.path.join(
         os.path.dirname(bag_path), "{}_rotor_mocap_estimation_error.png".format(bag_stem)
     )
@@ -496,17 +565,26 @@ def main():
         namespace=args.namespace,
         world_frame=args.world_frame,
         max_tf_age=args.max_tf_age,
+        window_start=window_start,
+        window_end=window_end,
         tf_topic=args.tf_topic,
         tf_static_topic=args.tf_static_topic,
     )
 
     if not any(len(values["time"]) > 0 for values in series.values()):
         raise RuntimeError(
-            "No valid mocap/TF pairs were found. Try increasing --max-tf-age or checking the TF world frame."
+            "No valid mocap/TF pairs were found in the requested {:.1f}-second window after trigger.".format(
+                args.plot_duration
+            )
         )
 
     plot_series(series, output_path)
     print_summary(series, skipped_missing_tf, skipped_bad_pose)
+    print(
+        "Trigger topic '{}' at {:.3f}s, plotting [{:.3f}, {:.3f}]".format(
+            trigger_topic, window_start, window_start, window_end
+        )
+    )
     print("Saved plot to {}".format(output_path))
 
     if args.csv:
