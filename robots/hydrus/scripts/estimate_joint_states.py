@@ -96,25 +96,129 @@ def angle_tick_to_wire_diff(tick_diff):
     return float(tick_diff) * math.pi * r_wheel / 4096.0
 
 
+MODULE_JOINT_GROUPS = (
+    ("soft_joint2", "soft_joint3"),
+    ("soft_joint5", "soft_joint6"),
+    ("soft_joint8", "soft_joint9"),
+    ("soft_joint11", "soft_joint12"),
+)
+
+MODULE_SERVO_INDICES = (
+    (0, 1, 2, 3),
+    (4, 5, 6, 7),
+    (8, 9, 10, 11),
+    (12, 13, 14, 15),
+)
+
+
+def clamp(v, lo, hi):
+    return max(lo, min(hi, v))
+
+
+def residual_sq(q1, q2, measured):
+    y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(q1, q1, q2, q2)
+    return (
+        (y_plus_long - measured[0]) ** 2
+        + (y_minus_long - measured[1]) ** 2
+        + (y_minus_short - measured[2]) ** 2
+        + (y_plus_short - measured[3]) ** 2
+    )
+
+
+def build_measured_by_module_from_servo_map(
+    servo_map,
+    servo_center=2047,
+    module_servo_indices=MODULE_SERVO_INDICES,
+):
+    required_indices = [idx for group in module_servo_indices for idx in group]
+    missing = [idx for idx in required_indices if idx not in servo_map]
+    if missing:
+        raise ValueError("Missing servo indices: {}".format(missing))
+
+    measured_by_module = []
+    for i0, i1, i2, i3 in module_servo_indices:
+        measured_by_module.append(
+            (
+                angle_tick_to_wire_diff(servo_center - servo_map[i0]),
+                angle_tick_to_wire_diff(servo_center - servo_map[i1]),
+                angle_tick_to_wire_diff(servo_center - servo_map[i2]),
+                angle_tick_to_wire_diff(servo_center - servo_map[i3]),
+            )
+        )
+    return measured_by_module
+
+
+def estimate_all_modules(
+    measured_by_module,
+    prev=None,
+    max_joint_abs_rad=1.5,
+    weight_previous=0.5,
+    ik_max_iters=120,
+    module_joint_groups=MODULE_JOINT_GROUPS,
+):
+    n_joints = len(module_joint_groups) * 2
+    max_abs = abs(float(max_joint_abs_rad))
+    if prev is None:
+        prev = [math.radians(22.5)] * n_joints
+    else:
+        prev = [float(v) for v in prev]
+
+    def objective(x):
+        q = [clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
+        fit = 0.0
+        for module_i, measured in enumerate(measured_by_module):
+            off = 2 * module_i
+            fit += residual_sq(q[off] / 2.0, q[off + 1] / 2.0, measured)
+        smooth = float(weight_previous) * sum(qi * qi for qi in q)
+        return fit + smooth
+
+    def closure_constraint(x):
+        q = [clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
+        return compute_end_pose_closure_residuals(q)
+
+    x0 = [clamp(v, -max_abs, max_abs) for v in prev]
+    res = minimize(
+        objective,
+        x0,
+        method="SLSQP",
+        bounds=[(-max_abs, max_abs)] * n_joints,
+        constraints=({"type": "eq", "fun": closure_constraint},),
+        options={"maxiter": max(1, int(ik_max_iters)), "ftol": 1e-8, "disp": False},
+    )
+    return [float(v) for v in res.x], res
+
+
+def estimate_all_modules_from_servo_map(
+    servo_map,
+    servo_center=2047,
+    prev=None,
+    max_joint_abs_rad=1.5,
+    weight_previous=0.5,
+    ik_max_iters=120,
+):
+    measured_by_module = build_measured_by_module_from_servo_map(
+        servo_map,
+        servo_center=servo_center,
+    )
+    est, res = estimate_all_modules(
+        measured_by_module,
+        prev=prev,
+        max_joint_abs_rad=max_joint_abs_rad,
+        weight_previous=weight_previous,
+        ik_max_iters=ik_max_iters,
+    )
+    return est, measured_by_module, res
+
+
 class EstimateJointStatesNode:
     # soft_airframe_202605 logical joints:
     # module1: soft_joint2,  soft_joint3
     # module2: soft_joint5,  soft_joint6
     # module3: soft_joint8,  soft_joint9
     # module4: soft_joint11, soft_joint12
-    MODULE_JOINT_GROUPS = (
-        ("soft_joint2", "soft_joint3"),
-        ("soft_joint5", "soft_joint6"),
-        ("soft_joint8", "soft_joint9"),
-        ("soft_joint11", "soft_joint12"),
-    )
+    MODULE_JOINT_GROUPS = MODULE_JOINT_GROUPS
     # module1: 0-3, module2: 4-7, module3: 8-11, module4: 12-15
-    MODULE_SERVO_INDICES = (
-        (0, 1, 2, 3),
-        (4, 5, 6, 7),
-        (8, 9, 10, 11),
-        (12, 13, 14, 15),
-    )
+    MODULE_SERVO_INDICES = MODULE_SERVO_INDICES
 
     def __init__(self):
         rospy.init_node("estimate_joint_states")
@@ -148,17 +252,11 @@ class EstimateJointStatesNode:
 
     @staticmethod
     def _clamp(v, lo, hi):
-        return max(lo, min(hi, v))
+        return clamp(v, lo, hi)
 
     @staticmethod
     def _residual_sq(q1, q2, measured):
-        y_plus_long, y_minus_long, y_plus_short, y_minus_short = get_wire_diff(q1, q1, q2, q2)
-        return (
-            (y_plus_long - measured[0]) ** 2
-            + (y_minus_long - measured[1]) ** 2
-            + (y_minus_short - measured[2]) ** 2
-            + (y_plus_short - measured[3]) ** 2
-        )
+        return residual_sq(q1, q2, measured)
 
     def _compute_cost_terms(self, q, measured_by_module, prev):
         n_joints = len(self.MODULE_JOINT_GROUPS) * 2
@@ -176,35 +274,19 @@ class EstimateJointStatesNode:
         return fit, closure, smooth, adjacent_cost, pose_pos_err2, sum_360_err2
 
     def _estimate_all_modules(self, measured_by_module, prev):
-        max_abs = abs(self.max_joint_abs_rad)
-        n_joints = len(self.MODULE_JOINT_GROUPS) * 2
-
-        def objective(x):
-            q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
-            fit, _, smooth, adjacent_cost, _, _ = self._compute_cost_terms(
-                q, measured_by_module, prev
-            )
-            return fit + smooth
-            # return fit + smooth + adjacent_cost
-
-        def closure_constraint(x):
-            q = [self._clamp(float(x[i]), -max_abs, max_abs) for i in range(n_joints)]
-            return compute_end_pose_closure_residuals(q)
-
-        x0 = [self._clamp(v, -max_abs, max_abs) for v in prev]
-        res = minimize(
-            objective,
-            x0,
-            method="SLSQP",
-            bounds=[(-max_abs, max_abs)] * n_joints,
-            constraints=({"type": "eq", "fun": closure_constraint},),
-            options={"maxiter": max(1, self.minimize_maxiter), "ftol": 1e-8, "disp": False},
+        est, res = estimate_all_modules(
+            measured_by_module,
+            prev=prev,
+            max_joint_abs_rad=self.max_joint_abs_rad,
+            weight_previous=self.w_prev,
+            ik_max_iters=self.minimize_maxiter,
+            module_joint_groups=self.MODULE_JOINT_GROUPS,
         )
         if not res.success:
             rospy.logwarn_throttle(
                 1.0, "Joint estimation optimization did not fully converge: %s", res.message
             )
-        return [float(v) for v in res.x]
+        return est
 
     def _low_pass_filter_positions(self, positions):
         if self.prev_filtered_positions is None or self.joint_lpf_alpha >= 1.0:
@@ -221,26 +303,15 @@ class EstimateJointStatesNode:
 
     def cb(self, msg):
         servo_map = {int(sv.index): int(sv.angle) for sv in msg.servos}
-
-        required_indices = [idx for group in self.MODULE_SERVO_INDICES for idx in group]
-        missing = [idx for idx in required_indices if idx not in servo_map]
-        if missing:
-            rospy.logwarn_throttle(1.0, "Missing servo indices in servo/states: %s", missing)
-            return
-
-        measured_by_module = []
-        for module_i, joint_group in enumerate(self.MODULE_JOINT_GROUPS):
-            i0, i1, i2, i3 = self.MODULE_SERVO_INDICES[module_i]
-
-            # pub_soft_link_servo_states.py の並びと一致:
-            # [y_plus_long, y_minus_long, y_minus_short, y_plus_short]
-            measured = (
-                angle_tick_to_wire_diff(self.servo_center - servo_map[i0]),
-                angle_tick_to_wire_diff(self.servo_center - servo_map[i1]),
-                angle_tick_to_wire_diff(self.servo_center - servo_map[i2]),
-                angle_tick_to_wire_diff(self.servo_center - servo_map[i3]),
+        try:
+            measured_by_module = build_measured_by_module_from_servo_map(
+                servo_map,
+                servo_center=self.servo_center,
+                module_servo_indices=self.MODULE_SERVO_INDICES,
             )
-            measured_by_module.append(measured)
+        except ValueError as exc:
+            rospy.logwarn_throttle(1.0, "%s", exc)
+            return
 
         prev_est = list(self.prev_est)
         est_all = self._estimate_all_modules(measured_by_module, prev_est)
