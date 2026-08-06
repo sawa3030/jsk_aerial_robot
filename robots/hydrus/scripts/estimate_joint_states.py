@@ -166,7 +166,7 @@ class EstimateJointStatesNode:
         adjacent = 0.0
         for module_i, measured in enumerate(measured_by_module):
             off = 2 * module_i
-            fit += self._residual_sq(q[off], q[off + 1], measured)
+            fit += self._residual_sq(q[off]/2, q[off + 1]/2, measured)
             adjacent += (q[off] - q[off + 1]) ** 2
 
         smooth = self.w_prev * sum((q[i]) ** 2 for i in range(n_joints))
