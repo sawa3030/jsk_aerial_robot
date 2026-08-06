@@ -1,0 +1,1 @@
+rosrun hydrus plot_rotor_mocap_estimation_error.py ~/rosbag/20260804_soft_airframe_sawada_change_configuration_2_2026-08-04-14-52-46.bag --output 20260804_soft_airframe_sawada_change_configuration_2
