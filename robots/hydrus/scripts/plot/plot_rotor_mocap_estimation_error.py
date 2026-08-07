@@ -490,7 +490,7 @@ def plot_series(series, output_path, x_axis_duration):
     rotor_names = sorted(series.keys(), key=rotor_sort_key)
     if not rotor_names:
         raise RuntimeError("Nothing to plot.")
-    x_ticks = np.arange(0.0, x_axis_duration + 0.1, 5.0)
+    x_ticks = np.arange(0.0, x_axis_duration, 5.0)
 
     fig, axes = plt.subplots(2, len(rotor_names), figsize=(max(4 * len(rotor_names), 4), 5.6), squeeze=False)
     fig.suptitle("Rotor mocap vs estimated TF error", fontsize=14)
@@ -630,7 +630,7 @@ def main():
     plot_series(
         series,
         output_path,
-        x_axis_duration=12.0,
+        x_axis_duration=args.window_end_seconds - args.window_start_seconds,
     )
     print_summary(series, skipped_missing_tf, skipped_bad_pose)
     print(

@@ -172,31 +172,35 @@ def plot_series(series, output_path, plot_duration):
 
     t = np.asarray(series["time"], dtype=float)
     t = t - t[0]
+    x_ticks = np.arange(0.0, plot_duration, 5.0)
 
-    fig, axes = plt.subplots(2, 1, figsize=(9, 6.5), squeeze=False)
+    fig, axes = plt.subplots(2, 1, figsize=(4, 5.6), squeeze=False)
     fig.suptitle("COG pose error from debug/pose/pid", fontsize=14)
 
     ax_pos = axes[0][0]
     ax_att = axes[1][0]
 
-    ax_pos.plot(t, series["x"], label="x", color="#1f77b4", linewidth=1.2)
-    ax_pos.plot(t, series["y"], label="y", color="#ff7f0e", linewidth=1.2)
-    ax_pos.plot(t, series["z"], label="z", color="#2ca02c", linewidth=1.2)
+    ax_pos.plot(t, series["x"], label="x", color="#0072B2", linewidth=1.2)
+    ax_pos.plot(t, series["y"], label="y", color="#D55E00", linewidth=1.2)
+    ax_pos.plot(t, series["z"], label="z", color="#009E73", linewidth=1.2)
     ax_pos.set_title("Position error")
     ax_pos.set_xlim(0, plot_duration)
-    ax_pos.set_ylabel("[m]")
+    ax_pos.set_xticks(x_ticks)
+    ax_pos.text(1.0, -0.05, "[s]", transform=ax_pos.transAxes, ha="right", va="top", fontsize=10)
+    ax_pos.text(-0.06, 1.0, "[m]", transform=ax_pos.transAxes, ha="left", va="bottom", fontsize=10)
     ax_pos.grid(True, linestyle=":", linewidth=0.8)
-    ax_pos.legend(loc="upper right", ncol=3, fontsize=9)
+    ax_pos.legend(loc="upper center", ncol=3, fontsize=9)
 
-    ax_att.plot(t, series["roll"], label="roll", color="#9467bd", linewidth=1.2)
-    ax_att.plot(t, series["pitch"], label="pitch", color="#8c564b", linewidth=1.2)
-    ax_att.plot(t, series["yaw"], label="yaw", color="#e377c2", linewidth=1.2)
+    ax_att.plot(t, series["roll"], label="roll", color="#009E73", linewidth=1.1)
+    ax_att.plot(t, series["pitch"], label="pitch", color="#E69F00", linewidth=1.1)
+    ax_att.plot(t, series["yaw"], label="yaw", color="#CC79A7", linewidth=1.1)
     ax_att.set_title("Attitude error")
     ax_att.set_xlim(0, plot_duration)
-    ax_att.set_xlabel("[s]")
-    ax_att.set_ylabel("[rad]")
+    ax_att.set_xticks(x_ticks)
+    ax_att.text(1.0, -0.05, "[s]", transform=ax_att.transAxes, ha="right", va="top", fontsize=10)
+    ax_att.text(-0.08, 1.0, "[rad]", transform=ax_att.transAxes, ha="left", va="bottom", fontsize=10)
     ax_att.grid(True, linestyle=":", linewidth=0.8)
-    ax_att.legend(loc="upper right", ncol=3, fontsize=9)
+    ax_att.legend(loc="upper center", ncol=3, fontsize=9)
 
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.97])
     fig.savefig(output_path, dpi=160)
@@ -244,7 +248,7 @@ def parse_args():
     )
     parser.add_argument(
         "--output",
-        help="Output PNG path. Default: <bag_basename>_rotor_mocap_estimation_error.png",
+        help="Output PNG path. Default: <bag_basename>_cog_error.png",
     )
     parser.add_argument("--csv", help="Optional CSV path for per-sample error export")
     return parser.parse_args()
@@ -281,7 +285,7 @@ def main():
         plot_duration = args.plot_duration
 
     output_path = args.output or os.path.join(
-        os.path.dirname(bag_path), "{}_rotor_mocap_estimation_error.png".format(bag_stem)
+        os.path.dirname(bag_path), "{}_cog_error.png".format(bag_stem)
     )
 
     series = collect_pid_error_series(
