@@ -458,41 +458,45 @@ def plot_series(series, output_path):
     if not rotor_names:
         raise RuntimeError("Nothing to plot.")
 
-    fig, axes = plt.subplots(len(rotor_names), 2, figsize=(14.0, max(3.5 * len(rotor_names), 4.5)), squeeze=False)
+    fig, axes = plt.subplots(2, len(rotor_names), figsize=(max(4 * len(rotor_names), 4), 5.6), squeeze=False)
     fig.suptitle("Rotor mocap vs estimated TF error", fontsize=14)
 
-    for row, rotor_name in enumerate(rotor_names):
+    for col, rotor_name in enumerate(rotor_names):
         values = series[rotor_name]
         t = np.asarray(values["time"], dtype=float)
         if len(t) == 0:
             continue
         t = t - t[0]
 
-        ax_xy = axes[row][0]
-        ax_att = axes[row][1]
+        ax_xy = axes[0][col]
+        ax_att = axes[1][col]
 
-        ax_xy.plot(t, values["dx"], label="x error in mocap frame", color="#1f77b4", linewidth=1.2)
-        ax_xy.plot(t, values["dy"], label="y error in mocap frame", color="#ff7f0e", linewidth=1.2)
+        ax_xy.plot(t, values["dx"], label="x", color="#1f77b4", linewidth=1.2)
+        ax_xy.plot(t, values["dy"], label="y", color="#ff7f0e", linewidth=1.2)
         # ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
-        ax_xy.set_title("{} position error in mocap frame".format(rotor_name))
-        ax_xy.set_xlabel("time from first valid sample [s]")
-        ax_xy.set_ylabel("position error in mocap frame [m]")
+        ax_xy.set_title("{} position error".format(rotor_name))
         ax_xy.set_xlim(0, 25)
         ax_xy.set_ylim(-0.15, 0.15)
+        ax_xy.set_xticks(np.arange(0, 25, 5))
+        ax_xy.set_yticks([-0.1, 0.0, 0.1])
+        ax_xy.text(1.0, -0.05, "[s]", transform=ax_xy.transAxes, ha="right", va="top", fontsize=10)
+        ax_xy.text(-0.08, 1.0, "[m]", transform=ax_xy.transAxes, ha="left", va="bottom", fontsize=10)
         ax_xy.grid(True, linestyle=":", linewidth=0.8)
-        ax_xy.legend(loc="best")
+        ax_xy.legend(loc="upper center", ncol=2, fontsize=9)
 
-        ax_att.plot(t, values["roll_deg"], label="roll err", color="#9467bd", linewidth=1.1)
-        ax_att.plot(t, values["pitch_deg"], label="pitch err", color="#8c564b", linewidth=1.1)
-        ax_att.plot(t, values["yaw_deg"], label="yaw err", color="#e377c2", linewidth=1.1)
+        ax_att.plot(t, values["roll_deg"], label="roll", color="#9467bd", linewidth=1.1)
+        ax_att.plot(t, values["pitch_deg"], label="pitch", color="#8c564b", linewidth=1.1)
+        ax_att.plot(t, values["yaw_deg"], label="yaw", color="#e377c2", linewidth=1.1)
         # ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
         ax_att.set_title("{} attitude error".format(rotor_name))
-        ax_att.set_xlabel("time from first valid sample [s]")
-        ax_att.set_ylabel("attitude error [deg]")
         ax_att.set_xlim(0, 25)
         ax_att.set_ylim(-15.0, 15.0)
+        ax_att.set_xticks(np.arange(0, 25, 5))
+        ax_att.set_yticks([-10, 0, 10])
+        ax_att.text(1.0, -0.05, "[s]", transform=ax_att.transAxes, ha="right", va="top", fontsize=10)
+        ax_att.text(-0.12, 1.0, "[deg]", transform=ax_att.transAxes, ha="left", va="bottom", fontsize=10)
         ax_att.grid(True, linestyle=":", linewidth=0.8)
-        ax_att.legend(loc="best")
+        ax_att.legend(loc="upper center", ncol=3, fontsize=9)
 
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.97])
     fig.savefig(output_path, dpi=160)
