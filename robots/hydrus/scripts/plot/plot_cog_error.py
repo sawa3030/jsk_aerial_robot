@@ -67,6 +67,28 @@ def find_trigger_window(bag_path, trigger_topic, ignore_seconds, plot_duration):
     return trigger_time, window_end
 
 
+def find_fixed_window(bag_path, window_start_seconds, window_end_seconds):
+    if window_end_seconds <= window_start_seconds:
+        raise ValueError(
+            "window_end_seconds ({:.3f}) must be greater than window_start_seconds ({:.3f}).".format(
+                window_end_seconds, window_start_seconds
+            )
+        )
+
+    with rosbag.Bag(bag_path, "r") as bag:
+        bag_start = bag.get_start_time()
+        bag_end = bag.get_end_time()
+
+    window_start = bag_start + window_start_seconds
+    window_end = bag_start + window_end_seconds
+    if window_end > bag_end:
+        raise RuntimeError(
+            "Bag ends at {:.3f}, but fixed window end is {:.3f}.".format(bag_end, window_end)
+        )
+
+    return window_start, window_end
+
+
 def init_series():
     series = {"time": []}
     for axis in AXES:
@@ -191,6 +213,16 @@ def parse_args():
     parser.add_argument("bag", help="Input rosbag path")
     parser.add_argument("--namespace", default="hydrus", help="Robot namespace, e.g. hydrus")
     parser.add_argument(
+        "--window-start-seconds",
+        type=float,
+        help="Optional fixed plot window start [s] from bag start",
+    )
+    parser.add_argument(
+        "--window-end-seconds",
+        type=float,
+        help="Optional fixed plot window end [s] from bag start",
+    )
+    parser.add_argument(
         "--ignore-seconds",
         type=float,
         default=30.0,
@@ -227,12 +259,26 @@ def main():
     trigger_topic = args.trigger_topic or "/{}/soft_joint_reference_interp".format(namespace)
     pid_topic = args.pid_topic or "/{}/debug/pose/pid".format(namespace)
 
-    window_start, window_end = find_trigger_window(
-        bag_path=bag_path,
-        trigger_topic=trigger_topic,
-        ignore_seconds=args.ignore_seconds,
-        plot_duration=args.plot_duration,
+    use_fixed_window = (
+        args.window_start_seconds is not None or args.window_end_seconds is not None
     )
+    if use_fixed_window:
+        if args.window_start_seconds is None or args.window_end_seconds is None:
+            raise ValueError("Both --window-start-seconds and --window-end-seconds must be specified together.")
+        window_start, window_end = find_fixed_window(
+            bag_path=bag_path,
+            window_start_seconds=args.window_start_seconds,
+            window_end_seconds=args.window_end_seconds,
+        )
+        plot_duration = args.window_end_seconds - args.window_start_seconds
+    else:
+        window_start, window_end = find_trigger_window(
+            bag_path=bag_path,
+            trigger_topic=trigger_topic,
+            ignore_seconds=args.ignore_seconds,
+            plot_duration=args.plot_duration,
+        )
+        plot_duration = args.plot_duration
 
     output_path = args.output or os.path.join(
         os.path.dirname(bag_path), "{}_rotor_mocap_estimation_error.png".format(bag_stem)
@@ -246,19 +292,32 @@ def main():
     )
 
     if not series["time"]:
+        if use_fixed_window:
+            raise RuntimeError(
+                "No PID error samples were found on '{}' in the requested fixed window [{:.3f}, {:.3f}] seconds.".format(
+                    pid_topic, args.window_start_seconds, args.window_end_seconds
+                )
+            )
         raise RuntimeError(
             "No PID error samples were found on '{}' in the requested {:.1f}-second window after trigger.".format(
                 pid_topic, args.plot_duration
             )
         )
 
-    plot_series(series, output_path, args.plot_duration)
+    plot_series(series, output_path, plot_duration)
     print_summary(series)
-    print(
-        "Trigger topic '{}' at {:.3f}s, plotting [{:.3f}, {:.3f}]".format(
-            trigger_topic, window_start, window_start, window_end
+    if use_fixed_window:
+        print(
+            "Plotting fixed bag window [{:.3f}, {:.3f}] seconds (absolute stamps [{:.3f}, {:.3f}]).".format(
+                args.window_start_seconds, args.window_end_seconds, window_start, window_end
+            )
         )
-    )
+    else:
+        print(
+            "Trigger topic '{}' at {:.3f}s, plotting [{:.3f}, {:.3f}]".format(
+                trigger_topic, window_start, window_start, window_end
+            )
+        )
     print("PID topic: {}".format(pid_topic))
     print("Saved plot to {}".format(output_path))
 

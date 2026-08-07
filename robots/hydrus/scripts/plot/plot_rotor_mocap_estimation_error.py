@@ -22,6 +22,8 @@ import rosbag
 
 
 MOCAP_TOPIC_RE = re.compile(r"^/(?P<ns>[^/]+)/(?P<rotor>thrust\d+)/mocap/pose$")
+DEFAULT_WINDOW_START_SECONDS = 35.59
+DEFAULT_WINDOW_END_SECONDS = 47.86
 
 
 @dataclass
@@ -196,6 +198,28 @@ def find_trigger_window(bag_path, trigger_topic, ignore_seconds, plot_duration):
     return trigger_time, window_end
 
 
+def find_fixed_window(bag_path, window_start_seconds, window_end_seconds):
+    if window_end_seconds <= window_start_seconds:
+        raise ValueError(
+            "window_end_seconds ({:.3f}) must be greater than window_start_seconds ({:.3f}).".format(
+                window_end_seconds, window_start_seconds
+            )
+        )
+
+    with rosbag.Bag(bag_path, "r") as bag:
+        bag_start = bag.get_start_time()
+        bag_end = bag.get_end_time()
+
+    window_start = bag_start + window_start_seconds
+    window_end = bag_start + window_end_seconds
+    if window_end > bag_end:
+        raise RuntimeError(
+            "Bag ends at {:.3f}, but fixed window end is {:.3f}.".format(bag_end, window_end)
+        )
+
+    return bag_start, window_start, window_end
+
+
 def get_world_to_child(current_transforms, world_frame, child_frame, sample_time, max_age):
     world = normalize_name(world_frame)
     child = normalize_name(child_frame)
@@ -349,6 +373,7 @@ def summarize_series(series):
         dx = np.asarray(values["dx"], dtype=float)
         dy = np.asarray(values["dy"], dtype=float)
         dxy = np.asarray(values["dxy"], dtype=float)
+        dz = np.asarray(values["dz"], dtype=float)
         angle = np.asarray(values["angle_deg"], dtype=float)
         tf_age = np.asarray(values["tf_age"], dtype=float)
         if len(dx) == 0:
@@ -360,6 +385,10 @@ def summarize_series(series):
                 math.sqrt(float(np.mean(dx ** 2))),
                 math.sqrt(float(np.mean(dy ** 2))),
                 math.sqrt(float(np.mean(dxy ** 2))),
+                float(np.max(np.abs(dx))),
+                float(np.max(np.abs(dy))),
+                float(np.max(dxy)),
+                float(np.max(np.abs(dz))),
                 float(np.mean(angle)),
                 math.sqrt(float(np.mean(angle ** 2))),
                 float(np.max(angle)),
@@ -376,12 +405,16 @@ def print_summary(series, skipped_missing_tf, skipped_bad_pose):
         return
 
     print(
-        "{:<8s} {:>7s} {:>12s} {:>12s} {:>12s} {:>14s} {:>14s} {:>12s} {:>12s}".format(
+        "{:<8s} {:>7s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>14s} {:>14s} {:>12s} {:>12s}".format(
             "rotor",
             "samples",
             "rmse_x_mocap[m]",
             "rmse_y_mocap[m]",
             "rmse_xy_mocap[m]",
+            "max|x|[m]",
+            "max|y|[m]",
+            "max_xy[m]",
+            "max|z|[m]",
             "mean_att[deg]",
             "rms_att[deg]",
             "max_att",
@@ -390,7 +423,7 @@ def print_summary(series, skipped_missing_tf, skipped_bad_pose):
     )
     for row in summary:
         print(
-            "{:<8s} {:>7d} {:>12.5f} {:>12.5f} {:>12.5f} {:>14.3f} {:>14.3f} {:>12.3f} {:>12.4f}".format(
+            "{:<8s} {:>7d} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f} {:>14.3f} {:>14.3f} {:>12.3f} {:>12.4f}".format(
                 *row
             )
         )
@@ -453,10 +486,11 @@ def write_csv(csv_path, series):
                 )
 
 
-def plot_series(series, output_path):
+def plot_series(series, output_path, x_axis_duration):
     rotor_names = sorted(series.keys(), key=rotor_sort_key)
     if not rotor_names:
         raise RuntimeError("Nothing to plot.")
+    x_ticks = np.arange(0.0, x_axis_duration + 0.1, 5.0)
 
     fig, axes = plt.subplots(2, len(rotor_names), figsize=(max(4 * len(rotor_names), 4), 5.6), squeeze=False)
     fig.suptitle("Rotor mocap vs estimated TF error", fontsize=14)
@@ -475,9 +509,9 @@ def plot_series(series, output_path):
         ax_xy.plot(t, values["dy"], label="y", color="#D55E00", linewidth=1.2)
         # ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
         ax_xy.set_title("{} position error".format(rotor_name))
-        ax_xy.set_xlim(0, 25)
+        ax_xy.set_xlim(0.0, x_axis_duration)
         ax_xy.set_ylim(-0.15, 0.15)
-        ax_xy.set_xticks(np.arange(0, 25, 5))
+        ax_xy.set_xticks(x_ticks)
         ax_xy.set_yticks([-0.1, 0.0, 0.1])
         ax_xy.text(1.0, -0.05, "[s]", transform=ax_xy.transAxes, ha="right", va="top", fontsize=10)
         ax_xy.text(-0.08, 1.0, "[m]", transform=ax_xy.transAxes, ha="left", va="bottom", fontsize=10)
@@ -489,9 +523,9 @@ def plot_series(series, output_path):
         ax_att.plot(t, values["yaw_deg"], label="yaw", color="#CC79A7", linewidth=1.1)
         # ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
         ax_att.set_title("{} attitude error".format(rotor_name))
-        ax_att.set_xlim(0, 25)
+        ax_att.set_xlim(0.0, x_axis_duration)
         ax_att.set_ylim(-15.0, 15.0)
-        ax_att.set_xticks(np.arange(0, 25, 5))
+        ax_att.set_xticks(x_ticks)
         ax_att.set_yticks([-10, 0, 10])
         ax_att.text(1.0, -0.05, "[s]", transform=ax_att.transAxes, ha="right", va="top", fontsize=10)
         ax_att.text(-0.12, 1.0, "[deg]", transform=ax_att.transAxes, ha="left", va="bottom", fontsize=10)
@@ -514,16 +548,28 @@ def parse_args():
     parser.add_argument("--namespace", default="hydrus", help="Robot namespace, e.g. hydrus")
     parser.add_argument("--world-frame", default="world", help="World frame name used in TF")
     parser.add_argument(
+        "--window-start-seconds",
+        type=float,
+        default=DEFAULT_WINDOW_START_SECONDS,
+        help="Plot window start [s] from bag start",
+    )
+    parser.add_argument(
+        "--window-end-seconds",
+        type=float,
+        default=DEFAULT_WINDOW_END_SECONDS,
+        help="Plot window end [s] from bag start",
+    )
+    parser.add_argument(
         "--ignore-seconds",
         type=float,
         default=30.0,
-        help="Ignore the first N seconds from bag start before searching the trigger topic",
+        help="Legacy trigger-window mode: ignore the first N seconds from bag start before searching the trigger topic",
     )
     parser.add_argument(
         "--plot-duration",
         type=float,
         default=25.0,
-        help="Plot this many seconds from the first trigger message after --ignore-seconds",
+        help="Legacy trigger-window mode: plot this many seconds from the first trigger message after --ignore-seconds",
     )
     parser.add_argument(
         "--trigger-topic",
@@ -553,12 +599,11 @@ def main():
 
     bag_path = os.path.abspath(args.bag)
     bag_stem = os.path.splitext(os.path.basename(bag_path))[0]
-    trigger_topic = args.trigger_topic or "/{}/soft_joint_reference_interp".format(normalize_name(args.namespace))
-    window_start, window_end = find_trigger_window(
+
+    _, window_start, window_end = find_fixed_window(
         bag_path=bag_path,
-        trigger_topic=trigger_topic,
-        ignore_seconds=args.ignore_seconds,
-        plot_duration=args.plot_duration,
+        window_start_seconds=args.window_start_seconds,
+        window_end_seconds=args.window_end_seconds,
     )
     output_path = args.output or os.path.join(
         os.path.dirname(bag_path), "{}_rotor_mocap_estimation_error.png".format(bag_stem)
@@ -577,16 +622,20 @@ def main():
 
     if not any(len(values["time"]) > 0 for values in series.values()):
         raise RuntimeError(
-            "No valid mocap/TF pairs were found in the requested {:.1f}-second window after trigger.".format(
-                args.plot_duration
+            "No valid mocap/TF pairs were found in the requested fixed window [{:.3f}, {:.3f}] seconds.".format(
+                args.window_start_seconds, args.window_end_seconds
             )
         )
 
-    plot_series(series, output_path)
+    plot_series(
+        series,
+        output_path,
+        x_axis_duration=12.0,
+    )
     print_summary(series, skipped_missing_tf, skipped_bad_pose)
     print(
-        "Trigger topic '{}' at {:.3f}s, plotting [{:.3f}, {:.3f}]".format(
-            trigger_topic, window_start, window_start, window_end
+        "Plotting fixed bag window [{:.3f}, {:.3f}] seconds (absolute stamps [{:.3f}, {:.3f}]).".format(
+            args.window_start_seconds, args.window_end_seconds, window_start, window_end
         )
     )
     print("Saved plot to {}".format(output_path))
