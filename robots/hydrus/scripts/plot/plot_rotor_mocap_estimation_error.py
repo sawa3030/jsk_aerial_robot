@@ -471,8 +471,8 @@ def plot_series(series, output_path):
         ax_xy = axes[0][col]
         ax_att = axes[1][col]
 
-        ax_xy.plot(t, values["dx"], label="x", color="#1f77b4", linewidth=1.2)
-        ax_xy.plot(t, values["dy"], label="y", color="#ff7f0e", linewidth=1.2)
+        ax_xy.plot(t, values["dx"], label="x", color="#0072B2", linewidth=1.2)
+        ax_xy.plot(t, values["dy"], label="y", color="#D55E00", linewidth=1.2)
         # ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
         ax_xy.set_title("{} position error".format(rotor_name))
         ax_xy.set_xlim(0, 25)
@@ -484,9 +484,9 @@ def plot_series(series, output_path):
         ax_xy.grid(True, linestyle=":", linewidth=0.8)
         ax_xy.legend(loc="upper center", ncol=2, fontsize=9)
 
-        ax_att.plot(t, values["roll_deg"], label="roll", color="#9467bd", linewidth=1.1)
-        ax_att.plot(t, values["pitch_deg"], label="pitch", color="#8c564b", linewidth=1.1)
-        ax_att.plot(t, values["yaw_deg"], label="yaw", color="#e377c2", linewidth=1.1)
+        ax_att.plot(t, values["roll_deg"], label="roll", color="#009E73", linewidth=1.1)
+        ax_att.plot(t, values["pitch_deg"], label="pitch", color="#E69F00", linewidth=1.1)
+        ax_att.plot(t, values["yaw_deg"], label="yaw", color="#CC79A7", linewidth=1.1)
         # ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
         ax_att.set_title("{} attitude error".format(rotor_name))
         ax_att.set_xlim(0, 25)
