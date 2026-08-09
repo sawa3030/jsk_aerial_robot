@@ -12,4 +12,7 @@
 # rosrun hydrus plot_cog_error.py ~/rosbag/20260807_soft_airframe_sawada_4_joints_9_2026-08-07-16-03-48.bag --output cog_error_20260807_soft_airframe_sawada_4_joints_9   --window-start-seconds 35.59 --window-end-seconds 47.86
 
 # rosrun hydrus plot_rotor_mocap_estimation_error.py ~/rosbag/20260804_soft_airframe_sawada_box_hold_1_2026-08-04-14-25-51.bag --output 20260804_soft_airframe_sawada_box_hold_1   --window-start-seconds 35 --window-end-seconds 45
-rosrun hydrus plot_cog_error.py ~/rosbag/20260804_soft_airframe_sawada_box_hold_1_2026-08-04-14-25-51.bag --output cog_error_20260804_soft_airframe_sawada_box_hold_1   --window-start-seconds 35 --window-end-seconds 45
+# rosrun hydrus plot_cog_error.py ~/rosbag/20260804_soft_airframe_sawada_box_hold_1_2026-08-04-14-25-51.bag --output cog_error_20260804_soft_airframe_sawada_box_hold_1   --window-start-seconds 35 --window-end-seconds 45
+
+rosrun hydrus plot_rotor_mocap_estimation_error.py ~/rosbag/20260804_soft_airframe_sawada_go_narrow_space_5_2026-08-04-18-15-55.bag --output 20260804_soft_airframe_sawada_go_narrow_space_5   --window-start-seconds 60 --window-end-seconds 75
+rosrun hydrus plot_cog_error.py ~/rosbag/20260804_soft_airframe_sawada_go_narrow_space_5_2026-08-04-18-15-55.bag --output cog_error_20260804_soft_airframe_sawada_go_narrow_space_5   --window-start-seconds 60 --window-end-seconds 75
