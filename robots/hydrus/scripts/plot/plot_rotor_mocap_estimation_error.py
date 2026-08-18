@@ -104,10 +104,10 @@ def quaternion_to_euler(quat):
     return roll, pitch, yaw
 
 
-def quaternion_angle_deg(quat):
+def quaternion_angle_rad(quat):
     q = normalize_quaternion(quat)
     w = max(-1.0, min(1.0, abs(q[3])))
-    return math.degrees(2.0 * math.acos(w))
+    return 2.0 * math.acos(w)
 
 
 def extract_stamp(msg, fallback_time):
@@ -345,11 +345,15 @@ def collect_error_series(
             series[rotor_name]["dy"].append(pos_error[1])
             series[rotor_name]["dxy"].append(float(np.linalg.norm(pos_error[:2])))
             series[rotor_name]["dz"].append(pos_error[2])
-            series[rotor_name]["roll_deg"].append(math.degrees(wrap_to_pi(roll_err)))
-            series[rotor_name]["pitch_deg"].append(math.degrees(wrap_to_pi(pitch_err)) - 10 if rotor_name == "thrust1" else math.degrees(wrap_to_pi(pitch_err)) + 10)
-            # series[rotor_name]["pitch_deg"].append(math.degrees(wrap_to_pi(pitch_err)))
-            series[rotor_name]["yaw_deg"].append(math.degrees(wrap_to_pi(yaw_err)))
-            series[rotor_name]["angle_deg"].append(quaternion_angle_deg(delta_q))
+            series[rotor_name]["roll_rad"].append(wrap_to_pi(roll_err))
+            series[rotor_name]["pitch_rad"].append(
+                wrap_to_pi(pitch_err) - math.radians(10.0)
+                if rotor_name == "thrust1"
+                else wrap_to_pi(pitch_err) + math.radians(10.0)
+            )
+            # series[rotor_name]["pitch_rad"].append(wrap_to_pi(pitch_err))
+            series[rotor_name]["yaw_rad"].append(wrap_to_pi(yaw_err))
+            series[rotor_name]["angle_rad"].append(quaternion_angle_rad(delta_q))
             series[rotor_name]["tf_age"].append(estimated["max_age"])
             series[rotor_name]["mocap_x"].append(mocap_translation[0])
             series[rotor_name]["mocap_y"].append(mocap_translation[1])
@@ -374,7 +378,7 @@ def summarize_series(series):
         dy = np.asarray(values["dy"], dtype=float)
         dxy = np.asarray(values["dxy"], dtype=float)
         dz = np.asarray(values["dz"], dtype=float)
-        angle = np.asarray(values["angle_deg"], dtype=float)
+        angle = np.asarray(values["angle_rad"], dtype=float)
         tf_age = np.asarray(values["tf_age"], dtype=float)
         if len(dx) == 0:
             continue
@@ -415,9 +419,9 @@ def print_summary(series, skipped_missing_tf, skipped_bad_pose):
             "max|y|[m]",
             "max_xy[m]",
             "max|z|[m]",
-            "mean_att[deg]",
-            "rms_att[deg]",
-            "max_att",
+            "mean_att[rad]",
+            "rms_att[rad]",
+            "max_att[rad]",
             "max_tf_age",
         )
     )
@@ -450,10 +454,10 @@ def write_csv(csv_path, series):
                 "dy_mocap",
                 "dxy_mocap",
                 "dz_mocap",
-                "roll_deg",
-                "pitch_deg",
-                "yaw_deg",
-                "angle_deg",
+                "roll_rad",
+                "pitch_rad",
+                "yaw_rad",
+                "angle_rad",
                 "tf_age",
                 "mocap_x",
                 "mocap_y",
@@ -473,10 +477,10 @@ def write_csv(csv_path, series):
                         values["dy"][i],
                         values["dxy"][i],
                         values["dz"][i],
-                        values["roll_deg"][i],
-                        values["pitch_deg"][i],
-                        values["yaw_deg"][i],
-                        values["angle_deg"][i],
+                        values["roll_rad"][i],
+                        values["pitch_rad"][i],
+                        values["yaw_rad"][i],
+                        values["angle_rad"][i],
                         values["tf_age"][i],
                         values["mocap_x"][i],
                         values["mocap_y"][i],
@@ -508,7 +512,13 @@ def plot_series(series, output_path, x_axis_duration):
         ax_xy.plot(t, values["dx"], label="x", color="#0072B2", linewidth=1.2)
         ax_xy.plot(t, values["dy"], label="y", color="#D55E00", linewidth=1.2)
         # ax_xy.plot(t, values["dxy"], label="xy norm in mocap frame", color="#2ca02c", linewidth=1.4, linestyle="--")
-        ax_xy.set_title("{} position error".format(rotor_name))
+        plot_rotor_name = {
+            "thrust1": "Thruster 1",
+            "thrust2": "Thruster 2",
+            "thrust3": "Thruster 3",
+            "thrust4": "Thruster 4",
+        }
+        ax_xy.set_title("Position estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
         ax_xy.set_xlim(0.0, x_axis_duration)
         ax_xy.set_ylim(-0.25, 0.25)
         ax_xy.set_xticks(x_ticks)
@@ -518,17 +528,17 @@ def plot_series(series, output_path, x_axis_duration):
         ax_xy.grid(True, linestyle=":", linewidth=0.8)
         ax_xy.legend(loc="upper center", ncol=2, fontsize=9)
 
-        ax_att.plot(t, values["roll_deg"], label="roll", color="#009E73", linewidth=1.1)
-        ax_att.plot(t, values["pitch_deg"], label="pitch", color="#E69F00", linewidth=1.1)
-        ax_att.plot(t, values["yaw_deg"], label="yaw", color="#CC79A7", linewidth=1.1)
-        # ax_att.plot(t, values["angle_deg"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
-        ax_att.set_title("{} attitude error".format(rotor_name))
+        ax_att.plot(t, values["roll_rad"], label="roll", color="#009E73", linewidth=1.1)
+        ax_att.plot(t, values["pitch_rad"], label="pitch", color="#E69F00", linewidth=1.1)
+        ax_att.plot(t, values["yaw_rad"], label="yaw", color="#CC79A7", linewidth=1.1)
+        # ax_att.plot(t, values["angle_rad"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
+        ax_att.set_title("Attitude estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
         ax_att.set_xlim(0.0, x_axis_duration)
-        ax_att.set_ylim(-15.0, 15.0)
+        ax_att.set_ylim(-0.3, 0.3)
         ax_att.set_xticks(x_ticks)
-        ax_att.set_yticks([-10, 0, 10])
+        ax_att.set_yticks([-0.2, 0.0, 0.2])
         ax_att.text(1.0, -0.05, "[s]", transform=ax_att.transAxes, ha="right", va="top", fontsize=10)
-        ax_att.text(-0.12, 1.0, "[deg]", transform=ax_att.transAxes, ha="left", va="bottom", fontsize=10)
+        ax_att.text(-0.12, 1.0, "[rad]", transform=ax_att.transAxes, ha="left", va="bottom", fontsize=10)
         ax_att.grid(True, linestyle=":", linewidth=0.8)
         ax_att.legend(loc="upper center", ncol=3, fontsize=9)
 
