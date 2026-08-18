@@ -24,6 +24,8 @@ import rosbag
 MOCAP_TOPIC_RE = re.compile(r"^/(?P<ns>[^/]+)/(?P<rotor>thrust\d+)/mocap/pose$")
 DEFAULT_WINDOW_START_SECONDS = 35.59
 DEFAULT_WINDOW_END_SECONDS = 47.86
+DEFAULT_SERVO_INDICES = (12,)
+SERVO_TICKS_PER_REV = 2047.0 * 2.0
 
 
 @dataclass
@@ -414,6 +416,40 @@ def collect_base_thrust_series(bag_path, command_topic, window_start, window_end
     return series
 
 
+def init_servo_series(servo_indices):
+    series = {"time": []}
+    for servo_index in servo_indices:
+        series[int(servo_index)] = []
+    return series
+
+
+def collect_servo_series(bag_path, servo_topic, servo_indices, window_start, window_end):
+    servo_indices = [int(idx) for idx in servo_indices]
+    series = init_servo_series(servo_indices)
+
+    with rosbag.Bag(bag_path, "r") as bag:
+        for _, msg, bag_time in bag.read_messages(topics=[servo_topic]):
+            sample_time = extract_stamp(msg, bag_time.to_sec())
+            if sample_time < window_start:
+                continue
+            if sample_time > window_end:
+                break
+
+            servo_map = {int(servo.index): float(servo.angle) for servo in getattr(msg, "servos", [])}
+            if not servo_map:
+                continue
+
+            series["time"].append(sample_time)
+            for servo_index in servo_indices:
+                series[servo_index].append(servo_map.get(servo_index, float("nan")))
+
+    return series
+
+
+def servo_ticks_to_rad(values):
+    return np.asarray(values, dtype=float) * (2.0 * math.pi / SERVO_TICKS_PER_REV) - (3.14 / 2.0)
+
+
 def summarize_series(series):
     lines = []
     for rotor_name in sorted(series.keys(), key=rotor_sort_key):
@@ -525,6 +561,45 @@ def print_base_thrust_summary(series, command_topic):
         print("{:<8s} {:>7d} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f}".format(*row))
 
 
+def summarize_servo_series(series):
+    if not series or not series.get("time"):
+        return []
+
+    lines = []
+    for servo_index in sorted(key for key in series.keys() if key != "time"):
+        values = np.asarray(series[servo_index], dtype=float)
+        finite_values = values[np.isfinite(values)]
+        if len(finite_values) == 0:
+            continue
+        lines.append(
+            (
+                servo_index,
+                len(finite_values),
+                float(np.mean(finite_values)),
+                math.sqrt(float(np.mean(finite_values ** 2))),
+                float(np.min(finite_values)),
+                float(np.max(finite_values)),
+            )
+        )
+    return lines
+
+
+def print_servo_summary(series, servo_topic):
+    summary = summarize_servo_series(series)
+    if not summary:
+        print("No servo state samples were found on '{}'.".format(servo_topic))
+        return
+
+    print("Servo angle summary from {}:".format(servo_topic))
+    print(
+        "{:<8s} {:>7s} {:>12s} {:>12s} {:>12s} {:>12s}".format(
+            "index", "samples", "mean[tick]", "rms[tick]", "min[tick]", "max[tick]"
+        )
+    )
+    for row in summary:
+        print("{:<8d} {:>7d} {:>12.5f} {:>12.5f} {:>12.5f} {:>12.5f}".format(*row))
+
+
 def write_csv(csv_path, series):
     with open(csv_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -572,7 +647,7 @@ def write_csv(csv_path, series):
                 )
 
 
-def plot_series(series, base_thrust_series, output_path, x_axis_duration):
+def plot_series(series, base_thrust_series, servo_series, output_path, x_axis_duration):
     rotor_names = sorted(series.keys(), key=rotor_sort_key)
     if not rotor_names:
         raise RuntimeError("Nothing to plot.")
@@ -605,7 +680,7 @@ def plot_series(series, base_thrust_series, output_path, x_axis_duration):
             "thrust3": "Thruster 3",
             "thrust4": "Thruster 4",
         }
-        ax_xy.set_title("Position estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
+        # ax_xy.set_title("Position estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
         ax_xy.set_xlim(0.0, x_axis_duration)
         ax_xy.set_ylim(-0.25, 0.25)
         ax_xy.set_xticks(x_ticks)
@@ -619,7 +694,7 @@ def plot_series(series, base_thrust_series, output_path, x_axis_duration):
         ax_att.plot(t, values["pitch_rad"], label="pitch", color="#E69F00", linewidth=1.1)
         ax_att.plot(t, values["yaw_rad"], label="yaw", color="#CC79A7", linewidth=1.1)
         # ax_att.plot(t, values["angle_rad"], label="angle norm", color="#d62728", linewidth=1.4, linestyle="--")
-        ax_att.set_title("Attitude estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
+        # ax_att.set_title("Attitude estimation error of {}".format(plot_rotor_name.get(rotor_name, rotor_name)))
         ax_att.set_xlim(0.0, x_axis_duration)
         ax_att.set_ylim(-0.3, 0.3)
         ax_att.set_xticks(x_ticks)
@@ -629,7 +704,37 @@ def plot_series(series, base_thrust_series, output_path, x_axis_duration):
         ax_att.grid(True, linestyle=":", linewidth=0.8)
         ax_att.legend(loc="upper center", ncol=3, fontsize=9)
 
-    axes[0][-1].axis("off")
+    ax_servo = axes[0][-1]
+    if servo_series and servo_series.get("time"):
+        servo_indices = sorted(key for key in servo_series.keys() if key != "time")
+        servo_t = np.asarray(servo_series["time"], dtype=float)
+        servo_t = servo_t - servo_t[0]
+        colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000", "#F0E442"]
+        for idx, servo_index in enumerate(servo_indices):
+            ax_servo.plot(
+                servo_t,
+                servo_ticks_to_rad(servo_series[servo_index]),
+                # label="servo[{}]".format(servo_index),
+                label="servo angle",
+                color=colors[idx % len(colors)],
+                linewidth=1.3,
+            )
+
+        # ax_servo.set_title("Servo state angle")
+        ax_servo.set_xlim(0.0, x_axis_duration)
+        ax_servo.set_ylim(2.5, 4.5)
+        ax_servo.set_xticks(x_ticks)
+        ax_servo.set_yticks([2.5, 3.0, 3.5, 4.0])
+        ax_servo.text(1.0, -0.05, "[s]", transform=ax_servo.transAxes, ha="right", va="top", fontsize=10)
+        ax_servo.text(-0.12, 1.0, "[rad]", transform=ax_servo.transAxes, ha="left", va="bottom", fontsize=10)
+        ax_servo.grid(True, linestyle=":", linewidth=0.8)
+        ax_servo.legend(loc="upper center", ncol=min(2, len(servo_indices)), fontsize=9)
+    else:
+        # ax_servo.set_title("Servo state angle")
+        ax_servo.text(0.5, 0.5, "No servo state samples", ha="center", va="center", transform=ax_servo.transAxes)
+        ax_servo.set_xticks([])
+        ax_servo.set_yticks([])
+        ax_servo.grid(False)
 
     ax_thrust = axes[1][-1]
     if base_thrust_series and base_thrust_series.get("time"):
@@ -724,6 +829,17 @@ def parse_args():
         "--command-topic",
         help="FourAxisCommand topic for base thrust overlay. Default: /<namespace>/four_axes/command",
     )
+    parser.add_argument(
+        "--servo-topic",
+        help="ServoStates topic for servo-angle overlay. Default: /<namespace>/servo/states",
+    )
+    parser.add_argument(
+        "--servo-indices",
+        nargs="+",
+        type=int,
+        default=list(DEFAULT_SERVO_INDICES),
+        help="ServoState indices to overlay from the ServoStates topic",
+    )
     parser.add_argument("--tf-topic", default="/tf", help="Dynamic TF topic")
     parser.add_argument("--tf-static-topic", default="/tf_static", help="Static TF topic")
     parser.add_argument(
@@ -743,6 +859,7 @@ def main():
     bag_path = os.path.abspath(args.bag)
     bag_stem = os.path.splitext(os.path.basename(bag_path))[0]
     command_topic = args.command_topic or "/{}/four_axes/command".format(normalize_name(args.namespace))
+    servo_topic = args.servo_topic or "/{}/servo/states".format(normalize_name(args.namespace))
 
     _, window_start, window_end = find_fixed_window(
         bag_path=bag_path,
@@ -769,6 +886,13 @@ def main():
         window_start=window_start,
         window_end=window_end,
     )
+    servo_series = collect_servo_series(
+        bag_path=bag_path,
+        servo_topic=servo_topic,
+        servo_indices=args.servo_indices,
+        window_start=window_start,
+        window_end=window_end,
+    )
 
     if not any(len(values["time"]) > 0 for values in series.values()):
         raise RuntimeError(
@@ -780,17 +904,20 @@ def main():
     plot_series(
         series,
         base_thrust_series,
+        servo_series,
         output_path,
         x_axis_duration=args.window_end_seconds - args.window_start_seconds,
     )
     print_summary(series, skipped_missing_tf, skipped_bad_pose)
     print_base_thrust_summary(base_thrust_series, command_topic)
+    print_servo_summary(servo_series, servo_topic)
     print(
         "Plotting fixed bag window [{:.3f}, {:.3f}] seconds (absolute stamps [{:.3f}, {:.3f}]).".format(
             args.window_start_seconds, args.window_end_seconds, window_start, window_end
         )
     )
     print("Command topic: {}".format(command_topic))
+    print("Servo topic: {} (indices: {})".format(servo_topic, ", ".join(str(idx) for idx in args.servo_indices)))
     print("Saved plot to {}".format(output_path))
 
     if args.csv:
