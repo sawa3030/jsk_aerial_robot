@@ -24,7 +24,7 @@ import rosbag
 MOCAP_TOPIC_RE = re.compile(r"^/(?P<ns>[^/]+)/(?P<rotor>thrust\d+)/mocap/pose$")
 DEFAULT_WINDOW_START_SECONDS = 35.59
 DEFAULT_WINDOW_END_SECONDS = 47.86
-DEFAULT_SERVO_INDICES = (12,)
+DEFAULT_SERVO_INDICES = (13,)
 SERVO_TICKS_PER_REV = 2047.0 * 2.0
 
 
@@ -722,9 +722,9 @@ def plot_series(series, base_thrust_series, servo_series, output_path, x_axis_du
 
         # ax_servo.set_title("Servo state angle")
         ax_servo.set_xlim(0.0, x_axis_duration)
-        ax_servo.set_ylim(2.5, 4.5)
+        # ax_servo.set_ylim(2.5, 4.5)
         ax_servo.set_xticks(x_ticks)
-        ax_servo.set_yticks([2.5, 3.0, 3.5, 4.0])
+        # ax_servo.set_yticks([2.5, 3.0, 3.5, 4.0])
         ax_servo.text(1.0, -0.05, "[s]", transform=ax_servo.transAxes, ha="right", va="top", fontsize=10)
         ax_servo.text(-0.12, 1.0, "[rad]", transform=ax_servo.transAxes, ha="left", va="bottom", fontsize=10)
         ax_servo.grid(True, linestyle=":", linewidth=0.8)
